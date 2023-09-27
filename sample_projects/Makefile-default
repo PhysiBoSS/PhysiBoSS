@@ -78,6 +78,7 @@ list-projects:
 	@echo ""
 	@echo "Sample intracellular projects: template_BM ode-energy-sample physiboss-cell-lines-sample"
 	@echo "                 cancer-metabolism-sample physiboss-tutorial physiboss-tutorial-invasion"
+	@echo "					physiboss-tnf-model "
 	@echo ""
 	
 template:
@@ -269,6 +270,16 @@ physiboss-tutorial-invasion:
 	cp ./sample_projects_intracellular/boolean/cancer_invasion/Makefile .
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
 	cp -r ./sample_projects_intracellular/boolean/cancer_invasion/config/* ./config/
+	
+physiboss-tnf-model:
+	cp ./sample_projects_intracellular/boolean/spheroid_tnf_model/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/boolean/spheroid_tnf_model/main-spheroid_TNF.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects_intracellular/boolean/spheroid_tnf_model/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp ./sample_projects_intracellular/boolean/spheroid_tnf_model/config/* ./config/
+	cp -r ./sample_projects_intracellular/boolean/spheroid_tnf_model/scripts ./
 
 ecoli-acetic-switch-sample:
 	cp ./sample_projects_intracellular/fba/ecoli_acetic_switch/custom_modules/* ./custom_modules/
