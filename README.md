@@ -7,9 +7,9 @@
 ## Overview: 
 PhysiBoSS 2.0 is a redesign and reimplementation of PhysiBoSS ([doi:10.1093/bioinformatics/bty766](https://doi.org/10.1093/bioinformatics/bty766)). It has been conceived as an add-on that expands the PhysiCell ([doi:10.1371/journal.pcbi.1005991](https://dx.doi.org/10.1371/journal.pcbi.1005991)) agent-based functionalities with intracellular cell signalling using MaBoSS having a decoupled, maintainable and model-agnostic design. PhysiBoSS 2.0 reproduces simulations reported in the original PhysiBoSS publications and can be used with other Boolean models, for instance to predict drug synergy in a gastric adenocarcinoma cell line.
 
-**Reference paper:** [PhysiBoSS 2.0: a sustainable integration of stochastic Boolean and agent-based modelling frameworks](https://www.biorxiv.org/content/10.1101/2022.01.06.468363v2.abstract)
+**Reference paper:** [PhysiBoSS 2.0: a sustainable integration of stochastic Boolean and agent-based modelling frameworks](https://www.nature.com/articles/s41540-023-00314-4)
 
-**Reference paper doi:** 10.1101/2022.01.06.468363
+**Reference paper doi:** [10.1038/s41540-023-00314-4](https://doi.org/10.1038/s41540-023-00314-4)
 
 ### How to run a PhysiBoSS sample_project inside PhysiCell:
 ~~~bash
