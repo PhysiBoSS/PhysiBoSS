@@ -1,5 +1,6 @@
-# PhysiBoSS 2.0: a sustainable integration of stochastic Boolean and agent-based modelling frameworks
+<img align="right" height="200" src="https://github.com/sysbio-curie/MaBoSS-env-2.0/assets/22156824/b1b9a843-a203-42e6-8f8f-1acd2e2f5285">
 
+# PhysiBoSS 2.0: a sustainable integration of stochastic Boolean and agent-based modelling frameworks
 **Version:** 2.1
 
 **Release date:** May 2022
@@ -62,3 +63,13 @@ make
 **`make jpeg`**          : uses ImageMagick to convert the SVG files in the output directory to JPG (with appropriate sizing to make movies). Supply `OUTPUT=foldername` to select a different folder. 
 
 **`make movie`**         : uses ffmpeg to convert the JPG files in the output directory an mp4 movie. Supply `OUTPUT=foldername` to select a different folder, or `FRAMERATE=framerate` to override the frame rate.
+
+## Legacy version
+
+PhysiBoSS 1.0, as described in [PhysiBoSS: a multi-scale agent-based modelling framework integrating physical dimension and cell signalling](https://doi.org/10.1093/bioinformatics/bty766), is accessible at [https://github.com/PhysiBoSS/PhysiBoSSv1](https://github.com/PhysiBoSS/PhysiBoSSv1).
+
+## Acknowledgements
+
+This work has received funding from the Horizon 2020 projects INFORE (ID: 825070) and PerMedCoE (ID: 951773) and from the Horizon Europe project CREXDATA (ID: 101092749). This work was funded in part by the French government under the management of Agence Nationale de la Recherche as part of the “Investissements d’avenir” programme, reference ANR-19-P3IA-0001 (PRAIRIE 3IA Institute).
+
+We thank Anne L'Hévéder for the PhysiBoSS logo.
