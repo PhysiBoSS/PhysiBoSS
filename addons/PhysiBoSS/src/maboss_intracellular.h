@@ -10,6 +10,8 @@
 #include "maboss_network.h"
 
 static std::string PhysiBoSS_Version = "2.1.0"; 
+static std::string PhysiBoSS_DOI = "10.1038/s41540-023-00314-4"; 
+static std::string PhysiBoSS_URL = "https://github.com/PhysiBoSS/PhysiBoSS"; 
 
 class MaBoSSIntracellular : public PhysiCell::Intracellular {
  private:
