@@ -21,6 +21,11 @@ make
 ./spheroid_TNF_model
 ~~~
 
+### PhysiBoSS documentation:
+
+The documentation of PhysiBoSS is available in the [PhysiBoSS User Guide](https://raw.githubusercontent.com/PhysiBoSS/PhysiBoSS/development/documentation/PhysiBoSS_User_Guide.pdf).
+
+
 ### Key makefile rules, from [PhysiCell repository](https://github.com/MathCancer/PhysiCell):
 
 **`make`**               : compiles the current project. If no 
