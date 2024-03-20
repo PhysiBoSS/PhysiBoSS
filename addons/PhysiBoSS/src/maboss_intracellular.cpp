@@ -485,3 +485,108 @@ void MaBoSSIntracellular::save(std::string filename)
 	
 	state_file.close();
 }
+
+PhysiCell::Cell* getById(int id) {
+	for( auto cell : *PhysiCell::all_cells )
+		if (cell->ID == id)
+			return cell;
+	return NULL;
+}
+
+void MaBoSSIntracellular::load_states( std::string input_filename )
+{
+	std::ifstream file( input_filename, std::ios::in );
+	if( !file )
+	{ 
+		std::cout << "Error: " << input_filename << " not found during intracellular_state loading. Quitting." << std::endl; 
+		exit(-1);
+	}
+	else
+	{
+		std::cout << "Loading MaBoSS intracellular states from XML ... " << std::endl; 
+	}
+
+	std::string line;
+	unsigned int i = 0;
+	while (std::getline(file, line))
+	{
+		std::stringstream cell_initial_state(line);
+		std::string intermediate;
+        std::vector <std::string> tokens;
+		while(getline(cell_initial_state, intermediate, ','))
+		{
+			tokens.push_back(intermediate);
+		}
+		
+		if (tokens.size() == 2 && tokens[0].compare("ID") != 0)
+		{
+			PhysiCell::Cell* cell = getById(stoi(tokens[0]));
+			if (cell != NULL)
+			{
+				std::cout << "#" << tokens[0] << " : " << tokens[1] << std::endl;	
+				static_cast<MaBoSSIntracellular*>(cell->phenotype.intracellular)->maboss.set_state(tokens[1].c_str());
+			}
+			else {
+				std::cerr << "Error: Cell with ID " << tokens[0] << " not found during intracellular_state loading." << std::endl;
+			}		
+		}
+		
+		i++;
+	}
+
+	file.close();
+	
+}
+
+void MaBoSSIntracellular::load_cfgs( std::string input_filename )
+{
+	std::ifstream file( input_filename, std::ios::in );
+	if( !file )
+	{ 
+		std::cout << "Error: " << input_filename << " not found during intracellular_state loading. Quitting." << std::endl; 
+		exit(-1);
+	}
+	else
+	{
+		std::cout << "Loading MaBoSS intracellular config from XML ... " << std::endl; 
+	}
+
+	std::string line;
+	unsigned int i = 0;
+	while (std::getline(file, line))
+	{
+		std::stringstream cell_initial_state(line);
+		std::string intermediate;
+        std::vector <std::string> tokens;
+		while(getline(cell_initial_state, intermediate, ','))
+		{
+			tokens.push_back(intermediate);
+		}
+
+		if (tokens.size() == 2 && tokens[0].compare("ID") != 0)
+		{
+			PhysiCell::Cell* cell = getById(stoi(tokens[0]));
+			if (cell != NULL)
+			{
+				std::cout << "#" << cell->ID << " : " << tokens[1] << std::endl;	
+				MaBoSSIntracellular* maboss_intra = static_cast<MaBoSSIntracellular*>(cell->phenotype.intracellular);
+				maboss_intra->cfg_filename = tokens[1];
+				maboss_intra->maboss.init_maboss(maboss_intra->bnd_filename, maboss_intra->cfg_filename);
+				maboss_intra->maboss.mutate(maboss_intra->mutations);
+				maboss_intra->maboss.set_initial_values(maboss_intra->initial_values);
+				maboss_intra->maboss.set_parameters(maboss_intra->parameters);
+				maboss_intra->maboss.set_discrete_time(maboss_intra->discrete_time, maboss_intra->time_tick);
+				maboss_intra->maboss.restart_node_values();
+			
+			}
+			else {
+				std::cerr << "Error: Cell with ID " << tokens[0] << " not found during intracellular_state loading." << std::endl;
+			}		
+		}
+		
+		i++;
+	}
+
+	file.close();
+	
+}
