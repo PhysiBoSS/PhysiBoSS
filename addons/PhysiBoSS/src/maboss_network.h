@@ -142,6 +142,8 @@ class MaBoSSNetwork
 		void print_nodes();
 
 		void set_state(NetworkState _state) { state = NetworkState(_state.getState()); }	
+		void set_state(char* state);
+
 		NetworkState get_maboss_state() { return state;}
 		void inherit_state(NetworkState mother, bool inherit_state, std::map<std::string, bool>& inherit_nodes) {
 			NetworkState new_state;

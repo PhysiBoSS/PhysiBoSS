@@ -485,3 +485,73 @@ void MaBoSSIntracellular::save(std::string filename)
 	
 	state_file.close();
 }
+void MaBoSSIntracellular::load_states( std::string input_filename, std::vector<PhysiCell::Cell*>& cells )
+{
+	std::ifstream file( input_filename, std::ios::in );
+	if( !file )
+	{ 
+		std::cout << "Error: " << input_filename << " not found during intracellular_state loading. Quitting." << std::endl; 
+		exit(-1);
+	}
+	else
+	{
+		std::cout << "Loading MaBoSS intracellular states from XML ... " << std::endl; 
+	}
+
+	std::string line;
+	unsigned int i = 0;
+	while (std::getline(file, line))
+	{
+		char* line_c = strdup(line.c_str());
+		char* cell_id = strtok(line_c, ",");
+		char* cell_state = strtok(NULL, ",");
+		if (strcmp(cell_id, "ID") != 0 && i < cells.size())
+		{
+			std::cout << "#" << cell_id << " : " << cell_state << std::endl;	
+			static_cast<MaBoSSIntracellular*>(cells[i]->phenotype.intracellular)->maboss.set_state(cell_state);
+			i++;		
+		}
+	}
+
+	file.close();
+	
+}
+
+void MaBoSSIntracellular::load_cfgs( std::string input_filename, std::vector<PhysiCell::Cell*>& cells )
+{
+	std::ifstream file( input_filename, std::ios::in );
+	if( !file )
+	{ 
+		std::cout << "Error: " << input_filename << " not found during intracellular_state loading. Quitting." << std::endl; 
+		exit(-1);
+	}
+	else
+	{
+		std::cout << "Loading MaBoSS intracellular config from XML ... " << std::endl; 
+	}
+
+	std::string line;
+	unsigned int i = 0;
+	while (std::getline(file, line))
+	{
+		char* line_c = strdup(line.c_str());
+		char* cell_id = strtok(line_c, ",");
+		char* cell_cfg = strtok(NULL, ",");
+		if (strcmp(cell_id, "ID") != 0 && i < cells.size())
+		{
+			std::cout << "#" << cell_id << " : " << cell_cfg << std::endl;	
+			MaBoSSIntracellular* maboss_intra = static_cast<MaBoSSIntracellular*>(cells[i]->phenotype.intracellular);
+			maboss_intra->cfg_filename = cell_cfg;
+			maboss_intra->maboss.init_maboss(maboss_intra->bnd_filename, maboss_intra->cfg_filename);
+			maboss_intra->maboss.mutate(maboss_intra->mutations);
+			maboss_intra->maboss.set_initial_values(maboss_intra->initial_values);
+			maboss_intra->maboss.set_parameters(maboss_intra->parameters);
+			maboss_intra->maboss.set_discrete_time(maboss_intra->discrete_time, maboss_intra->time_tick);
+			maboss_intra->maboss.restart_node_values();
+			i++;		
+		}
+	}
+
+	file.close();
+	
+}

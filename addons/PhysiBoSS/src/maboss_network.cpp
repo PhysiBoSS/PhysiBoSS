@@ -165,3 +165,14 @@ void MaBoSSNetwork::print_nodes()
 	}
 	std::cout << std::endl;
 }
+
+void MaBoSSNetwork::set_state(char * state) 
+{
+	NetworkState network_state;
+	char* node = strtok(state, " -- ");
+	while (node != NULL) {
+		network_state.setNodeState(network->getNode(node), true);
+		node = strtok(NULL, " -- ");
+	}
+	set_state(network_state);
+}
