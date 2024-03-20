@@ -291,6 +291,15 @@ prostate:
 	cp ./sample_projects_intracellular/boolean/prostate/config/* ./config/
 	cp -r ./sample_projects_intracellular/boolean/prostate/scripts ./
 
+physiboss-cellcycle:
+	cp ./sample_projects_intracellular/boolean/cell_cycle/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/boolean/cell_cycle/main.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects_intracellular/boolean/cell_cycle/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp -r ./sample_projects_intracellular/boolean/cell_cycle/config/* ./config/
+
 ecoli-acetic-switch-sample:
 	cp ./sample_projects_intracellular/fba/ecoli_acetic_switch/custom_modules/* ./custom_modules/
 	touch main.cpp && cp main.cpp main-backup.cpp
