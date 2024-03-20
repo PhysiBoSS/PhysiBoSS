@@ -66,7 +66,9 @@
 */
 
 #include "./PhysiCell_geometry.h"
-
+#ifdef ADDON_PHYSIBOSS
+#include "../addons/PhysiBoSS/src/maboss_intracellular.h"
+#endif
 namespace PhysiCell{
 
 // square fills 
@@ -341,14 +343,14 @@ void load_cells_csv_v1( std::string filename )
 
 bool load_cells_from_pugixml( pugi::xml_node root )
 {
-	pugi::xml_node node = root.child( "initial_conditions" ); 
-	if( !node )
+	pugi::xml_node initial_conditions = root.child( "initial_conditions" ); 
+	if( !initial_conditions )
 	{ 
 		std::cout << "Warning: XML-based cell positions has wrong formating. Ignoring!" << std::endl; 
 		return false;
 	}
 
-	node = node.child( "cell_positions" ); 
+	pugi::xml_node node = initial_conditions.child( "cell_positions" ); 
 	if( !node )
 	{
 		std::cout << "Warning: XML-based cell positions has wrong formating. Ignoring!" << std::endl; 
@@ -373,6 +375,29 @@ bool load_cells_from_pugixml( pugi::xml_node root )
 		std::cout << "Loading cells from CSV file " << input_filename << " ... " << std::endl; 
 		load_cells_csv( input_filename );
 		system("sleep 1");
+		
+		#ifdef ADDON_PHYSIBOSS
+			node = initial_conditions.child("intracellular_states" ); 
+			std::string type = node.attribute("type").value();
+			
+			// enabled? 
+			if( node.attribute("enabled").as_bool() == true && type == "maboss")
+			{
+				std::string folder = xml_get_string_value( node, "folder" ); 
+				std::string filename = xml_get_string_value( node, "filename" ); 
+				std::string input_filename = folder + "/" + filename; 
+
+				std::string value_type = node.attribute("values").value();
+				if (value_type == "state")
+				{
+					MaBoSSIntracellular::load_states( input_filename );
+				} else if (value_type == "cfg") {
+					MaBoSSIntracellular::load_cfgs( input_filename );
+				}
+			}
+		#endif
+
+		return true; 
 	}
 	else if( filetype == "matlab" || filetype == "mat" || filetype == "MAT" )
 	{
