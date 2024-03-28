@@ -27,12 +27,12 @@ from the PhysiCell root folder, after obtaining the binary file as described abo
 
 ### Cell fate model
 
-- config/simple_tnf/0_2D.xml : Initial step of the model, with a growing tumour
-- config/simple_tnf/1_Long_TNF_2D.xml : Simulation of a long TNF treatment
-- config/simple_tnf/1_Long_TNF_stochastic_time_2D.xml : Simulation of a long TNF treatment, with cell desynchronisation
-- config/simple_tnf/2_Short_TNF_2D.xml : Simulation of pulsatile TNF treatment
-- config/simple_tnf/3_Necrotic_core_2D.xml : Simulation of a necrotic core in the tumour
-- config/simple_tnf/4_mutants_2D.xml : Simulation of an heterogenous tumour, with a population resistant to the TNF treatment
+- config/simple_tnf/0_Initial.xml : Initial step of the model, with a growing tumour
+- config/simple_tnf/1_Long_TNF.xml : Simulation of a long TNF treatment
+- config/simple_tnf/1_Long_TNF_stochastic_time.xml : Simulation of a long TNF treatment, with cell desynchronisation
+- config/simple_tnf/2_Short_TNF.xml : Simulation of pulsatile TNF treatment
+- config/simple_tnf/3_Necrotic_core.xml : Simulation of a necrotic core in the tumour
+- config/simple_tnf/4_Mutants.xml : Simulation of an heterogenous tumour, with a population resistant to the TNF treatment
 
 ### Cell cycle model
 
