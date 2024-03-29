@@ -44,7 +44,11 @@ from the PhysiCell root folder, after obtaining the binary file as described abo
 ### Differentiation model
 
 - config/differentiation/PhysiCell_settings.xml : Default simulation of the T Cell differentiation model
-- config/differentiation/PhysiCell_settings_lower_bias : Simulation of the T Cell differentiation model with more stochasticity in the chemotaxis of dendritic cells
+- config/differentiation/PhysiCell_settings_FOXP3_2_mutant.xml : Simulation of the T Cell differentiation model with FOXP3_2 knockout in navice T cells
+- config/differentiation/PhysiCell_settings_NFKB_mutant.xml : Simulation of the T Cell differentiation model with NFKB knockout in navice T cells
+- config/differentiation/PhysiCell_settings_FOXP3_2_lower.xml : Simulation of the T Cell differentiation model with lower activation rate for FOXP3_2 in navice T cells
+- config/differentiation/PhysiCell_settings_NFKB_lower.xml : Simulation of the T Cell differentiation model with lower activation rate for NFKB in navice T cells
+
 
 ## Scripts
 

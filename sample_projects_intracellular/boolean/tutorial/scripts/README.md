@@ -12,8 +12,6 @@ Cell_cycle_analysis.ipynb : Analysis of the results of the cell cycle PhysiBoSS 
 
 Corral_analysis.ipynb : Analysis of the Corral model
 
-Differentiation_Plot.ipynb : Creating the differentiation plot with dendritic cells trajectory (Figure 3C,D)
-
 
 ## Running the notebooks
 

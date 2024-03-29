@@ -23,5 +23,4 @@ dependencies:
   - seaborn
   - pip
   - pip:
-    - git+https://github.com/marcorusc/PhysiCOOL@49cb8935610ac730dc007855ae95e8dbeaa737be
     - pcdl[scverse]
