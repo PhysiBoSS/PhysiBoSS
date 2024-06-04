@@ -77,59 +77,42 @@ void create_cell_types(void)
 
 	SeedRandom(parameters.ints("random_seed")); // or specify a seed here
 
-	// housekeeping
-	std::cout << cell_defaults.name << std::endl;
+	initialize_default_cell_definition();
 
-	cell_defaults.functions.volume_update_function = standard_volume_update_function;
-	cell_defaults.functions.update_velocity = standard_update_cell_velocity;
-	cell_defaults.functions.update_migration_bias = NULL;
-	cell_defaults.functions.custom_cell_rule = NULL;
+	/*  This parses the cell definitions in the XML config file.  */
+	initialize_cell_definitions_from_pugixml();
+
+	//  This sets the pre and post intracellular update functions
+	cell_defaults.functions.pre_update_intracellular =  update_boolean_model_inputs;
+	cell_defaults.functions.post_update_intracellular = update_behaviors;
+	cell_defaults.functions.update_phenotype = NULL;
+
+	drug_transport_model_setup();
+	boolean_model_interface_setup();
 
 	cell_defaults.custom_data.add_variable("time", "min", PhysiCell_globals.current_time );
 	cell_defaults.custom_data.add_variable("total_live_cells", "dimensionless", 0.0 );
 
 	cell_defaults.custom_data.add_variable("reactivation_rate", "1/min", 0.0 );
 	cell_defaults.custom_data.add_variable("mutation_rate", "1/generation", 0.0 );
-	
-	cell_defaults.functions.add_cell_basement_membrane_interactions = NULL;
-	cell_defaults.functions.calculate_distance_to_membrane = NULL;
-	cell_defaults.functions.set_orientation = NULL;
-
-	// cell_defaults.functions.update_phenotype = NULL;
-	cell_defaults.functions.update_phenotype = tumor_cell_phenotype_with_signaling;
-
-	initialize_cell_definitions_from_pugixml();
-
-	drug_transport_model_setup();
-	boolean_model_interface_setup();
 
 	submodel_registry.display(std::cout);
 
 	build_cell_definitions_maps();
+	setup_signal_behavior_dictionaries();
 	display_cell_definitions(std::cout);
+
+	PhysiCell::Cycle_Model cycle_model = cell_defaults.phenotype.cycle.model();
+	int start_phase_idxx = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
+	int end_phase_idxx = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
+	cycle_model.phase_link(start_phase_idx, end_phase_idx).exit_function = my_mutation_function;
 
 	return;
 }
 
 void setup_microenvironment(void)
 {
-	// make sure to override and go back to 2D
-	// if (default_microenvironment_options.simulate_2D == true)
-	// {
-	// 	std::cout << "Warning: overriding XML config option and setting to 3D!" << std::endl;
-	// 	default_microenvironment_options.simulate_2D = false;
-	// }
-
-	// microenvironment.add_density( "drug_X", "mM" );
-	// microenvironment.diffusion_coefficients[1] = 0.0; 
-	// microenvironment.decay_rates[1] = 0.0;
-	
-
-	// initialize BioFVM
 	initialize_microenvironment();
-
-
-
 	return;
 }
 
@@ -254,23 +237,17 @@ void update_cell_gowth_parameters_pressure_based( Cell* pCell, Phenotype& phenot
     double scaling = pressure_effect_growth_rate(p, hill_coeff_pressure, pressure_half );
 	// std::cout << "scaling is: " << scaling << std::endl;
 
-	double rate = phenotype.cycle.data.transition_rate(0, 0);
+	// MPONCE: 
+	// 1- explicar de donde sales la formula del scaling
+	// 2- por que te tomas el trabajo de averiguar el modelo de ciclo celular
+	// y luego usas índices harcodeados? 
+	// double rate = phenotype.cycle.data.transition_rate(0, 0);
+	double rate = phenotype.cycle.data.transition_rate(start_phase_index, end_phase_index);
 	rate *= (1 - scaling);
 	if (rate < 0)
 		rate = 0;
 	
 	phenotype.cycle.data.transition_rate(start_phase_index, end_phase_index) = rate;
-
-	// adding noise after division
-
-	std::string drug_X_target_node = parameters.strings("drug_X_target");
-	// if (drug_X_target_node != "none"){ add_noise_after_division(pCell, phenotype, drug_X_target_node);}
-	
-	std::string drug_Y_target_node = parameters.strings("drug_Y_target");
-	// if (drug_Y_target_node != "none"){ add_noise_after_division(pCell, phenotype, drug_Y_target_node);}
-
-	// Adding a custom phase exit function -- the smooth option for adding a mutation
-	phenotype.cycle.model().phase_link(start_phase_index, end_phase_index).exit_function = my_mutation_function;
 
 }
 
@@ -314,48 +291,6 @@ void my_mutation_function( Cell* pCell, Phenotype& phenotype, double dt )
 }
 
 
-// void add_noise_after_division(Cell *pCell, Phenotype& phenotype, std::string drug_name){
-
-// 	// ADDING NOISE TO SPECIFIC CUSTOM DATA AFTER EACH DIVISION
-// 	// This is done through flagging agents with elapsed time in phase 0
-
-// 	double time_in_phase = pCell->phenotype.cycle.data.elapsed_time_in_phase;
-// 	static int reactivation_value_idx = pCell->custom_data.find_variable_index("reactivation_value");
-
-
-// 	double mutation_prob_mean = parameters.doubles("mutation_prob_mean");
-// 	double mutation_prob_sd = parameters.doubles("mutation_prob_sd");
-// 	double mutation_rate = NormalRandom(mutation_prob_mean, mutation_prob_sd ) * dt; 
-
-// 	// std::cout << time_in_phase << std::endl;
-
-	
-// 	// Mutate after division (Implementation method B)
-// 	// if (( uniform_random() < pCell->custom_data.variables[reactivation_prob_idx].value ) & (drug_X_target_node != "none") )
-
-// 	if (( time_in_phase == 0) & (uniform_random() < mutation_value)){ 
-
-// 		// std::cout << "this cell " << pCell->ID << " has time elapsed in phase " << phenotype.cycle.data.elapsed_time_in_phase << std::endl;
-// 		std::cout << "this cell " << pCell->ID << " is mutating " << std::endl;
-
-// 		std::string drug_target_node = parameters.strings(drug_name);
-
-// 		double mutation_type = uniform_random();
-
-// 		if (mutation_value < 0.5){ return; } // Neutral mutation
-// 		if ( (mutation_value > 0.5) & (mutation_value < 0.5) ){ pCell->phenotype.intracellular->set_boolean_variable_value(drug_target_node, 1);} // 
-// 		if (mutation_value = 0){ return;} 
-
-// 		// this allows for maintaining some sort of reactivation value
-// 		// pCell->custom_data.variables[reactivation_value_idx].value += NormalRandom(reactivation_noise_mean, reactivation_noise_sd) * 0.1;
-// 		// if (pCell->custom_data.variables[reactivation_value_idx].value < 0){ pCell->custom_data.variables[reactivation_value_idx].value = 0;}
-// 		// if (pCell->custom_data.variables[reactivation_value_idx].value > 1){ pCell->custom_data.variables[reactivation_value_idx].value = 1;}
-
-
-// 	}
-
-// 	return;
-// }
 
 
 // custom cell phenotype function to run PhysiBoSS when is needed
@@ -370,7 +305,7 @@ void tumor_cell_phenotype_with_signaling(Cell *pCell, Phenotype &phenotype, doub
 		return;
 	}
 	
-	update_cell_and_death_parameters_O2_based(pCell, phenotype, dt);
+	// update_cell_and_death_parameters_O2_based(pCell, phenotype, dt);
 	// drug_transport_model_main( dt );
 	ags_bm_interface_main(pCell, phenotype, dt);
 	update_cell_gowth_parameters_pressure_based(pCell, phenotype, dt);
