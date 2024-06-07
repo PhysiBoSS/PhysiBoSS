@@ -11,27 +11,6 @@ using namespace PhysiCell;
 
 Submodel_Information bm_interface_info;
 
-double Hill_response_function( double s, double half_max , double hill_power )
-{ 
-    // newer. only one expensive a^b operation. 45% less computationl expense. 
-
-	// give an early exit possibility to cut cost on "empty" rules
-	if(s < 1e-16 ) // maybe also try a dynamic threshold: 0.0001 * half_max 
-	{ return 0.0; } 
-
-	// operations to reduce a^b operations and minimize hidden memory allocation / deallocation / copy operations. 
-	// Hill = (s/half_max)^hill_power / ( 1 + (s/half_max)^hill_power  )
-	double temp = s; // s 
-	temp /= half_max; // s/half_max 
-	double temp1 = pow(temp,hill_power); // (s/half_max)^h 
-	temp = temp1;  // (s/half_max)^h 
-	temp +=1 ;  // (1+(s/half_max)^h ); 
-	temp1 /= temp; // (s/half_max)^h / ( 1 + s/half_max)^h) 
-    if(temp1 < 1e-16)
-        temp1 = 0.0;
-	return temp1; 
-}
-
 
 void boolean_model_interface_setup()
 {
@@ -63,8 +42,33 @@ void boolean_model_interface_setup()
 
 
     // Could add here output of transfer functions
-
 	bm_interface_info.register_model();
+}
+
+
+double calculate_drug_effect(Cell* pCell, std::string drug_name){
+    
+	std::string p_half_max_name   = drug_name + "_half_max";
+    std::string p_hill_coeff_name = drug_name + "_Hill_coeff";
+    
+    static int drug_idx         = microenvironment.find_density_index( drug_name );
+    static int p_half_max_idx   = pCell->custom_data.find_variable_index(p_half_max_name);
+    static int p_hill_coeff_idx = pCell->custom_data.find_variable_index(p_hill_coeff_name);
+	
+    double cell_volume   = pCell->phenotype.volume.total;
+    double ic_drug_total = pCell->phenotype.molecular.internalized_total_substrates[drug_idx];
+    double ic_drug_conc  = ic_drug_total / cell_volume; // Convert to concentration
+
+    double p_half_max    = pCell->custom_data[p_half_max_idx].value;
+    double p_hill_coeff  = pCell->custom_data[p_hill_coeff_idx].value;
+
+    return Hill_response_function(ic_drug_conc, p_half_max, p_hill_coeff);
+}
+
+std::string get_drug_target(std::string drug_name){
+    std::string param_name = drug_name + "_target";
+    std::string drug_target = parameters.strings(param_name);
+    return drug_target;
 }
 
 void update_boolean_model_inputs( Cell* pCell, Phenotype& phenotype, double dt )
@@ -73,62 +77,25 @@ void update_boolean_model_inputs( Cell* pCell, Phenotype& phenotype, double dt )
     if( pCell->phenotype.death.dead == true )
 	{ return; }
 
-    // anti_node_mapping_function(pCell, "drug_Y", parameters.strings("drug_Y_target"), parameters.doubles("drug_Y_half_max"), parameters.doubles("drug_Y_Hill_coeff"));
-    // anti_node_mapping_function(pCell, "drug_X", parameters.strings("drug_X_target"), parameters.doubles("drug_X_half_max"), parameters.doubles("drug_X_Hill_coeff"));
+    int totat_drugs = 2;
+    std::string drugs[totat_drugs] = { "drug_X", "drug_Y" };
+ 
+  
+    for (int i = 0; i < totat_drugs; i++){
+        std::string drug_name = drugs[i];
+        std::string target_node = get_drug_target(drug_name);
 
-    // for drug_X
-    double cell_volume = pCell->phenotype.volume.total;
-	static int drug_X_idx = microenvironment.find_density_index( "drug_X" );
-
-    double drug_X_int = pCell->phenotype.molecular.internalized_total_substrates[drug_X_idx];
-    drug_X_int /= cell_volume; // Convert to density (mM)
-
-    double drug_X_target_inactivate_p = Hill_response_function(drug_X_int, parameters.doubles("drug_X_half_max"), parameters.doubles("drug_X_Hill_coeff") );
-    std::string drug_X_target_node = parameters.strings("drug_X_target");
-
-    // [WIP] Can't get the state of the node if it's not on the BM
-    // if(drug_X_target_node != "none")
-    //     {bool drug_X_target_state = pCell->phenotype.intracellular->get_boolean_variable_value(drug_X_target_node);}
-
-    if (drug_X_target_node != "none"){
-        if ( uniform_random() < drug_X_target_inactivate_p ){ 
-            pCell->phenotype.intracellular->set_boolean_variable_value(drug_X_target_node, 1);
-        } else { 
-            pCell->phenotype.intracellular->set_boolean_variable_value(drug_X_target_node, 0);
+        double drug_effect = calculate_drug_effect(pCell, drug_name);
+            
+        if (drug_effect > 0){
+            if ( uniform_random() < drug_effect )
+                pCell->phenotype.intracellular->set_boolean_variable_value(target_node, 1);
+            else
+                pCell->phenotype.intracellular->set_boolean_variable_value(target_node, 0);
         }
     }
-
-
-    // for drug_Y
-	static int drug_Y_idx = microenvironment.find_density_index( "drug_Y" );
-
-    double drug_Y_int = pCell->phenotype.molecular.internalized_total_substrates[drug_Y_idx];
-    drug_Y_int /= cell_volume; // Convert to density (mM)
-
-    double drug_Y_target_inactivate_p = Hill_response_function(drug_Y_int, parameters.doubles("drug_Y_half_max"), parameters.doubles("drug_Y_Hill_coeff") );
-    std::string drug_Y_target_node = parameters.strings("drug_Y_target");
-
-    // if(drug_Y_target_node != "none")
-    //     {bool drug_Y_target_state = pCell->phenotype.intracellular->get_boolean_variable_value(drug_Y_target_node);}
-
-    if (drug_Y_target_node != "none"){
-        if ( uniform_random() < drug_Y_target_inactivate_p ){ 
-            pCell->phenotype.intracellular->set_boolean_variable_value(drug_Y_target_node, 1);
-        } else { 
-            pCell->phenotype.intracellular->set_boolean_variable_value(drug_Y_target_node, 0);
-        }
-    }
-
-
-    // pCell->phenotype.intracellular->print_current_nodes();
-
-    // Possibility of reactivating this node (or downstream)
-    // Toy case for PI3K (would need a dictionary for the different drugs)
 
     static int reactivation_prob_idx = pCell->custom_data.find_variable_index("reactivation_value");
-
-    // std::cout << "drug X target state " << drug_X_target_state << std::endl;
-    // std::cout << "drug Y target state " << drug_Y_target_state << std::endl;
 
     if (( uniform_random() < pCell->custom_data.variables[reactivation_prob_idx].value ) & (drug_X_target_node != "none") )
     {
@@ -143,8 +110,6 @@ void update_boolean_model_inputs( Cell* pCell, Phenotype& phenotype, double dt )
     }  
 
     return;
-
-
 }
 
 void update_cell_from_boolean_model(Cell* pCell, Phenotype& phenotype, double dt)

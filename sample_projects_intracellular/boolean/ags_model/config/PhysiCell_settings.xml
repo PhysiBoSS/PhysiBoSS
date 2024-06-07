@@ -103,20 +103,14 @@
 		<cell_definition ID="0" name="default">
 			<phenotype>
 				<cycle code="5" name="live">  
-					
-					
 					<phase_transition_rates units="1/min"> 
 						<rate end_index="0" fixed_duration="false" start_index="0">0.00209</rate> 
 					</phase_transition_rates>
-					
-					
-					
 				</cycle>
 				
 				<death>  
 					<model code="100" name="apoptosis"> 
 						<death_rate units="1/min">5.31667e-05</death_rate>
-						
 						
 						<phase_durations units="min">
 							<duration fixed_duration="true" index="0">516</duration>
@@ -133,14 +127,10 @@
 
 					<model code="101" name="necrosis">
 						<death_rate units="1/min">0.0</death_rate>
-						
-						 
-						
 						<phase_durations units="min">
 							<duration fixed_duration="true" index="0">0</duration>
 							<duration fixed_duration="true" index="1">86400</duration>
 						</phase_durations>
-						
 						<parameters>
 							<unlysed_fluid_change_rate units="1/min">0.05</unlysed_fluid_change_rate>
 							<lysed_fluid_change_rate units="1/min">0</lysed_fluid_change_rate>
@@ -152,7 +142,6 @@
 					</model> 
 				</death>					
 								
-
 				<secretion>
 					<substrate name="oxygen"> 
 						<secretion_rate units="1/min">0</secretion_rate>
@@ -174,54 +163,38 @@
 			</phenotype>
 			
 			<custom_data>
-				<drug_X_pulse_period type="double" units="min"> 0 </drug_X_pulse_period> 
-				<drug_X_pulse_duration type="double" units="min"> 10 </drug_X_pulse_duration> 
-				<drug_X_pulse_concentration type="double" units="min">0.000175</drug_X_pulse_concentration> 
+				
 
 				<drug_X_permeability type="double" units="amol/um^3">0.00021979189</drug_X_permeability> 
 				<drug_X_target type="string" units="">anti_PI3K</drug_X_target>
 				<drug_X_half_max type="double" units="mM">3.3857220000000006e-05</drug_X_half_max>
 				<drug_X_Hill_coeff type="double" units="mM">5.503406625769999</drug_X_Hill_coeff>
 
-				<drug_Y_pulse_period type="double" units="min"> 0 </drug_Y_pulse_period> 
-				<drug_Y_pulse_duration type="double" units="min">0</drug_Y_pulse_duration> 
-				<drug_Y_pulse_concentration type="double" units="min">0.0</drug_Y_pulse_concentration> 
-				
 				<drug_Y_permeability type="double" units="amol/um^3"> 0.0 </drug_Y_permeability>
 				<drug_Y_target type="string" units="">none</drug_Y_target>
 				<drug_Y_half_max type="double" units="mM">0.0</drug_Y_half_max>
 				<drug_Y_Hill_coeff type="double" units="mM">0.0</drug_Y_Hill_coeff>
 
-				<!-- Heterogeneous reactivation of cancer pathways -->
-				<!-- <reactivation_value type="double" units="uM?"> 0.5 </reactivation_value> -->
-				<reactivation_rate_mean type="double" units="uM?"> 0.0 </reactivation_rate_mean>
-				<reactivation_rate_sd type="double" units="uM?"> 0 </reactivation_rate_sd>
-
-				<mutation_rate_mean type="double" units="uM?"> 0 </mutation_rate_mean> <!-- from https://bionumbers.hms.harvard.edu/bionumber.aspx?s=n&v=20&id=100417 -->
-				<mutation_rate_sd type="double" units="uM?"> 0 </mutation_rate_sd>
-				<!-- <mutation_value type="double" units="uM?"> 0.0 </mutation_value> for debugging purposes -->
-
-
 				<basal_growth_rate type="double" units="1/min">0.00209</basal_growth_rate> 
 				<hill_coeff_growth type="double" units="dimensionless">6.9505</hill_coeff_growth>
 				<K_half_growth type="double" units="dimensionless">0.0585</K_half_growth>
-
 			
 				<apoptosis_rate_basal type="double" units="1/min">5.31667e-05</apoptosis_rate_basal>
 				<max_apoptosis_rate type="double" units="1/min">0.0098</max_apoptosis_rate>
 				<hill_coeff_apoptosis type="double" units="dimensionless">3.6787</hill_coeff_apoptosis>
 				<K_half_apoptosis type="double" units="dimensionless">0.0193</K_half_apoptosis>
 				
-				
 				<hill_coeff_pressure type="double" units="1/min">6.9583485811</hill_coeff_pressure>
 				<pressure_half type="double" units="1/min">4.7920543763</pressure_half> 
-
 				
 				<w1_growth type="double" units="dimensionlaess">0.2215</w1_growth>
 				<w2_growth type="double" units="dimensionlaess">0.2574</w2_growth>
 
 				<w1_apoptosis type="double" units="dimensionlaess">0.1092</w1_apoptosis>
 				<w2_apoptosis type="double" units="dimensionlaess">0.3765</w2_apoptosis>
+
+				<reactivation_rate_mean type="double" units="1/min">0.0</reactivation_rate_mean>
+				<reactivation_rate_sd type="double" units="1/min">0.0</reactivation_rate_sd>
 				
 			</custom_data>
 		</cell_definition>
@@ -242,9 +215,16 @@
 		<cell_spacing type="double" units="um"> 1.6 </cell_spacing> <!-- 1.6 -->
 		<membrane_length type="int" units=""> 0 </membrane_length>
     	
+		<drug_X_pulse_period type="double" units="min"> 0 </drug_X_pulse_period> 
+		<drug_X_pulse_duration type="double" units="min"> 10 </drug_X_pulse_duration> 
+		<drug_X_pulse_concentration type="double" units="min">0.000175</drug_X_pulse_concentration>
 
+		<drug_Y_pulse_period type="double" units="min"> 0 </drug_Y_pulse_period> 
+		<drug_Y_pulse_duration type="double" units="min">0</drug_Y_pulse_duration> 
+		<drug_Y_pulse_concentration type="double" units="min">0.0</drug_Y_pulse_concentration>
 
-
+		<mutation_rate_mean type="double" units="uM?"> 0 </mutation_rate_mean> <!-- from https://bionumbers.hms.harvard.edu/bionumber.aspx?s=n&v=20&id=100417 -->
+		<mutation_rate_sd type="double" units="uM?"> 0 </mutation_rate_sd>
 
 	</user_parameters>
 	
