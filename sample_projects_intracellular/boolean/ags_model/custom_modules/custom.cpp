@@ -83,8 +83,8 @@ void create_cell_types(void)
 	initialize_cell_definitions_from_pugixml();
 
 	//  This sets the pre and post intracellular update functions
-	cell_defaults.functions.pre_update_intracellular =  update_boolean_model_inputs;
-	cell_defaults.functions.post_update_intracellular = update_behaviors;
+	cell_defaults.functions.pre_update_intracellular =  pre_update_boolean;
+	cell_defaults.functions.post_update_intracellular = post_update_boolean;
 	cell_defaults.functions.update_phenotype = NULL;
 
 	drug_transport_model_setup();
@@ -144,111 +144,35 @@ void setup_tissue( void )
 
 void update_cell_gowth_parameters_pressure_based( Cell* pCell, Phenotype& phenotype, double dt ) 
 {
-	// supported cycle models:
-		// advanced_Ki67_cycle_model= 0;
-		// basic_Ki67_cycle_model=1
-		// live_cells_cycle_model = 5; 
 	
 	if( phenotype.death.dead == true )
 	{ return; }
 	
-	// set up shortcuts to find the Q and K(1) phases (assuming Ki67 basic or advanced model)
-	static bool indices_initiated = false; 
-	static int start_phase_index; // Q_phase_index; 
-	static int end_phase_index; // K_phase_index;
-	static int necrosis_index; 
 	
 	static int oxygen_substrate_index = pCell->get_microenvironment()->find_density_index( "oxygen" ); 
+	static int start_phase_index = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
+	static int necrosis_index = phenotype.death.find_death_model_index( PhysiCell_constants::necrosis_death_model ); 
+	static int end_phase_index = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
 	
-	if( indices_initiated == false )
-	{
-		// Ki67 models
-		
-		if( phenotype.cycle.model().code == PhysiCell_constants::advanced_Ki67_cycle_model || 
-			phenotype.cycle.model().code == PhysiCell_constants::basic_Ki67_cycle_model )
-		{
-			start_phase_index = phenotype.cycle.model().find_phase_index( PhysiCell_constants::Ki67_negative );
-			necrosis_index = phenotype.death.find_death_model_index( PhysiCell_constants::necrosis_death_model ); 
-			
-			if( phenotype.cycle.model().code == PhysiCell_constants::basic_Ki67_cycle_model )
-			{
-				end_phase_index = 
-					phenotype.cycle.model().find_phase_index( PhysiCell_constants::Ki67_positive );
-				indices_initiated = true; 
-			}
-			if( phenotype.cycle.model().code == PhysiCell_constants::advanced_Ki67_cycle_model )
-			{
-				end_phase_index = 
-					phenotype.cycle.model().find_phase_index( PhysiCell_constants::Ki67_positive_premitotic );
-				indices_initiated = true; 
-			}
-		}
-		
-		// live model 
-			
-		if( phenotype.cycle.model().code == PhysiCell_constants::live_cells_cycle_model )
-		{
-			start_phase_index = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
-			necrosis_index = phenotype.death.find_death_model_index( PhysiCell_constants::necrosis_death_model ); 
-			end_phase_index = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
-			indices_initiated = true; 
-		}
-		
-		// cytometry models 
-		
-		if( phenotype.cycle.model().code == PhysiCell_constants::flow_cytometry_cycle_model || 
-			phenotype.cycle.model().code == PhysiCell_constants::flow_cytometry_separated_cycle_model )
-		{
-			start_phase_index = phenotype.cycle.model().find_phase_index( PhysiCell_constants::G0G1_phase );
-			necrosis_index = phenotype.death.find_death_model_index( PhysiCell_constants::necrosis_death_model ); 
-			end_phase_index = phenotype.cycle.model().find_phase_index( PhysiCell_constants::S_phase );
-			indices_initiated = true; 
-		}	
 
-		if( phenotype.cycle.model().code == PhysiCell_constants::cycling_quiescent_model )
-		{
-			start_phase_index = phenotype.cycle.model().find_phase_index( PhysiCell_constants::quiescent );
-			necrosis_index = phenotype.death.find_death_model_index( PhysiCell_constants::necrosis_death_model ); 
-			end_phase_index = phenotype.cycle.model().find_phase_index( PhysiCell_constants::cycling );
-			indices_initiated = true; 
-		}
-		
-	}
-	
-	// don't continue if we never "figured out" the current cycle model. 
-	if( indices_initiated == false )
-	{
-		return; 
-	}
-
-	// this multiplier is for linear interpolation of the oxygen value 
-	double multiplier = 1.0;
-	
-	// now, update the appropriate cycle transition rate 
-
-
+	// this multiplier is for linear interpolation of the oxygen value 	
 	// PRESSURE-BASED CONTACT-INHIBITION
 	// Check relative pressure to either number of neighbor cells or set max logistic function to number of neighbor cells
 	// pressure threshold set to 1, above this value there is no growth
-
-	double p = pCell->state.simple_pressure; 
+	double cell_pressure = pCell->state.simple_pressure; 
     double hill_coeff_pressure = parameters.doubles("hill_coeff_pressure");
     double pressure_half = parameters.doubles("pressure_half");
-    double scaling = pressure_effect_growth_rate(p, hill_coeff_pressure, pressure_half );
-	// std::cout << "scaling is: " << scaling << std::endl;
-
-	// MPONCE: 
-	// 1- explicar de donde sales la formula del scaling
-	// 2- por que te tomas el trabajo de averiguar el modelo de ciclo celular
-	// y luego usas índices harcodeados? 
-	// double rate = phenotype.cycle.data.transition_rate(0, 0);
-	double rate = phenotype.cycle.data.transition_rate(start_phase_index, end_phase_index);
-	rate *= (1 - scaling);
-	if (rate < 0)
-		rate = 0;
+    
+	double scaling = pressure_effect_growth_rate(cell_pressure, hill_coeff_pressure, pressure_half);
+	double growth_rate = phenotype.cycle.data.transition_rate(start_phase_index, end_phase_index);
 	
-	phenotype.cycle.data.transition_rate(start_phase_index, end_phase_index) = rate;
+	growth_rate = growth_rate * (1 - scaling);
+	if (growth_rate < 0)
+		growth_rate = 0;
+	
+	phenotype.cycle.data.transition_rate(start_phase_index, end_phase_index) = growth_rate;
 
+	return;
 }
 
 void my_mutation_function( Cell* pCell, Phenotype& phenotype, double dt )
@@ -292,44 +216,6 @@ void my_mutation_function( Cell* pCell, Phenotype& phenotype, double dt )
 
 
 
-
-// custom cell phenotype function to run PhysiBoSS when is needed
-void tumor_cell_phenotype_with_signaling(Cell *pCell, Phenotype &phenotype, double dt)
-{
-	
-	// std::cout << "Choosing penotype with signalling " << std::endl;
-
-	if (phenotype.death.dead == true)
-	{
-		pCell->functions.update_phenotype = NULL;
-		return;
-	}
-	
-	// update_cell_and_death_parameters_O2_based(pCell, phenotype, dt);
-	// drug_transport_model_main( dt );
-	ags_bm_interface_main(pCell, phenotype, dt);
-	update_cell_gowth_parameters_pressure_based(pCell, phenotype, dt);
-
-	// Adding time to custom data
-	static int time_index = pCell->custom_data.find_variable_index("time");
-	pCell->custom_data.variables[time_index].value = PhysiCell_globals.current_time;
-
-	// Adding total number of cells
-	static int total_live_cells_index = pCell->custom_data.find_variable_index("total_live_cells");
-	float cells = 0.0;
-
-	#pragma omp parallel for 
-	for( int i=0; i < (*all_cells).size() ; i++ )
-	{
-		Cell* pCell = (*all_cells)[i]; 
-		if( pCell->phenotype.death.dead == true)
-		{ continue; }
-
-		cells += 1; 
-	}
-
-	pCell->custom_data.variables[total_live_cells_index].value = cells;
-}
 
 
 // cell coloring function for ploting the svg files
