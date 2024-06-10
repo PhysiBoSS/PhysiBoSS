@@ -76,8 +76,8 @@ list-projects:
 	@echo "                 worm-sample interaction-sample mechano-sample rules-sample physimess-sample"
 	@echo ""
 	@echo "Sample intracellular projects: template_BM ode-energy-sample physiboss-cell-lines-sample"
-	@echo "                 physiboss-tnf-model cancer-metabolism-sample prostate physiboss-tutorial"
-	@echo "                 physiboss-tutorial-invasion"
+	@echo "                 physiboss-tnf-model physiboss-drugs-synergy-model cancer-metabolism-sample"
+	@echo "                 prostate physiboss-tutorial physiboss-tutorial-invasion"
 	
 template:
 	cp ./sample_projects/template/custom_modules/* ./custom_modules/
@@ -226,6 +226,15 @@ physiboss-tnf-model:
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
 	cp ./sample_projects_intracellular/boolean/spheroid_tnf_model/config/* ./config/
 	cp -r ./sample_projects_intracellular/boolean/spheroid_tnf_model/scripts ./
+
+physiboss-drugs-synergy-model:
+	cp ./sample_projects_intracellular/boolean/ags_model/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/boolean/ags_model/main.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects_intracellular/boolean/ags_model/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp ./sample_projects_intracellular/boolean/ags_model/config/* ./config/
 
 prostate:
 	cp ./sample_projects_intracellular/boolean/prostate/custom_modules/* ./custom_modules/

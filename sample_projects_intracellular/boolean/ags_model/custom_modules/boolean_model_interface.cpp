@@ -16,7 +16,7 @@ std::string get_drug_target(std::string drug_name){
 void boolean_model_interface_setup()
 {
     bm_interface_info.name = "AGS Boolean model interface"; 
-	bm_interface_info.version = "0.0.1";
+	bm_interface_info.version = "0.0.2";
 	
     bm_interface_info.main_function = ags_bm_interface_main; 
 
@@ -46,7 +46,10 @@ void boolean_model_interface_setup()
 	bm_interface_info.register_model();
 }
 
-void update_monitor_variables(Cell* pCell )
+
+// @othmane: New PhysiBoSS, this might not be even needed, can be tracked through the BM states CSV in the output folder
+
+void update_monitor_variables(Cell* pCell ) 
 {
 	static int mek_node_ix = pCell->custom_data.find_variable_index("mek_node");
 	static int akt_node_ix = pCell->custom_data.find_variable_index("akt_node");
@@ -102,8 +105,10 @@ double calculate_drug_effect(Cell* pCell, std::string drug_name){
     double ic_drug_total = pCell->phenotype.molecular.internalized_total_substrates[drug_idx];
     double ic_drug_conc  = ic_drug_total / cell_volume; // Convert to concentration
 
-    double p_half_max    = pCell->custom_data[p_half_max_idx].value;
-    double p_hill_coeff  = pCell->custom_data[p_hill_coeff_idx].value;
+    std::cout << pCell->custom_data[p_half_max_idx] << std::endl;
+
+    double p_half_max    = pCell->custom_data[p_half_max_idx];
+    double p_hill_coeff  = pCell->custom_data[p_hill_coeff_idx];
 
     return Hill_response_function(ic_drug_conc, p_half_max, p_hill_coeff);
 }
@@ -120,7 +125,7 @@ void update_boolean_model_inputs( Cell* pCell, Phenotype& phenotype, double dt )
         std::string drug_name = drugs[i];
         std::string target_node = get_drug_target(drug_name);
         double drug_effect = calculate_drug_effect(pCell, drug_name);    
-        if (drug_effect > 0){
+        if (drug_effect > 0){ // why 0 here?
             if ( uniform_random() < drug_effect )
                 pCell->phenotype.intracellular->set_boolean_variable_value(target_node, 1);
             else
@@ -148,7 +153,7 @@ void pathway_reactivation( Cell* pCell, Phenotype& phenotype, double dt ){
     return;
 }
 
-void pre_update_boolean(Cell* pCell, Phenotype& phenotype, double dt)
+void pre_update_intracellular_ags(Cell* pCell, Phenotype& phenotype, double dt)
 {
     if( phenotype.death.dead == true )
 	{
@@ -156,7 +161,7 @@ void pre_update_boolean(Cell* pCell, Phenotype& phenotype, double dt)
 		return;
 	}
     // Update MaBoSS input nodes based on the environment and cell state
-    update_boolean_model_inputs(Cell* pCell, Phenotype& phenotype, double dt);
+    update_boolean_model_inputs(pCell, phenotype, dt);
 
     // This function can be use for the reactivation mechanisms
     // pathway_reactivation( Cell* pCell, Phenotype& phenotype, double dt )
@@ -169,22 +174,17 @@ void pre_update_boolean(Cell* pCell, Phenotype& phenotype, double dt)
 double growth_mapping_logistic(double doubling_time, double hill_coeff, double K_half, double S_value){
 
     // double growth_logistic_function = doubling_time / (1 + std::exp(- log10(readout_value) * scaling));
-
     double growth_logistic_function;
     growth_logistic_function = (doubling_time * std::pow(S_value, hill_coeff ) ) / (K_half + std::pow(S_value, hill_coeff) ) ;
 
     return growth_logistic_function;
-
 }
 
 double apoptosis_mapping_logistic(double basal_apoptosis_rate, double maximum_apoptosis_rate, double hill_coeff, double K_half, double S_value){
-
-
     double apoptosis_mapping_function;
     apoptosis_mapping_function = (maximum_apoptosis_rate * std::pow(S_value, hill_coeff) ) / (K_half + std::pow(S_value, hill_coeff) ) ;
 
     return apoptosis_mapping_function +  basal_apoptosis_rate;
-    
 }
 
 void update_cell_from_boolean_model(Cell* pCell, Phenotype& phenotype, double dt){
@@ -256,7 +256,9 @@ void update_cell_from_boolean_model(Cell* pCell, Phenotype& phenotype, double dt
     return;
 }
 
-void post_update_boolean(Cell* pCell, Phenotype& phenotype, double dt)
+void post_update_intracellular_ags(Cell* pCell, Phenotype& phenotype, double dt)
+
+
 {
     if( phenotype.death.dead == true )
 	{
@@ -268,7 +270,19 @@ void post_update_boolean(Cell* pCell, Phenotype& phenotype, double dt)
     update_cell_from_boolean_model(pCell, phenotype, dt);
     
     // Get track of some boolean node values for debugging
+    // Probably not needed anymore
     update_monitor_variables(pCell);
 
     return;
+}
+
+//  @oth: added the main interface function
+
+void ags_bm_interface_main (Cell* pCell, Phenotype& phenotype, double dt){
+    
+	if( phenotype.death.dead == true )
+	{
+		pCell->functions.update_phenotype = NULL;
+		return;
+	}
 }

@@ -33,7 +33,7 @@
 #                                                                             #
 # BSD 3-Clause License (see https://opensource.org/licenses/BSD-3-Clause)     #
 #                                                                             #
-# Copyright (c) 2015-2018, Paul Macklin and the PhysiCell Project             #
+# Copyright (c) 2015-2021, Paul Macklin and the PhysiCell Project             #
 # All rights reserved.                                                        #
 #                                                                             #
 # Redistribution and use in source and binary forms, with or without          #
@@ -65,27 +65,72 @@
 ###############################################################################
 */
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+#include <sstream>
 #include "./custom.h"
+#include "../BioFVM/BioFVM.h"  
 
-// declare cell definitions here
-void create_cell_types(void)
+void create_cell_types( void )
 {
-	// use the same random seed so that future experiments have the
-	// same initial histogram of oncoprotein, even if threading means
-	// that future division and other events are still not identical
-	// for all runs
+	// set the random seed 
+	SeedRandom( parameters.ints("random_seed") );  
 
-	SeedRandom(parameters.ints("random_seed")); // or specify a seed here
+	/* 
+	   Put any modifications to default cell definition here if you 
+	   want to have "inherited" by other cell types. 
+	   
+	   This is a good place to set default functions. 
+	*/ 
 
 	initialize_default_cell_definition();
+	cell_defaults.phenotype.secretion.sync_to_microenvironment( &microenvironment ); 
+	
+	cell_defaults.functions.volume_update_function = standard_volume_update_function;
+	cell_defaults.functions.update_velocity = standard_update_cell_velocity;
 
-	/*  This parses the cell definitions in the XML config file.  */
+	cell_defaults.functions.update_migration_bias = NULL; 
+	cell_defaults.functions.update_phenotype = NULL; // update_cell_and_death_parameters_O2_based; 
+	cell_defaults.functions.custom_cell_rule = NULL; // @oth: add here custom cell cycle function?
+	cell_defaults.functions.contact_function = NULL; 
+	
+	cell_defaults.functions.add_cell_basement_membrane_interactions = NULL; 
+	cell_defaults.functions.calculate_distance_to_membrane = NULL; 
+
+	/*
+	   This parses the cell definitions in the XML config file. 
+	*/
+
 	initialize_cell_definitions_from_pugixml();
 
-	//  This sets the pre and post intracellular update functions
-	cell_defaults.functions.pre_update_intracellular =  pre_update_boolean;
-	cell_defaults.functions.post_update_intracellular = post_update_boolean;
-	cell_defaults.functions.update_phenotype = NULL;
+	/*
+	   This builds the map of cell definitions and summarizes the setup. 
+	*/
+		
+	build_cell_definitions_maps();
+
+	/*
+	   This intializes cell signal and response dictionaries 
+	*/
+
+	setup_signal_behavior_dictionaries(); 	
+	
+	/*
+       Cell rule definitions 
+	*/
+
+	setup_cell_rules(); 
+
+	/* 
+	   Put any modifications to individual cell definitions here. 
+	   
+	   This is a good place to set custom functions. 
+	*/
+
+	// This sets the pre and post simulation functions
+	cell_defaults.functions.pre_update_intracellular =  pre_update_intracellular_ags;
+	cell_defaults.functions.post_update_intracellular = post_update_intracellular_ags;
+	cell_defaults.functions.update_phenotype = update_cell_gowth_parameters_pressure_based;
 
 	drug_transport_model_setup();
 	boolean_model_interface_setup();
@@ -97,16 +142,13 @@ void create_cell_types(void)
 	cell_defaults.custom_data.add_variable("mutation_rate", "1/generation", 0.0 );
 
 	submodel_registry.display(std::cout);
+	/*
+	   This builds the map of cell definitions and summarizes the setup. 
+	*/
 
-	build_cell_definitions_maps();
-	setup_signal_behavior_dictionaries();
 	display_cell_definitions(std::cout);
 
-	PhysiCell::Cycle_Model cycle_model = cell_defaults.phenotype.cycle.model();
-	int start_phase_idxx = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
-	int end_phase_idxx = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
-	cycle_model.phase_link(start_phase_idx, end_phase_idx).exit_function = my_mutation_function;
-
+	// @oth: moved cell cycle function outside of here to the phenotype function
 	return;
 }
 
@@ -142,35 +184,53 @@ void setup_tissue( void )
 	return; 
 }
 
+// @othmane [WIP] -- Copied from cancer_invasion model, left empty so far -- should this go here?
+
+// void pre_update_intracellular(Cell* pCell, Phenotype& phenotype, double dt){
+// 	return;
+// }
+
+
+
 void update_cell_gowth_parameters_pressure_based( Cell* pCell, Phenotype& phenotype, double dt ) 
 {
 	
 	if( phenotype.death.dead == true )
 	{ return; }
-	
-	
-	static int oxygen_substrate_index = pCell->get_microenvironment()->find_density_index( "oxygen" ); 
-	static int start_phase_index = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
-	static int necrosis_index = phenotype.death.find_death_model_index( PhysiCell_constants::necrosis_death_model ); 
-	static int end_phase_index = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
-	
 
+	// Custom cycle exit in the phenotype
+	PhysiCell::Cycle_Model cycle_model = cell_defaults.phenotype.cycle.model();
+	static int oxygen_substrate_index = pCell->get_microenvironment()->find_density_index( "oxygen" ); 
+	static int start_phase_idx = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
+	static int end_phase_idx = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
+	static int necrosis_idx = phenotype.death.find_death_model_index( PhysiCell_constants::necrosis_death_model );
+
+	cycle_model.phase_link(start_phase_idx, end_phase_idx).exit_function = my_mutation_function;
+
+	
 	// this multiplier is for linear interpolation of the oxygen value 	
 	// PRESSURE-BASED CONTACT-INHIBITION
-	// Check relative pressure to either number of neighbor cells or set max logistic function to number of neighbor cells
+	// Check relative pressure to eith er number of neighbor cells or set max logistic function to number of neighbor cells
 	// pressure threshold set to 1, above this value there is no growth
+
 	double cell_pressure = pCell->state.simple_pressure; 
     double hill_coeff_pressure = parameters.doubles("hill_coeff_pressure");
     double pressure_half = parameters.doubles("pressure_half");
-    
-	double scaling = pressure_effect_growth_rate(cell_pressure, hill_coeff_pressure, pressure_half);
-	double growth_rate = phenotype.cycle.data.transition_rate(start_phase_index, end_phase_index);
+
+	// @oth: Discarded -- use PC Hill function instead
+	// double scaling = pressure_effect_growth_rate(cell_pressure, hill_coeff_pressure, pressure_half); // @oth: Discarded -- use PC Hill function instead
+
+	double scaling = Hill_response_function(cell_pressure, pressure_half, hill_coeff_pressure);
+	double growth_rate = phenotype.cycle.data.transition_rate(start_phase_idx, end_phase_idx);
+
+	// Pressure affects negatively
 	
-	growth_rate = growth_rate * (1 - scaling);
+	growth_rate *= (1 - scaling);
 	if (growth_rate < 0)
 		growth_rate = 0;
 	
-	phenotype.cycle.data.transition_rate(start_phase_index, end_phase_index) = growth_rate;
+	phenotype.cycle.data.transition_rate(start_phase_idx, end_phase_idx) = growth_rate;
+
 
 	return;
 }
@@ -336,7 +396,7 @@ void color_node(Cell* pCell){
 	pCell->custom_data[node_name] = pCell->phenotype.intracellular->get_boolean_variable_value(node_name);
 }
 
-void inject_density_sphere(int density_index, double concentration, double membrane_lenght) // it's lengTH
+void inject_density_sphere(int density_index, double concentration, double membrane_length) 
 {
 	// Inject given concentration on the extremities only
 	#pragma omp parallel for
@@ -558,6 +618,15 @@ void get_heterogeneity_summary(Cell* pCell){
 	std::cout << "mean: " << mean << std::endl; 
 	std::cout << "standard deviation: " << standard_deviation << std::endl; 
 	std::cout << "[min max]: [" << min << " " << max << "]" << std::endl << std::endl; 
+
+}
+
+
+// FUNCTIONS TO PLOT CELLS
+
+std::vector<std::string> my_coloring_function_for_stroma( double concentration, double max_conc, double min_conc )
+{
+	 return paint_by_density_percentage( concentration,  max_conc,  min_conc); 
 
 }
 

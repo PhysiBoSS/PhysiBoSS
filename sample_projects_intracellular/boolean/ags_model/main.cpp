@@ -33,7 +33,7 @@
 #                                                                             #
 # BSD 3-Clause License (see https://opensource.org/licenses/BSD-3-Clause)     #
 #                                                                             #
-# Copyright (c) 2015-2018, Paul Macklin and the PhysiCell Project             #
+# Copyright (c) 2015-2022, Paul Macklin and the PhysiCell Project             #
 # All rights reserved.                                                        #
 #                                                                             #
 # Redistribution and use in source and binary forms, with or without          #
@@ -75,12 +75,11 @@
 
 #include "./core/PhysiCell.h"
 #include "./modules/PhysiCell_standard_modules.h" 
-#include "./addons/PhysiBoSS/src/maboss_intracellular.h"
-#include "./addons/PhysiBoSS/src/maboss_network.h"
 
 // put custom code modules here! 
-#include "./custom_modules/custom.h" 
 
+#include "./custom_modules/custom.h" 
+#include "./addons/PhysiBoSS/src/maboss_intracellular.h"
 
 using namespace BioFVM;
 using namespace PhysiCell;
@@ -93,12 +92,29 @@ int main( int argc, char* argv[] )
 	// load and parse settings file(s)
 	
 	bool XML_status = false; 
+	char copy_command [1024]; 
+	char copy_command_2 [1024];
 	if( argc > 1 )
-	{ XML_status = load_PhysiCell_config_file( argv[1] ); }
+	{
+		XML_status = load_PhysiCell_config_file( argv[1] ); 
+		sprintf( copy_command , "cp %s %s/PhysiCell_settings.xml" , argv[1] , PhysiCell_settings.folder.c_str() ); 
+		sprintf( copy_command_2 , "cp %s %s" , argv[1] , PhysiCell_settings.folder.c_str() ); 
+	}
 	else
-	{ XML_status = load_PhysiCell_config_file( "./config/PhysiCell_settings.xml" ); }
+	{
+		XML_status = load_PhysiCell_config_file( "./config/PhysiCell_settings.xml" );
+		sprintf( copy_command , "cp ./config/PhysiCell_settings.xml %s" , PhysiCell_settings.folder.c_str() ); 
+	}
 	if( !XML_status )
 	{ exit(-1); }
+	
+	// copy config file to output directry 
+	system( copy_command ); 
+	
+	if ( argc > 1 )
+	{
+		system( copy_command_2 );
+	}
 
 	// OpenMP setup
 	omp_set_num_threads(PhysiCell_settings.omp_num_threads);
@@ -119,7 +135,7 @@ int main( int argc, char* argv[] )
 	double drug_X_pulse_period = parameters.doubles("drug_X_pulse_period");
 	double drug_X_pulse_duration = parameters.doubles("drug_X_pulse_duration");
 	double drug_X_pulse_concentration = parameters.doubles("drug_X_pulse_concentration");
-	double membrane_lenght = parameters.doubles("membrane_length"); // radious around which the drug_X pulse is injected
+	double membrane_length = parameters.doubles("membrane_length"); // radious around which the drug_X pulse is injected
 
 	double drug_X_pulse_timer = drug_X_pulse_period;
 	double drug_X_pulse_injection_timer = -1;
@@ -155,7 +171,7 @@ int main( int argc, char* argv[] )
 	double mechanics_voxel_size = 30; 
 	Cell_Container* cell_container = create_cell_container_for_microenvironment( microenvironment, mechanics_voxel_size );
 	
-	/* Users typically ssetup_microenvironmenttart modifying here. START USERMODS */ 
+	/* Users typically start modifying here. START USERMODS */ 
 
 
 	
@@ -212,7 +228,10 @@ int main( int argc, char* argv[] )
 	
 	char filename[1024];
 	sprintf( filename , "%s/initial" , PhysiCell_settings.folder.c_str() ); 
-	save_PhysiCell_to_MultiCellDS_xml_pugi( filename , microenvironment , PhysiCell_globals.current_time ); 
+	save_PhysiCell_to_MultiCellDS_v2( filename , microenvironment , PhysiCell_globals.current_time ); 
+	
+	sprintf( filename , "%s/states_initial.csv", PhysiCell_settings.folder.c_str());
+	MaBoSSIntracellular::save( filename, *PhysiCell::all_cells);
 	
 	// save a quick SVG cross section through z = 0, after setting its 
 	// length bar to 200 microns 
@@ -221,11 +240,16 @@ int main( int argc, char* argv[] )
 
 	// for simplicity, set a pathology coloring function 
 	
-	std::vector<std::string> (*cell_coloring_function)(Cell*) = my_coloring_function;
-	// std::vector<std::string> (*cell_coloring_function)(Cell*) = heterogeneity_coloring_function;
+	std::vector<std::string> (*cell_coloring_function)(Cell*) = paint_by_number_cell_coloring; 
+	std::vector<std::string> (*ECM_coloring_function)(double, double, double) = my_coloring_function_for_stroma; 
 	
 	sprintf( filename , "%s/initial.svg" , PhysiCell_settings.folder.c_str() ); 
-	SVG_plot( filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function );
+	SVG_plot( filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function, ECM_coloring_function);
+	
+	sprintf( filename , "%s/legend.svg" , PhysiCell_settings.folder.c_str() ); 
+	create_plot_legend( filename , cell_coloring_function ); 
+
+	add_software_citation( "PhysiBoSS" , PhysiBoSS_Version , PhysiBoSS_DOI, PhysiBoSS_URL); 
 	
 	display_citations(); 
 	
@@ -243,6 +267,7 @@ int main( int argc, char* argv[] )
 		report_file<<"simulated time\tnum cells\tnum division\tnum death\twall time"<<std::endl;
 	}
 
+	// main loop 
 
 	try 
 	{		
@@ -291,7 +316,10 @@ int main( int argc, char* argv[] )
 				{	
 					sprintf( filename , "%s/output%08u" , PhysiCell_settings.folder.c_str(),  PhysiCell_globals.full_output_index ); 
 					
-					save_PhysiCell_to_MultiCellDS_xml_pugi( filename , microenvironment , PhysiCell_globals.current_time ); 
+					save_PhysiCell_to_MultiCellDS_v2( filename , microenvironment , PhysiCell_globals.current_time ); 
+
+					sprintf( filename , "%s/states_%08u.csv", PhysiCell_settings.folder.c_str(), PhysiCell_globals.full_output_index);
+					
 					MaBoSSIntracellular::save( filename, *PhysiCell::all_cells );
 				}
 				
@@ -305,7 +333,7 @@ int main( int argc, char* argv[] )
 				if( PhysiCell_settings.enable_SVG_saves == true )
 				{	
 					sprintf( filename , "%s/snapshot%08u.svg" , PhysiCell_settings.folder.c_str() , PhysiCell_globals.SVG_output_index ); 
-					SVG_plot( filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function );
+					SVG_plot( filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function, ECM_coloring_function);
 					
 					PhysiCell_globals.SVG_output_index++; 
 					PhysiCell_globals.next_SVG_save_time  += PhysiCell_settings.SVG_save_interval;
@@ -326,13 +354,13 @@ int main( int argc, char* argv[] )
 			*/
 
 			if ( PhysiCell_globals.current_time >= drug_X_pulse_timer && PhysiCell_globals.current_time <= drug_X_pulse_timer + drug_X_pulse_duration  )
-				inject_density_sphere(drug_X_ix, drug_X_pulse_concentration, membrane_lenght);
+				inject_density_sphere(drug_X_ix, drug_X_pulse_concentration, membrane_length);
 				
 			if (PhysiCell_globals.current_time < drug_X_pulse_timer)
 				remove_density(drug_X_ix);
 			
 			if ( PhysiCell_globals.current_time >= drug_Y_pulse_timer && PhysiCell_globals.current_time <= drug_Y_pulse_timer + drug_Y_pulse_duration  )
-				inject_density_sphere(drug_Y_ix, drug_Y_pulse_concentration, membrane_lenght);
+				inject_density_sphere(drug_Y_ix, drug_Y_pulse_concentration, membrane_length);
 
 			if (PhysiCell_globals.current_time < drug_Y_pulse_timer)
 				remove_density(drug_Y_ix);
@@ -349,6 +377,9 @@ int main( int argc, char* argv[] )
 			// run PhysiCell 
 			((Cell_Container *)microenvironment.agent_container)->update_all_cells( PhysiCell_globals.current_time );
 			
+			/*
+			  Custom add-ons could potentially go here. 
+			*/
 			
 			PhysiCell_globals.current_time += diffusion_dt;
 		}
@@ -367,11 +398,13 @@ int main( int argc, char* argv[] )
 	// save a final simulation snapshot 
 	
 	sprintf( filename , "%s/final" , PhysiCell_settings.folder.c_str() ); 
-	save_PhysiCell_to_MultiCellDS_xml_pugi( filename , microenvironment , PhysiCell_globals.current_time ); 
+	save_PhysiCell_to_MultiCellDS_v2( filename , microenvironment , PhysiCell_globals.current_time ); 
+	
+	sprintf( filename , "%s/states_final.csv", PhysiCell_settings.folder.c_str());
+	MaBoSSIntracellular::save( filename, *PhysiCell::all_cells );
 	
 	sprintf( filename , "%s/final.svg" , PhysiCell_settings.folder.c_str() ); 
-	SVG_plot( filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function );
-
+	SVG_plot( filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function, ECM_coloring_function);
 	
 	// timer 
 	

@@ -123,7 +123,7 @@ std::vector<init_record> read_init_file(std::string filename, char delimiter, bo
 inline float sphere_volume_from_radius(float radius) {return 4/3 * PhysiCell_constants::pi * std::pow(radius, 3);}
 
 // helper function to inject density surrounding a spheroid
-void inject_density_sphere(int density_index, double concentration, double membrane_lenght);
+void inject_density_sphere(int density_index, double concentration, double membrane_length);
 
 // helper function to remove a density
 void remove_density( int density_index );
@@ -140,3 +140,5 @@ double total_necrosis_cell_count();
 
 std::vector<std::vector<double>> create_cell_circle_positions(double cell_radius, double sphere_radius);
 std::vector<std::vector<double>> create_cell_sphere_positions(double cell_radius, double sphere_radius);
+std::vector<std::string> my_coloring_function_for_stroma( double concentration, double max_conc, double min_conc );
+
