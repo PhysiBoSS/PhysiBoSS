@@ -83,6 +83,9 @@ void create_cell_types( void )
 	   This is a good place to set default functions. 
 	*/ 
 
+	std::cout << "about to initialize default cell def" << std::endl;
+
+
 	initialize_default_cell_definition();
 	cell_defaults.phenotype.secretion.sync_to_microenvironment( &microenvironment ); 
 	
@@ -101,11 +104,15 @@ void create_cell_types( void )
 	   This parses the cell definitions in the XML config file. 
 	*/
 
+	std::cout << "about to initialize cell def from xml" << std::endl;
+
 	initialize_cell_definitions_from_pugixml();
 
 	/*
 	   This builds the map of cell definitions and summarizes the setup. 
 	*/
+
+	std::cout << "about to initialize cell def map" << std::endl;
 		
 	build_cell_definitions_maps();
 

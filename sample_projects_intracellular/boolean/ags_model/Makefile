@@ -1,8 +1,8 @@
 VERSION := $(shell grep . VERSION.txt | cut -f1 -d:)
 PROGRAM_NAME := physiboss-drugs-synergy-model
 
-# CC := g++ # default compilation
-CC := g++ -g # Add "-g" for debugging
+CC := g++ # default compilation
+# CC := g++ -g # Add "-g" for debugging
 # CC := g++-mp-7 # typical macports compiler name
 # CC := g++-7 # typical homebrew compiler name 
 
@@ -13,9 +13,9 @@ ifdef PHYSICELL_CPP
 endif
 
 ### MaBoSS configuration 
-# MaBoSS max nodes (defaulted to 64)
+# MaBoSS max nodes
 ifndef MABOSS_MAX_NODES
-MABOSS_MAX_NODES = 128
+MABOSS_MAX_NODES = 256
 endif
 
 # MaBoSS directory
@@ -59,9 +59,10 @@ ARCH := native # best auto-tuning
 # ARCH := nocona #64-bit pentium 4 or later 
 
 # CFLAGS := -march=$(ARCH) -Ofast -s -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
-# CFLAGS := -march=$(ARCH) -Og -ggdb -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
+CFLAGS := -g -march=$(ARCH)  -Og -ggdb -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11 
+# CFLAGS := -g -march=$(ARCH) -Xclang -Og -ggdb -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11 
 # CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
-CFLAGS := -g -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
+# CFLAGS := -g -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
 
 # debug:
 # CFLAGS := -march=$(ARCH) -O0 -ggdb -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
@@ -79,7 +80,7 @@ else
 endif
 
 CFLAGS_LINK := $(shell echo $(CFLAGS) | sed -e "s/-fopenmp//g")
-COMPILE_COMMAND := $(CC) $(CFLAGS) $(EXTRA_FLAGS)
+COMPILE_COMMAND := $(CC) $(CFLAGS)  $(EXTRA_FLAGS)
 LINK_COMMAND := $(CC) $(CFLAGS_LINK) $(EXTRA_FLAGS)
 
 BioFVM_OBJECTS := BioFVM_vector.o BioFVM_mesh.o BioFVM_microenvironment.o BioFVM_solvers.o BioFVM_matlab.o \
@@ -111,11 +112,15 @@ ALL_OBJECTS := $(PhysiCell_OBJECTS) $(PhysiCell_custom_module_OBJECTS) $(PhysiBo
 
 all: main.cpp $(ALL_OBJECTS) $(MaBoSS)
 	$(COMPILE_COMMAND) $(INC) -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp $(LIB)
-	@echo ""
-	@echo "check for $(PROGRAM_NAME)"
+	make name 
 	
 static: main.cpp $(ALL_OBJECTS) $(MaBoSS)
 	$(LINK_COMMAND) $(INC) -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp $(LIB) -static-libgcc -static-libstdc++ $(STATIC_OPENMP)
+
+name:
+	@echo ""
+	@echo "Executable name is" $(PROGRAM_NAME)
+	@echo ""
 
 # PhysiCell core components	
 
@@ -209,6 +214,7 @@ PhysiCell_geometry.o: ./modules/PhysiCell_geometry.cpp
 	$(COMPILE_COMMAND) -c ./modules/PhysiCell_geometry.cpp 	
 	
 # user-defined PhysiCell modules
+
 Compile_MaBoSS: ./addons/PhysiBoSS/MaBoSS-env-2.0/engine/src/BooleanNetwork.h
 	cd ./addons/PhysiBoSS/MaBoSS-env-2.0/engine/src;make CXX=$(CC) MAXNODES=$(MABOSS_MAX_NODES) install_alib;make clean; cd ../../../../..
 
@@ -245,6 +251,7 @@ reset:
 	rm -f ./custom_modules/*
 	touch ./custom_modules/empty.txt 
 	touch ALL_CITATIONS.txt 
+	touch ./core/PhysiCell_cell.cpp
 	rm ALL_CITATIONS.txt 
 	rm ./config/PhysiCell_settings_*.xml
 	cp ./config/PhysiCell_settings-backup.xml ./config/PhysiCell_settings.xml
@@ -294,6 +301,96 @@ untar:
 	cp ./archives/latest.tar .
 	tar -xzf latest.tar
 
+# easier animation 
+
+FRAMERATE := 24
+OUTPUT := output_ags
+
+jpeg: 
+	@magick identify -format "%h" $(OUTPUT)/initial.svg > __H.txt 
+	@magick identify -format "%w" $(OUTPUT)/initial.svg > __W.txt 
+	@expr 2 \* \( $$(grep . __H.txt) / 2 \) > __H1.txt 
+	@expr 2 \* \( $$(grep . __W.txt) / 2 \) > __W1.txt 
+	@echo "$$(grep . __W1.txt)!x$$(grep . __H1.txt)!" > __resize.txt 
+	@magick mogrify -format jpg -resize $$(grep . __resize.txt) $(OUTPUT)/s*.svg
+	rm -f __H*.txt __W*.txt __resize.txt 
+	
+gif: 
+	magick convert $(OUTPUT)/s*.svg $(OUTPUT)/out.gif 
+
 movie:
-	ffmpeg -r 25 -i output/snapshot%08d.svg -pix_fmt yuv420p output.mp4
-	vlc output.mp4
+	ffmpeg -r $(FRAMERATE) -f image2 -i $(OUTPUT)/snapshot%08d.jpg -vcodec libx264 -pix_fmt yuv420p -strict -2 -tune animation -crf 15 -acodec none $(OUTPUT)/out.mp4
+	
+# upgrade rules 
+
+SOURCE := PhysiCell_upgrade.zip 
+get-upgrade: 
+	@echo $$(curl https://raw.githubusercontent.com/MathCancer/PhysiCell/master/VERSION.txt) > VER.txt 
+	@echo https://github.com/MathCancer/PhysiCell/releases/download/$$(grep . VER.txt)/PhysiCell_V.$$(grep . VER.txt).zip > DL_FILE.txt 
+	rm -f VER.txt
+	$$(curl -L $$(grep . DL_FILE.txt) --output PhysiCell_upgrade.zip)
+	rm -f DL_FILE.txt 
+
+PhysiCell_upgrade.zip: 
+	make get-upgrade 
+
+upgrade: $(SOURCE)
+	unzip $(SOURCE) PhysiCell/VERSION.txt
+	mv -f PhysiCell/VERSION.txt . 
+	unzip $(SOURCE) PhysiCell/core/* 
+	cp -r PhysiCell/core/* core 
+	unzip $(SOURCE) PhysiCell/modules/* 
+	cp -r PhysiCell/modules/* modules 
+	unzip $(SOURCE) PhysiCell/sample_projects/* 
+	cp -r PhysiCell/sample_projects/* sample_projects 
+	unzip $(SOURCE) PhysiCell/BioFVM/* 
+	cp -r PhysiCell/BioFVM/* BioFVM
+	unzip $(SOURCE) PhysiCell/documentation/User_Guide.pdf
+	mv -f PhysiCell/documentation/User_Guide.pdf documentation
+	rm -f -r PhysiCell
+	rm -f $(SOURCE) 
+
+# use: make save PROJ=your_project_name
+PROJ := physiboss-drugs-synergy-model
+
+save: 
+	echo "Saving project as $(PROJ) ... "
+	mkdir -p ./user_projects
+	mkdir -p ./user_projects/$(PROJ)
+	mkdir -p ./user_projects/$(PROJ)/custom_modules
+	mkdir -p ./user_projects/$(PROJ)/config 
+	cp main.cpp ./user_projects/$(PROJ)
+	cp Makefile ./user_projects/$(PROJ)
+	cp VERSION.txt ./user_projects/$(PROJ)
+	cp ./config/* ./user_projects/$(PROJ)/config
+	cp ./custom_modules/* ./user_projects/$(PROJ)/custom_modules
+
+load: 
+	echo "Loading project from $(PROJ) ... "
+	cp ./user_projects/$(PROJ)/main.cpp .
+	cp ./user_projects/$(PROJ)/Makefile .
+	cp ./user_projects/$(PROJ)/config/* ./config/ 
+	cp ./user_projects/$(PROJ)/custom_modules/* ./custom_modules/ 
+
+pack:
+	@echo " "
+	@echo "Preparing project $(PROJ) for sharing ... "
+	@echo " " 
+	cd ./user_projects && zip -r $(PROJ).zip $(PROJ)
+	@echo " "
+	@echo "Share ./user_projects/$(PROJ).zip ... "
+	@echo "Other users can unzip $(PROJ).zip in their ./user_projects, compile, and run."
+	@echo " " 
+
+unpack:
+	@echo " "
+	@echo "Preparing shared project $(PROJ).zip for use ... "
+	@echo " " 
+	cd ./user_projects && unzip $(PROJ).zip 
+	@echo " "
+	@echo "Load this project via make load PROJ=$(PROJ) ... "
+	@echo " " 	
+
+list-user-projects:
+	@echo "user projects::"
+	@cd ./user_projects && ls -dt1 * | grep . | sed 's!empty.txt!!'

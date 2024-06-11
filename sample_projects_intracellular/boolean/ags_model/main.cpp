@@ -122,7 +122,6 @@ int main( int argc, char* argv[] )
 	// PNRG setup 
 	SeedRandom( parameters.ints("random_seed") ); // or specify a seed here
 	
-	
 	// time setup 
 	std::string time_units = "min"; 
 
@@ -131,26 +130,22 @@ int main( int argc, char* argv[] )
 	setup_microenvironment(); // modify this in the custom code 
 	std::cout << "setup OK" << std::endl;
 
-	// User parameters 
-	double drug_X_pulse_period = parameters.doubles("drug_X_pulse_period");
-	double drug_X_pulse_duration = parameters.doubles("drug_X_pulse_duration");
-	double drug_X_pulse_concentration = parameters.doubles("drug_X_pulse_concentration");
-	double membrane_length = parameters.doubles("membrane_length"); // radious around which the drug_X pulse is injected
+	// // User parameters 
 
-	double drug_X_pulse_timer = drug_X_pulse_period;
-	double drug_X_pulse_injection_timer = -1;
-
-
-	double drug_Y_pulse_period = parameters.doubles("drug_Y_pulse_period");
-	double drug_Y_pulse_duration = parameters.doubles("drug_Y_pulse_duration");
-	double drug_Y_pulse_concentration = parameters.doubles("drug_Y_pulse_concentration");
-
-	double drug_Y_pulse_timer = drug_Y_pulse_period;
-	double drug_Y_pulse_injection_timer = -1;
-
-	// Drugs density index
-	static int drug_X_ix = microenvironment.find_density_index("drug_X");	
-	static int drug_Y_ix = microenvironment.find_density_index("drug_Y");
+	// double drug_X_pulse_period = parameters.doubles("drug_X_pulse_period");
+	// double drug_X_pulse_duration = parameters.doubles("drug_X_pulse_duration");
+	// double drug_X_pulse_concentration = parameters.doubles("drug_X_pulse_concentration");
+	// double membrane_length = parameters.doubles("membrane_length"); // radious around which the drug_X pulse is injected
+	// double drug_X_pulse_timer = drug_X_pulse_period;
+	// double drug_X_pulse_injection_timer = -1;
+	// double drug_Y_pulse_period = parameters.doubles("drug_Y_pulse_period");
+	// double drug_Y_pulse_duration = parameters.doubles("drug_Y_pulse_duration");
+	// double drug_Y_pulse_concentration = parameters.doubles("drug_Y_pulse_concentration");
+	// double drug_Y_pulse_timer = drug_Y_pulse_period;
+	// double drug_Y_pulse_injection_timer = -1;
+	// // Drugs density index
+	// static int drug_X_ix = microenvironment.find_density_index("drug_X");	
+	// static int drug_Y_ix = microenvironment.find_density_index("drug_Y");
 
 	// this is to emulate PhysiBoSSv1 TNF experiment
 	// bool seed_tnf = true; // Was set to false in TNF model (?)
@@ -166,10 +161,12 @@ int main( int argc, char* argv[] )
 	// }
 	
 	/* PhysiCell setup */ 
- 	
+
+	std::cout << "begin setup" << std::endl;
 	// set mechanics voxel size, and match the data structure to BioFVM
 	double mechanics_voxel_size = 30; 
 	Cell_Container* cell_container = create_cell_container_for_microenvironment( microenvironment, mechanics_voxel_size );
+
 	
 	/* Users typically start modifying here. START USERMODS */ 
 
@@ -193,13 +190,14 @@ int main( int argc, char* argv[] )
 	// 	}
 	// }
 
-
+	std::cout << "about to create cells" << std::endl;
 	create_cell_types();
 	std::cout << "create cells OK" << std::endl;
 
 
 
 	// update monitoring variables too in setup_tissue();
+	std::cout << "about to setup tissue" << std::endl;
 	setup_tissue();
 	std::cout << "setup tissue OK" << std::endl;
 
@@ -244,7 +242,7 @@ int main( int argc, char* argv[] )
 	std::vector<std::string> (*ECM_coloring_function)(double, double, double) = my_coloring_function_for_stroma; 
 	
 	sprintf( filename , "%s/initial.svg" , PhysiCell_settings.folder.c_str() ); 
-	SVG_plot( filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function, ECM_coloring_function);
+	SVG_plot( filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function );
 	
 	sprintf( filename , "%s/legend.svg" , PhysiCell_settings.folder.c_str() ); 
 	create_plot_legend( filename , cell_coloring_function ); 
@@ -281,35 +279,6 @@ int main( int argc, char* argv[] )
 				if( PhysiCell_settings.enable_legacy_saves == true )
 				{	
 					log_output( PhysiCell_globals.current_time , PhysiCell_globals.full_output_index, microenvironment, report_file);
-					
-					//Count Necrotic Apoptotic Alive cells
-					// Producer
-					std::string message;
-					std::string topic_name = "cells";
-					double timepoint = PhysiCell_globals.current_time;
-					int alive_no,necrotic_no,apoptotic_no=0;
-					alive_no = total_live_cell_count();
-					necrotic_no = total_necrosis_cell_count();
-					apoptotic_no = total_dead_cell_count();
-					pid_t pid_var = getpid();
-					// MessageBuilder builder(topic_name);
-					message = std::to_string(pid_var) + ';' + std::to_string(timepoint) + ';' + std::to_string(alive_no) + ';' + std::to_string(apoptotic_no) + ';' + std::to_string(necrotic_no) + ';';
-					
-					
-					// message = '{' + 'process_id' + std::to_string(pid_var) + ',' + 'timepoint' + std::to_string(timepoint) + ',' 
-					// + 'alive' + std::to_string(alive_no) + ',' + 'apoptotic' + std::to_string(apoptotic_no) + ',' 
-					// + 'necrotic' + std::to_string(necrotic_no) + '}';
-					// Define the configuration structure
-					// Configuration config = { { "metadata.broker.list", "localhost:9092" } };
-				    // Create the producer
-				    // BufferedProducer<std::string> producer(config);
-					//Produce a message
-					// The message that will be sent
-					// std::cout << "Message to Kafka: " << message << std::endl;
-					// std::string str(message);
-					// builder.partition(0).payload(str);
-				    // producer.add_message(builder);
-				    // producer.flush();
 				}
 				
 				if( PhysiCell_settings.enable_full_saves == true )
@@ -413,3 +382,33 @@ int main( int argc, char* argv[] )
 
 	return 0; 
 }
+
+
+					//Count Necrotic Apoptotic Alive cells
+					// Producer
+					// std::string message;
+					// std::string topic_name = "cells";
+					// double timepoint = PhysiCell_globals.current_time;
+					// int alive_no,necrotic_no,apoptotic_no=0;
+					// alive_no = total_live_cell_count();
+					// necrotic_no = total_necrosis_cell_count();
+					// apoptotic_no = total_dead_cell_count();
+					// pid_t pid_var = getpid();
+					// // MessageBuilder builder(topic_name);
+					// message = std::to_string(pid_var) + ';' + std::to_string(timepoint) + ';' + std::to_string(alive_no) + ';' + std::to_string(apoptotic_no) + ';' + std::to_string(necrotic_no) + ';';
+					
+					
+					// message = '{' + 'process_id' + std::to_string(pid_var) + ',' + 'timepoint' + std::to_string(timepoint) + ',' 
+					// + 'alive' + std::to_string(alive_no) + ',' + 'apoptotic' + std::to_string(apoptotic_no) + ',' 
+					// + 'necrotic' + std::to_string(necrotic_no) + '}';
+					// Define the configuration structure
+					// Configuration config = { { "metadata.broker.list", "localhost:9092" } };
+				    // Create the producer
+				    // BufferedProducer<std::string> producer(config);
+					//Produce a message
+					// The message that will be sent
+					// std::cout << "Message to Kafka: " << message << std::endl;
+					// std::string str(message);
+					// builder.partition(0).payload(str);
+				    // producer.add_message(builder);
+				    // producer.flush();
