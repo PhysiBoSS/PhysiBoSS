@@ -6,7 +6,6 @@ using namespace PhysiCell;
 Submodel_Information bm_interface_info;
 
 // Auxiliar functions
-
 std::string get_drug_target(std::string drug_name){
     std::string param_name = drug_name + "_target";
     std::string drug_target = parameters.strings(param_name);
@@ -44,6 +43,15 @@ void boolean_model_interface_setup()
 
     // Could add here output of transfer functions
 	bm_interface_info.register_model();
+}
+// @oth: This is not really needed, except for the setup function above
+void ags_bm_interface_main (Cell* pCell, Phenotype& phenotype, double dt){
+    
+	if( phenotype.death.dead == true )
+	{
+		pCell->functions.update_phenotype = NULL;
+		return;
+	}
 }
 
 
@@ -105,7 +113,7 @@ double calculate_drug_effect(Cell* pCell, std::string drug_name){
     double ic_drug_total = pCell->phenotype.molecular.internalized_total_substrates[drug_idx];
     double ic_drug_conc  = ic_drug_total / cell_volume; // Convert to concentration
 
-    std::cout << pCell->custom_data[p_half_max_idx] << std::endl;
+    // std::cout << pCell->custom_data[p_half_max_idx] << std::endl;
 
     double p_half_max    = pCell->custom_data[p_half_max_idx];
     double p_hill_coeff  = pCell->custom_data[p_hill_coeff_idx];
@@ -169,22 +177,45 @@ void pre_update_intracellular_ags(Cell* pCell, Phenotype& phenotype, double dt)
     return;
 }
 
-// Functions used to update the cell agent just after MaBoSS was updated
 
-double growth_mapping_logistic(double doubling_time, double hill_coeff, double K_half, double S_value){
+// @oth: added these functions to compute the readout nodes from the BM
+double get_boolean_antisurvival_outputs(Cell* pCell, Phenotype& phenotype){
 
-    // double growth_logistic_function = doubling_time / (1 + std::exp(- log10(readout_value) * scaling));
-    double growth_logistic_function;
-    growth_logistic_function = (doubling_time * std::pow(S_value, hill_coeff ) ) / (K_half + std::pow(S_value, hill_coeff) ) ;
+    // Antisurvival node outputs
+    bool casp37_b1 = pCell->phenotype.intracellular->get_boolean_variable_value( "Caspase37_b1" );
+    bool casp37_b2 = pCell->phenotype.intracellular->get_boolean_variable_value( "Caspase37_b2" );
+    bool FOXO = pCell->phenotype.intracellular->get_boolean_variable_value( "FOXO" );
+    bool antisurvival_b1 = pCell->phenotype.intracellular->get_boolean_variable_value( "Antisurvival_b1" );
+    bool antisurvival_b2 = pCell->phenotype.intracellular->get_boolean_variable_value( "Antisurvival_b2" );
+    bool antisurvival_b3 = pCell->phenotype.intracellular->get_boolean_variable_value( "Antisurvival_b3" );
 
-    return growth_logistic_function;
+    double anti_w1 = get_custom_data_variable(pCell, "w1_apoptosis");
+    double anti_w2 = get_custom_data_variable(pCell, "w2_apoptosis") + anti_w1;
+    double anti_w3 = 1 - (anti_w1 + anti_w2);
+    double S_anti = (anti_w1*antisurvival_b1) + (anti_w2 * antisurvival_b2) + (anti_w3 * antisurvival_b3);
+    double S_anti_real = (anti_w1*casp37_b1) + (anti_w2 * casp37_b2) + (anti_w3 * FOXO);
+
+    return S_anti_real;
+
 }
 
-double apoptosis_mapping_logistic(double basal_apoptosis_rate, double maximum_apoptosis_rate, double hill_coeff, double K_half, double S_value){
-    double apoptosis_mapping_function;
-    apoptosis_mapping_function = (maximum_apoptosis_rate * std::pow(S_value, hill_coeff) ) / (K_half + std::pow(S_value, hill_coeff) ) ;
+double get_boolean_prosurvival_outputs(Cell* pCell, Phenotype& phenotype){
 
-    return apoptosis_mapping_function +  basal_apoptosis_rate;
+    bool cMYC = pCell->phenotype.intracellular->get_boolean_variable_value( "cMYC" );
+    bool CCND_b1 = pCell->phenotype.intracellular->get_boolean_variable_value( "CCND1_b1" );
+    bool CCND_b2 = pCell->phenotype.intracellular->get_boolean_variable_value( "CCND1_b2" );
+    bool prosurvival_b1 = pCell->phenotype.intracellular->get_boolean_variable_value( "Prosurvival_b1" );
+    bool prosurvival_b2 = pCell->phenotype.intracellular->get_boolean_variable_value( "Prosurvival_b2" );
+    bool prosurvival_b3 = pCell->phenotype.intracellular->get_boolean_variable_value( "Prosurvival_b3" );
+
+    double pro_w1 = get_custom_data_variable(pCell, "w1_growth");
+    double pro_w2 = get_custom_data_variable(pCell, "w2_growth"); + pro_w1;
+    double pro_w3 = 1 - (pro_w1 + pro_w2);
+    double S_pro = (pro_w1*prosurvival_b1) + (pro_w2 * prosurvival_b2) + (pro_w3 * prosurvival_b3);
+    double S_pro_real = (pro_w1*cMYC) + (pro_w2 * CCND_b1) + (pro_w3 * CCND_b2);
+
+    return S_pro_real;
+
 }
 
 void update_cell_from_boolean_model(Cell* pCell, Phenotype& phenotype, double dt){
@@ -195,55 +226,32 @@ void update_cell_from_boolean_model(Cell* pCell, Phenotype& phenotype, double dt
     static int apoptosis_model_index = phenotype.death.find_death_model_index( "Apoptosis" );
     static int necrosis_model_index = phenotype.death.find_death_model_index( "Necrosis" );
 
-    bool casp37_b1 = pCell->phenotype.intracellular->get_boolean_variable_value( "Caspase37_b1" );
-    bool casp37_b2 = pCell->phenotype.intracellular->get_boolean_variable_value( "Caspase37_b2" );
-    bool FOXO = pCell->phenotype.intracellular->get_boolean_variable_value( "FOXO" );
-
-    bool antisurvival_b1 = pCell->phenotype.intracellular->get_boolean_variable_value( "Antisurvival_b1" );
-    bool antisurvival_b2 = pCell->phenotype.intracellular->get_boolean_variable_value( "Antisurvival_b2" );
-    bool antisurvival_b3 = pCell->phenotype.intracellular->get_boolean_variable_value( "Antisurvival_b3" );
-
-    double anti_w1 = parameters.doubles("w1_apoptosis");
-    double anti_w2 = parameters.doubles("w2_apoptosis") + anti_w1;
-    double anti_w3 = 1 - (anti_w1 + anti_w2);
-    double S_anti = (anti_w1*antisurvival_b1) + (anti_w2 * antisurvival_b2) + (anti_w3 * antisurvival_b3);
-    double S_anti_real = (anti_w1*casp37_b1) + (anti_w2 * casp37_b2) + (anti_w3 * FOXO);
-
-    bool prosurvival_b1 = pCell->phenotype.intracellular->get_boolean_variable_value( "Prosurvival_b1" );
-    bool prosurvival_b2 = pCell->phenotype.intracellular->get_boolean_variable_value( "Prosurvival_b2" );
-    bool prosurvival_b3 = pCell->phenotype.intracellular->get_boolean_variable_value( "Prosurvival_b3" );
-
-    bool cMYC = pCell->phenotype.intracellular->get_boolean_variable_value( "cMYC" );
-    bool CCND_b1 = pCell->phenotype.intracellular->get_boolean_variable_value( "CCND1_b1" );
-    bool CCND_b2 = pCell->phenotype.intracellular->get_boolean_variable_value( "CCND1_b2" );
-
-    double pro_w1 = parameters.doubles("w1_growth");
-    double pro_w2 = parameters.doubles("w2_growth") + pro_w1;
-    double pro_w3 = 1 - (pro_w1 + pro_w2);
-    double S_pro = (pro_w1*prosurvival_b1) + (pro_w2 * prosurvival_b2) + (pro_w3 * prosurvival_b3);
-    double S_pro_real = (pro_w1*cMYC) + (pro_w2 * CCND_b1) + (pro_w3 * CCND_b2);
-
+    
     // Connect output from model to actual cell variables
+    double apoptosis_rate_basal = get_custom_data_variable(pCell, "apoptosis_rate_basal");
+    double maximum_apoptosis_rate =  get_custom_data_variable(pCell, "max_apoptosis_rate");
+    double hill_coeff_apoptosis = get_custom_data_variable(pCell, "hill_coeff_apoptosis");
+    double K_half_apoptosis = get_custom_data_variable(pCell, "K_half_apoptosis");
+    double S_anti_real = get_boolean_antisurvival_outputs(pCell, phenotype);
 
-    double apoptosis_rate_basal = parameters.doubles("apoptosis_rate_basal");
-    double maximum_apoptosis_rate = parameters.doubles("max_apoptosis_rate");
-    double hill_coeff_apoptosis = parameters.doubles("hill_coeff_apoptosis");
-    double K_half_apoptosis = parameters.doubles("K_half_apoptosis");
-    
-    double apoptosis_value =  apoptosis_mapping_logistic(apoptosis_rate_basal, maximum_apoptosis_rate, 
-                                                            hill_coeff_apoptosis, K_half_apoptosis, S_anti);
-    
-    double apoptosis_value_Hill = Hill_response_function(S_anti, K_half_apoptosis, 
-                                                            hill_coeff_apoptosis);
+    // sigmoidal mapping
+    double apoptosis_value_Hill = maximum_apoptosis_rate * (Hill_response_function(S_anti_real, K_half_apoptosis, hill_coeff_apoptosis));
+    apoptosis_value_Hill += apoptosis_rate_basal;
+
+    // Effect on the apoptosis rate
+    pCell-> phenotype.death.rates[apoptosis_model_index] = apoptosis_value_Hill;
 
 
-    double basal_growth_rate = parameters.doubles("basal_growth_rate");
-    double hill_coeff_growth = parameters.doubles("hill_coeff_growth");
-    double K_half_growth = parameters.doubles("K_half_growth");
-    double growth_value = growth_mapping_logistic(basal_growth_rate, hill_coeff_growth, K_half_growth, S_pro);
-    double growth_value_Hill = Hill_response_function(S_pro, K_half_growth, hill_coeff_growth); // Max value is 1 
 
-    // Another option is to use the growth_value_Hill as a probability
+    double basal_growth_rate = get_custom_data_variable(pCell, "basal_growth_rate");
+    double hill_coeff_growth = get_custom_data_variable(pCell, "hill_coeff_growth");
+    double K_half_growth = get_custom_data_variable(pCell, "K_half_growth");
+    double S_pro_real = get_boolean_prosurvival_outputs(pCell, phenotype);
+
+    // Effect on the growth rate
+    double growth_value_Hill = basal_growth_rate * Hill_response_function(S_pro_real, K_half_growth, hill_coeff_growth); // Max value is the basal growth rate
+    phenotype.cycle.data.transition_rate(0, 0) = basal_growth_rate;
+
 
     if ( uniform_random() < growth_value_Hill ){ 
         phenotype.cycle.data.transition_rate(0, 0) = basal_growth_rate;
@@ -251,14 +259,11 @@ void update_cell_from_boolean_model(Cell* pCell, Phenotype& phenotype, double dt
         phenotype.cycle.data.transition_rate(0, 0) = 0;  // Best to actually add an arrest function
     }
 
-    pCell-> phenotype.death.rates[apoptosis_model_index] = (apoptosis_value_Hill * maximum_apoptosis_rate) + apoptosis_rate_basal;
     
     return;
 }
 
 void post_update_intracellular_ags(Cell* pCell, Phenotype& phenotype, double dt)
-
-
 {
     if( phenotype.death.dead == true )
 	{
@@ -270,19 +275,8 @@ void post_update_intracellular_ags(Cell* pCell, Phenotype& phenotype, double dt)
     update_cell_from_boolean_model(pCell, phenotype, dt);
     
     // Get track of some boolean node values for debugging
-    // Probably not needed anymore
+    // @oth: Probably not needed anymore with pcdl
     update_monitor_variables(pCell);
 
     return;
-}
-
-//  @oth: added the main interface function
-
-void ags_bm_interface_main (Cell* pCell, Phenotype& phenotype, double dt){
-    
-	if( phenotype.death.dead == true )
-	{
-		pCell->functions.update_phenotype = NULL;
-		return;
-	}
 }

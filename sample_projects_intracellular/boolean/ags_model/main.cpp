@@ -128,41 +128,11 @@ int main( int argc, char* argv[] )
 	/* Microenvironment setup */ 
 	
 	setup_microenvironment(); // modify this in the custom code 
-	std::cout << "setup OK" << std::endl;
 
-	// // User parameters 
 
-	// double drug_X_pulse_period = parameters.doubles("drug_X_pulse_period");
-	// double drug_X_pulse_duration = parameters.doubles("drug_X_pulse_duration");
-	// double drug_X_pulse_concentration = parameters.doubles("drug_X_pulse_concentration");
-	// double membrane_length = parameters.doubles("membrane_length"); // radious around which the drug_X pulse is injected
-	// double drug_X_pulse_timer = drug_X_pulse_period;
-	// double drug_X_pulse_injection_timer = -1;
-	// double drug_Y_pulse_period = parameters.doubles("drug_Y_pulse_period");
-	// double drug_Y_pulse_duration = parameters.doubles("drug_Y_pulse_duration");
-	// double drug_Y_pulse_concentration = parameters.doubles("drug_Y_pulse_concentration");
-	// double drug_Y_pulse_timer = drug_Y_pulse_period;
-	// double drug_Y_pulse_injection_timer = -1;
-	// // Drugs density index
-	// static int drug_X_ix = microenvironment.find_density_index("drug_X");	
-	// static int drug_Y_ix = microenvironment.find_density_index("drug_Y");
-
-	// this is to emulate PhysiBoSSv1 TNF experiment
-	// bool seed_tnf = true; // Was set to false in TNF model (?)
-
-	// do small diffusion steps alone to initialize densities
-	// if ( seed_tnf )
-	// {
-	// 	inject_density_sphere(drug_X_ix, drug_X_pulse_concentration, membrane_lenght);
-	// 	inject_density_sphere(drug_Y_ix, drug_Y_pulse_concentration, membrane_lenght);
-
-	// 	for ( int i = 0; i < 25; i ++ )
-	// 		microenvironment.simulate_diffusion_decay( diffusion_dt );
-	// }
 	
 	/* PhysiCell setup */ 
 
-	std::cout << "begin setup" << std::endl;
 	// set mechanics voxel size, and match the data structure to BioFVM
 	double mechanics_voxel_size = 30; 
 	Cell_Container* cell_container = create_cell_container_for_microenvironment( microenvironment, mechanics_voxel_size );
@@ -170,18 +140,25 @@ int main( int argc, char* argv[] )
 	
 	/* Users typically start modifying here. START USERMODS */ 
 
+	create_cell_types();
+	std::cout << "create cells OK" << std::endl;
 
-	
+
+
+	// update monitoring variables too in setup_tissue();
+	setup_tissue();
+	std::cout << "setup tissue OK" << std::endl;
+
+
+
+	// @oth: this is deprecated, delete it
 	// Run the MaBoSS model prior to the simulation  
 	// needs to be done before setup_tissue(), because that's where you call the update variables functions
-
-
 	// int max_iter = 1;
 	// #pragma omp parallel for 
 	// for( int i=0; i < (*all_cells).size(); i++ )
 	// {
 	// 	// std::cout << "Running MaBoSS on agent:" << i << std::endl;
-
 	// 	#pragma omp parallel for 
 	// 	for (int j=0; j < max_iter; j++){
 	// 		(*all_cells)[i]->phenotype.intracellular->update();
@@ -190,27 +167,11 @@ int main( int argc, char* argv[] )
 	// 	}
 	// }
 
-	std::cout << "about to create cells" << std::endl;
-	create_cell_types();
-	std::cout << "create cells OK" << std::endl;
-
-
-
-	// update monitoring variables too in setup_tissue();
-	std::cout << "about to setup tissue" << std::endl;
-	setup_tissue();
-	std::cout << "setup tissue OK" << std::endl;
-
-
-
-
-	// main loop
 	std::cout << "beginning maboss first save..." << std::endl;
 	char filename2[1024];
 	sprintf( filename2 , "%s/BM_initial_readouts.txt" , PhysiCell_settings.folder.c_str() ); 
 	MaBoSSIntracellular::save( filename2, *PhysiCell::all_cells );
 	std::cout << "maboss first save OK" << std::endl;
-
 
 
 	/* Users typically stop modifying here. END USERMODS */ 
@@ -252,7 +213,6 @@ int main( int argc, char* argv[] )
 	display_citations(); 
 	
 	// set the performance timers 
-
 	BioFVM::RUNTIME_TIC();
 	BioFVM::TIC();
 	
@@ -313,35 +273,15 @@ int main( int argc, char* argv[] )
 			  Custom add-ons could potentially go here. 
 			*/	
 
-
-			/*
-				Slight modification on the use of the inject_density and remove_density() functions in TNF
-					- Just a single addition of substrate
-					- remove_desntiy used to avoid any substrate prior to time of addition
-					- Controlled by two parameters: time of addition and duration of pulse
-
-			*/
-
-			if ( PhysiCell_globals.current_time >= drug_X_pulse_timer && PhysiCell_globals.current_time <= drug_X_pulse_timer + drug_X_pulse_duration  )
-				inject_density_sphere(drug_X_ix, drug_X_pulse_concentration, membrane_length);
-				
-			if (PhysiCell_globals.current_time < drug_X_pulse_timer)
-				remove_density(drug_X_ix);
-			
-			if ( PhysiCell_globals.current_time >= drug_Y_pulse_timer && PhysiCell_globals.current_time <= drug_Y_pulse_timer + drug_Y_pulse_duration  )
-				inject_density_sphere(drug_Y_ix, drug_Y_pulse_concentration, membrane_length);
-
-			if (PhysiCell_globals.current_time < drug_Y_pulse_timer)
-				remove_density(drug_Y_ix);
+			// @oth: #TODO: complete function from template_BM
+			treatment_function();
 
 			
 			// update the microenvironment
 			microenvironment.simulate_diffusion_decay( diffusion_dt );
 
-			
 			// update te AGS receptor model of each cell 
 			drug_transport_model_main( diffusion_dt );
-
 			
 			// run PhysiCell 
 			((Cell_Container *)microenvironment.agent_container)->update_all_cells( PhysiCell_globals.current_time );
@@ -376,39 +316,8 @@ int main( int argc, char* argv[] )
 	SVG_plot( filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function, ECM_coloring_function);
 	
 	// timer 
-	
 	std::cout << std::endl << "Total simulation runtime: " << std::endl; 
 	BioFVM::display_stopwatch_value( std::cout , BioFVM::runtime_stopwatch_value() ); 
 
 	return 0; 
 }
-
-
-					//Count Necrotic Apoptotic Alive cells
-					// Producer
-					// std::string message;
-					// std::string topic_name = "cells";
-					// double timepoint = PhysiCell_globals.current_time;
-					// int alive_no,necrotic_no,apoptotic_no=0;
-					// alive_no = total_live_cell_count();
-					// necrotic_no = total_necrosis_cell_count();
-					// apoptotic_no = total_dead_cell_count();
-					// pid_t pid_var = getpid();
-					// // MessageBuilder builder(topic_name);
-					// message = std::to_string(pid_var) + ';' + std::to_string(timepoint) + ';' + std::to_string(alive_no) + ';' + std::to_string(apoptotic_no) + ';' + std::to_string(necrotic_no) + ';';
-					
-					
-					// message = '{' + 'process_id' + std::to_string(pid_var) + ',' + 'timepoint' + std::to_string(timepoint) + ',' 
-					// + 'alive' + std::to_string(alive_no) + ',' + 'apoptotic' + std::to_string(apoptotic_no) + ',' 
-					// + 'necrotic' + std::to_string(necrotic_no) + '}';
-					// Define the configuration structure
-					// Configuration config = { { "metadata.broker.list", "localhost:9092" } };
-				    // Create the producer
-				    // BufferedProducer<std::string> producer(config);
-					//Produce a message
-					// The message that will be sent
-					// std::cout << "Message to Kafka: " << message << std::endl;
-					// std::string str(message);
-					// builder.partition(0).payload(str);
-				    // producer.add_message(builder);
-				    // producer.flush();

@@ -67,11 +67,13 @@
 
 #include "../core/PhysiCell.h"
 #include "../modules/PhysiCell_standard_modules.h" 
+
+// AGS model headers
 #include "./drug_transport_model.h"
 #include "./boolean_model_interface.h"
 
 //change
-#include "../addons/PhysiBoSS/src/maboss_network.h"
+// #include "../addons/PhysiBoSS/src/maboss_network.h"
 
 using namespace BioFVM; 
 using namespace PhysiCell;
@@ -94,11 +96,13 @@ void basic_2D_disk_setup( Cell* pCell, double tumor_radius, double cell_spacing 
 // set up the BioFVM microenvironment 
 void setup_microenvironment( void ); 
 
+// Adding different drugs
+void treatment_function (void);
+
 // custom pathology coloring function 
 std::vector<std::string> my_coloring_function( Cell* );
 
-// custom cell phenotype function to update cell fate based on the BM and the 
-// ags model dynamics
+// custom cell phenotype function to update cell fate based on the BM and the ags model dynamics
 void tumor_cell_phenotype_with_signaling( Cell* pCell, Phenotype& phenotype, double dt );
 
 // Function that updates growth rate based on the pressure of a given agent
@@ -109,7 +113,7 @@ void add_reactivation_prob(Cell* pCell, double reactivation_mean, double reactiv
 void add_mutation_prob(Cell* pCell, double mutation_mean, double mutation_sd);
 void add_pump_heterogeneity(Cell* pCell, std::string variable_name, double variable_mean, double variable_sd, double variable_min, double variable_max);
 void get_heterogeneity_summary(Cell* pCell);
-void my_mutation_function( Cell* pCell, Phenotype& phenotype, double dt );
+void phase_exit_mutation_function( Cell* pCell, Phenotype& phenotype, double dt );
 void add_noise_after_division(Cell *pCell, Phenotype& phenotype, std::string drug_name);
 
 

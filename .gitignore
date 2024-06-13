@@ -30,3 +30,4 @@ user_projects/*
 !user_projects/empty.txt
 .vscode
 *.tar.gz
+postsim_analysis/pymcdsts_2d_cellcount.png

@@ -142,13 +142,15 @@ void create_cell_types( void )
 	drug_transport_model_setup();
 	boolean_model_interface_setup();
 
-	cell_defaults.custom_data.add_variable("time", "min", PhysiCell_globals.current_time );
-	cell_defaults.custom_data.add_variable("total_live_cells", "dimensionless", 0.0 );
+	// @oth: this is not needed anymore
+	// cell_defaults.custom_data.add_variable("time", "min", PhysiCell_globals.current_time );
+	// cell_defaults.custom_data.add_variable("total_live_cells", "dimensionless", 0.0 );
 
 	cell_defaults.custom_data.add_variable("reactivation_rate", "1/min", 0.0 );
 	cell_defaults.custom_data.add_variable("mutation_rate", "1/generation", 0.0 );
 
 	submodel_registry.display(std::cout);
+
 	/*
 	   This builds the map of cell definitions and summarizes the setup. 
 	*/
@@ -165,14 +167,12 @@ void setup_microenvironment(void)
 	return;
 }
 
-
 void setup_tissue( void )
 {
 	// place a cluster of tumor cells at the center 
 	
 	double cell_radius = cell_defaults.phenotype.geometry.radius; 
 	double cell_spacing = parameters.doubles("cell_spacing") * cell_radius; 
-	
 	double tumor_radius = parameters.doubles( "tumor_radius" ); 
 	// Parameter<double> temp; 
 	// int i = parameters.doubles.find_index( "tumor_radius" ); 
@@ -191,47 +191,36 @@ void setup_tissue( void )
 	return; 
 }
 
-// @othmane [WIP] -- Copied from cancer_invasion model, left empty so far -- should this go here?
-
-// void pre_update_intracellular(Cell* pCell, Phenotype& phenotype, double dt){
-// 	return;
-// }
-
-
-
 void update_cell_gowth_parameters_pressure_based( Cell* pCell, Phenotype& phenotype, double dt ) 
 {
 	
 	if( phenotype.death.dead == true )
 	{ return; }
 
+	// First check O2 availability
+	update_cell_and_death_parameters_O2_based(pCell, phenotype, dt);
+
 	// Custom cycle exit in the phenotype
 	PhysiCell::Cycle_Model cycle_model = cell_defaults.phenotype.cycle.model();
-	static int oxygen_substrate_index = pCell->get_microenvironment()->find_density_index( "oxygen" ); 
 	static int start_phase_idx = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
 	static int end_phase_idx = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
-	static int necrosis_idx = phenotype.death.find_death_model_index( PhysiCell_constants::necrosis_death_model );
 
-	cycle_model.phase_link(start_phase_idx, end_phase_idx).exit_function = my_mutation_function;
+	// static int necrosis_idx = phenotype.death.find_death_model_index( PhysiCell_constants::necrosis_death_model ); // @oth: not employed, should remove
+	cycle_model.phase_link(start_phase_idx, end_phase_idx).exit_function = phase_exit_mutation_function;
 
 	
-	// this multiplier is for linear interpolation of the oxygen value 	
 	// PRESSURE-BASED CONTACT-INHIBITION
+	// @oth: #TODO Encapsulate this in a function?
 	// Check relative pressure to eith er number of neighbor cells or set max logistic function to number of neighbor cells
 	// pressure threshold set to 1, above this value there is no growth
 
 	double cell_pressure = pCell->state.simple_pressure; 
-    double hill_coeff_pressure = parameters.doubles("hill_coeff_pressure");
-    double pressure_half = parameters.doubles("pressure_half");
-
-	// @oth: Discarded -- use PC Hill function instead
-	// double scaling = pressure_effect_growth_rate(cell_pressure, hill_coeff_pressure, pressure_half); // @oth: Discarded -- use PC Hill function instead
-
+	double hill_coeff_pressure = get_custom_data_variable(pCell, "hill_coeff_pressure");
+	double pressure_half = get_custom_data_variable(pCell, "pressure_half");
 	double scaling = Hill_response_function(cell_pressure, pressure_half, hill_coeff_pressure);
 	double growth_rate = phenotype.cycle.data.transition_rate(start_phase_idx, end_phase_idx);
 
 	// Pressure affects negatively
-	
 	growth_rate *= (1 - scaling);
 	if (growth_rate < 0)
 		growth_rate = 0;
@@ -242,9 +231,8 @@ void update_cell_gowth_parameters_pressure_based( Cell* pCell, Phenotype& phenot
 	return;
 }
 
-void my_mutation_function( Cell* pCell, Phenotype& phenotype, double dt )
+void phase_exit_mutation_function( Cell* pCell, Phenotype& phenotype, double dt )
 {
-	
 	// std::cout << "applying mutation at exit phase on cell " << pCell->ID << std::endl;
 
 	static int reactivation_value_idx = pCell->custom_data.find_variable_index("reactivation_value");
@@ -280,9 +268,6 @@ void my_mutation_function( Cell* pCell, Phenotype& phenotype, double dt )
 
 	return;
 }
-
-
-
 
 
 // cell coloring function for ploting the svg files
@@ -392,12 +377,6 @@ std::vector<init_record> read_init_file(std::string filename, char delimiter, bo
 }
 
 
-void set_input_nodes(Cell* pCell) {}
-
-void from_nodes_to_cell(Cell* pCell, Phenotype& phenotype, double dt) {}
-
-
-
 void color_node(Cell* pCell){
 	std::string node_name = parameters.strings("node_to_visualize");
 	pCell->custom_data[node_name] = pCell->phenotype.intracellular->get_boolean_variable_value(node_name);
@@ -411,7 +390,6 @@ void inject_density_sphere(int density_index, double concentration, double membr
 	{
 		auto current_voxel = microenvironment.voxels(n);
 		std::vector<double> cent = {current_voxel.center[0], current_voxel.center[1], current_voxel.center[2]};
-		
 		microenvironment.density_vector(n)[density_index] = concentration;
 
 		// if (current_voxel.center[2] >= 2)
@@ -430,108 +408,30 @@ void remove_density(int density_index)
 		microenvironment.density_vector(n)[density_index] = 0;
 }
 
-
-
-double total_live_cell_count()
-{
-	double out = 0.0;
-
-	for (int i = 0; i < (*all_cells).size(); i++)
-	{
-		if ((*all_cells)[i]->phenotype.death.dead == false && (*all_cells)[i]->type == 0)
-		{
-			out += 1.0;
-		}
-	}
-
-	return out;
-}
-
-double total_dead_cell_count()
-{
-	double out = 0.0;
-
-	for (int i = 0; i < (*all_cells).size(); i++)
-	{
-		if ((*all_cells)[i]->phenotype.death.dead == true && (*all_cells)[i]->phenotype.death.current_death_model_index == 0)
-		{
-			out += 1.0;
-		}
-	}
-
-	return out;
-}
-
-double total_necrosis_cell_count()
-{
-	double out = 0.0;
-
-	for (int i = 0; i < (*all_cells).size(); i++)
-	{
-		if ((*all_cells)[i]->phenotype.death.dead == true && (*all_cells)[i]->phenotype.death.current_death_model_index == 1)
-		{
-			out += 1.0;
-		}
-	}
-
-	return out;
-}
-
 void add_reactivation_prob(Cell* pCell, double reactivation_mean, double reactivation_sd){
-
 	static int reactivation_prob_idx = pCell->custom_data.find_variable_index("reactivation_rate");
 	double reactivation_rate_min = 0.0;
 	// double resistance_max = 1.0;
-
 	pCell->custom_data.variables[reactivation_prob_idx].value = NormalRandom( reactivation_mean, reactivation_sd );
 	if( pCell->custom_data.variables[reactivation_prob_idx].value < reactivation_rate_min ){ pCell->custom_data.variables[reactivation_prob_idx].value = reactivation_rate_min; }
-
-	std::cout << "This cell has " << pCell->custom_data.variables[reactivation_prob_idx].value << " probab. of reactivating different pathways" << std::endl;
+	// std::cout << "This cell has " << pCell->custom_data.variables[reactivation_prob_idx].value << " probab. of reactivating different pathways" << std::endl;
 }
 
 void add_mutation_rate(Cell* pCell, double mutation_rate_mean, double mutation_rate_sd){
-
 	static int mutation_prob_idx = pCell->custom_data.find_variable_index("mutation_rate");
 	double mutation_rate_min = 0.0;
 	double mutation_rate_max = 1.0;
-
 	pCell->custom_data.variables[mutation_prob_idx].value = NormalRandom( mutation_rate_mean, mutation_rate_sd );
 	if( pCell->custom_data.variables[mutation_prob_idx].value < mutation_rate_min ){ pCell->custom_data.variables[mutation_prob_idx].value = mutation_rate_min; }
-
-	std::cout << "This cell has " << pCell->custom_data.variables[mutation_prob_idx].value << " mutation rate " << std::endl;
+	// std::cout << "This cell has " << pCell->custom_data.variables[mutation_prob_idx].value << " mutation rate " << std::endl;
 }
 
 
-// void add_pump_heterogeneity(Cell* pCell, std::string variable_name, double variable_mean, double variable_sd, double variable_min, double variable_max){
-
-// 	// This function adds, to each agent, a value for the Km, the k2 and the total amount of transporter (Enzyme),
-// 	// drawn from a given distribution in the config XML.
-
-// 	std::string variable_name_value = variable_name + "_value";
-
-// 	static int variable_idx = pCell->custom_data.find_variable_index(variable_name_value);
-	
-// 	pCell->custom_data.variables[variable_idx].value = NormalRandom( variable_mean, variable_sd );
-// 	if( pCell->custom_data.variables[variable_idx].value < variable_min){ pCell->custom_data.variables[variable_idx].value = variable_min; }
-// 	if( pCell->custom_data.variables[variable_idx].value > variable_max ){ pCell->custom_data.variables[variable_idx].value = variable_max; }
-
-// 	std::cout << "The variable " << variable_name << " has a prob of " << pCell->custom_data.variables[variable_idx].value << " in cell " << pCell->ID << std::endl;
-// }
 
 void basic_2D_disk_setup( Cell* pCell, double tumor_radius, double cell_spacing){
 
-	// double pump_total_Enzyme_mean = parameters.doubles("pump_total_Enzyme_mean");
-	// double pump_total_Enzyme_sd = parameters.doubles("pump_total_Enzyme_sd");
-	// double pump_k_2_mean = parameters.doubles("pump_k_2_mean");
-	// double pump_k_2_sd = parameters.doubles("pump_k_2_sd");
-	// double pump_kM_mean = parameters.doubles("pump_kM_mean");
-	// double pump_kM_sd = parameters.doubles("pump_kM_sd");
-
-	// This basic setup also accounts for heterogeneity in the population.
-
 	double reactivation_rate_mean = parameters.doubles("reactivation_rate_mean");
 	double reactivation_rate_sd = parameters.doubles("reactivation_rate_sd");
-
 	double mutation_rate_mean = parameters.doubles("mutation_rate_mean");
 	double mutation_rate_sd = parameters.doubles("mutation_rate_sd");
 	
@@ -595,6 +495,8 @@ void basic_2D_disk_setup( Cell* pCell, double tumor_radius, double cell_spacing)
 
 }
 
+// @oth: move to utils.cpp?
+
 void get_heterogeneity_summary(Cell* pCell){
 
 	static int reactivation_prob_idx = pCell->custom_data.find_variable_index("reactivation_value");
@@ -637,36 +539,113 @@ std::vector<std::string> my_coloring_function_for_stroma( double concentration, 
 
 }
 
+void treatment_function ()
+{
+	bool treatment = parameters.bools("treatment");
 
+	if (treatment){
+		int n_substrates = 2;
+		std::string substrate[n_substrates] = { "drug_X", "drug_Y" };
+	
+		for (int i = 0; i < n_substrates; i++){
+			std::string substrate_name = substrate[i];
+			static int substrate_idx = microenvironment.find_density_index(substrate_name);
 
+			// drug pulse timer
+			double drug_pulse_period 			= parameters.doubles(substrate_name + "_pulse_period");
+			double drug_pulse_duration 			= parameters.doubles(substrate_name + "_pulse_duration");
+			double drug_pulse_concentration 	= parameters.doubles(substrate_name + "_pulse_concentration");
+			// double drug_pulse_radius 			= parameters.doubles(substrate_name + "_pulse_radius");
+			double drug_membrane_length 		= parameters.doubles(substrate_name + "_membrane_length");
+			double drug_pulse_timer 			= drug_pulse_period;
+			double drug_pulse_injection_timer 	= -1;
+			double time 						= PhysiCell_globals.current_time;
 
-// OLD CODE
+			// Option A: Follow TNF model
+			if (time >= drug_pulse_timer && time <= drug_pulse_timer + drug_pulse_duration){
+				// std::cout << substrate_name << " added at t=" << time << std::endl;
+				inject_density_sphere(substrate_idx, drug_pulse_concentration, drug_membrane_length);
+			}
+			if (time < drug_pulse_timer){ remove_density(substrate_idx); }
 
-
-	// output[3].assign("black");
-
-	// std::cout << "this cell " << pCell->ID <<" has a prob of " << reactivation_prob << std::endl;
-
-	// int oncoprotein = (int) round( 0.5 * pCell->custom_data[oncoprotein_i] * 255.0 ); 
-	// 	char szTempString [128];
-	// 	sprintf( szTempString , "rgb(%u,%u,%u)", oncoprotein, oncoprotein, 255-oncoprotein );
-	// 	output[0].assign( szTempString );
-	// 	output[1].assign( szTempString );
-
-	// 	sprintf( szTempString , "rgb(%u,%u,%u)", (int)round(output[0][0]/2.0) , (int)round(output[0][1]/2.0) , (int)round(output[0][2]/2.0) );
-	// 	output[2].assign( szTempString );
+			// Option B: Emulate the template_BM structure, based on residuals 
+			// if ((int)time % (int)drug_pulse_period == 0){
+			// 	std::cout << substrate_name << " activation at t=" << time << std::endl;
+			// 	BioFVM::microenvironment.set_substrate_dirichlet_activation(substrate_idx, true);	
+			// }
+			// if((int)time % (int)drug_pulse_period == (int)drug_pulse_duration){
+			// 	std::cout << substrate_name << " inactivation at t=" << time << std::endl;
+			// 	BioFVM::microenvironment.set_substrate_dirichlet_activation(substrate_idx, false);	
+			// }
 		
+		}
 
-	// // dead cells
-	// if (pCell->phenotype.death.dead == false)
-	// {
-	// 	// static double V_cell = pCell->phenotype.volume.total; 
-	// 	// static int drug_X_index = microenvironment.find_density_index("drug_X");
-	// 	// static int drug_Y_index = microenvironment.find_density_index("drug_Y");
+	}
 
-	// 	// double I_drug_X = pCell->phenotype.molecular.internalized_total_substrates[drug_X_index] / V_cell;
-	// 	// double I_drug_Y = pCell->phenotype.molecular.internalized_total_substrates[drug_Y_index] / V_cell;
+	return;
+}
 
-	// 	// float activation_threshold = pCell->custom_data.find_variable_index("activation threshold");
 
-	// }
+
+// void add_pump_heterogeneity(Cell* pCell, std::string variable_name, double variable_mean, double variable_sd, double variable_min, double variable_max){
+
+// 	// This function adds, to each agent, a value for the Km, the k2 and the total amount of transporter (Enzyme),
+// 	// drawn from a given distribution in the config XML.
+
+// 	std::string variable_name_value = variable_name + "_value";
+
+// 	static int variable_idx = pCell->custom_data.find_variable_index(variable_name_value);
+	
+// 	pCell->custom_data.variables[variable_idx].value = NormalRandom( variable_mean, variable_sd );
+// 	if( pCell->custom_data.variables[variable_idx].value < variable_min){ pCell->custom_data.variables[variable_idx].value = variable_min; }
+// 	if( pCell->custom_data.variables[variable_idx].value > variable_max ){ pCell->custom_data.variables[variable_idx].value = variable_max; }
+
+// 	std::cout << "The variable " << variable_name << " has a prob of " << pCell->custom_data.variables[variable_idx].value << " in cell " << pCell->ID << std::endl;
+// }
+
+
+
+// double total_live_cell_count()
+// {
+// 	double out = 0.0;
+
+// 	for (int i = 0; i < (*all_cells).size(); i++)
+// 	{
+// 		if ((*all_cells)[i]->phenotype.death.dead == false && (*all_cells)[i]->type == 0)
+// 		{
+// 			out += 1.0;
+// 		}
+// 	}
+
+// 	return out;
+// }
+
+// double total_dead_cell_count()
+// {
+// 	double out = 0.0;
+
+// 	for (int i = 0; i < (*all_cells).size(); i++)
+// 	{
+// 		if ((*all_cells)[i]->phenotype.death.dead == true && (*all_cells)[i]->phenotype.death.current_death_model_index == 0)
+// 		{
+// 			out += 1.0;
+// 		}
+// 	}
+
+// 	return out;
+// }
+
+// double total_necrosis_cell_count()
+// {
+// 	double out = 0.0;
+
+// 	for (int i = 0; i < (*all_cells).size(); i++)
+// 	{
+// 		if ((*all_cells)[i]->phenotype.death.dead == true && (*all_cells)[i]->phenotype.death.current_death_model_index == 1)
+// 		{
+// 			out += 1.0;
+// 		}
+// 	}
+
+// 	return out;
+// }

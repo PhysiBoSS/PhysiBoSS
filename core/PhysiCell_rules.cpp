@@ -2328,6 +2328,9 @@ std::vector<double> UniformInShell( double r1, double r2 )
 
 void setup_cell_rules( void )
 {
+
+	std::cout << "setting up cell rules" << std::endl;
+	
 	// setup 
 	intialize_hypothesis_rulesets(); 
 

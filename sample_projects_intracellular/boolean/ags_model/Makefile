@@ -60,7 +60,6 @@ ARCH := native # best auto-tuning
 
 # CFLAGS := -march=$(ARCH) -Ofast -s -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
 CFLAGS := -g -march=$(ARCH)  -Og -ggdb -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11 
-# CFLAGS := -g -march=$(ARCH) -Xclang -Og -ggdb -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11 
 # CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
 # CFLAGS := -g -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
 

@@ -85,10 +85,10 @@
 
 
 	<domain>
-		<x_min>-300</x_min> 
-		<x_max>300</x_max>
-		<y_min>-300</y_min>
-		<y_max>300</y_max>
+		<x_min>-600</x_min> 
+		<x_max>600</x_max>
+		<y_min>-600</y_min>
+		<y_max>600</y_max>
 		<z_min>-30</z_min>
 		<z_max>30</z_max>
 		<dx>20</dx> 
@@ -108,7 +108,7 @@
 	</overall>
 	
 	<parallel>
-		<omp_num_threads>6</omp_num_threads>
+		<omp_num_threads>96</omp_num_threads> <!-- Much better than 6 -->
 	</parallel> 
 	
 	<save>
@@ -143,17 +143,24 @@
 			</physical_parameter_set>
 			<initial_condition units="mmHg">0</initial_condition>
 			<Dirichlet_boundary_condition units="mmHg" enabled="true">0</Dirichlet_boundary_condition>
-<!-- use this block to set Dirichlet boundary conditions on individual boundaries --> 
-<!--
-			<Dirichlet_options>
-				<boundary_value ID="xmin" enabled="false">0</boundary_value>
-				<boundary_value ID="xmax" enabled="false">0</boundary_value>
-				<boundary_value ID="ymin" enabled="false">0</boundary_value>
-				<boundary_value ID="ymax" enabled="false">0</boundary_value>
-				<boundary_value ID="zmin" enabled="false">1</boundary_value>
-				<boundary_value ID="zmax" enabled="false">0</boundary_value>
-			</Dirichlet_options>
--->
+		</variable>
+
+		<variable name="drug_X" units="umol" ID="1">
+			<physical_parameter_set>
+				<diffusion_coefficient units="micron^2/min">100000.0</diffusion_coefficient>
+				<decay_rate units="1/min">.1</decay_rate> 
+			</physical_parameter_set>
+			<initial_condition units="umol">0</initial_condition>
+			<Dirichlet_boundary_condition units="umol" enabled="true">0</Dirichlet_boundary_condition>
+		</variable>
+
+		<variable name="drug_Y" units="umol" ID="2">
+			<physical_parameter_set>
+				<diffusion_coefficient units="micron^2/min">100000.0</diffusion_coefficient>
+				<decay_rate units="1/min">.1</decay_rate> 
+			</physical_parameter_set>
+			<initial_condition units="umol">0</initial_condition>
+			<Dirichlet_boundary_condition units="umol" enabled="true">0</Dirichlet_boundary_condition>
 		</variable>
 
 		<options>
@@ -272,7 +279,7 @@
 						<use_2D>true</use_2D>
 						<chemotaxis>
 							<enabled>false</enabled>
-							<substrate>substrate</substrate>
+							<substrate>oxygen</substrate>
 							<direction>1</direction>
 						</chemotaxis>
 					</options>
@@ -310,48 +317,47 @@
 				<molecular />
 				<intracellular type="maboss">
 					<bnd_filename>./config/AGS_all_nodes.bnd</bnd_filename>
-					<cfg_filename>./config/AGS_all_nodes.cfg</cfg_filename>
+					<cfg_filename>./config/AGS_all_nodes_real.cfg</cfg_filename>
 					<settings>
-						<intracellular_dt>10</intracellular_dt>
-						<time_stochasticity>1</time_stochasticity>
+                  		<intracellular_dt>10.0</intracellular_dt>
+                        <time_stochasticity>0.0</time_stochasticity> <!-- 0.0 -->
+                        <scaling>10</scaling> <!-- 10 -->
+                        <start_time>0.0</start_time>
+                        <inheritance global="True" />
 					</settings>
 				</intracellular>
 			</phenotype>
 			
 			<custom_data>
-				
+				<sample units="dimensionless" conserved="false">1.0</sample>
 
-				<drug_X_permeability type="double" units="amol/um^3">0.00021979189</drug_X_permeability> 
-				<drug_X_target type="string" units="">anti_PI3K</drug_X_target>
-				<drug_X_half_max type="double" units="mM">3.3857220000000006e-05</drug_X_half_max>
-				<drug_X_Hill_coeff type="double" units="mM">5.503406625769999</drug_X_Hill_coeff>
+				<drug_X_permeability type="double" units="amol/um^3" conserved="false">0.00021979189</drug_X_permeability> 
+				<drug_X_half_max type="double" units="mM" conserved="false">3.3857220000000006e-05</drug_X_half_max>
+				<drug_X_Hill_coeff type="double" units="mM" conserved="false">5.503406625769999</drug_X_Hill_coeff>
 
-				<drug_Y_permeability type="double" units="amol/um^3"> 0.0 </drug_Y_permeability>
-				<drug_Y_target type="string" units="">none</drug_Y_target>
-				<drug_Y_half_max type="double" units="mM">0.0</drug_Y_half_max>
-				<drug_Y_Hill_coeff type="double" units="mM">0.0</drug_Y_Hill_coeff>
+				<drug_Y_permeability type="double" units="amol/um^3" conserved="false"> 0.0 </drug_Y_permeability>
+				<drug_Y_half_max type="double" units="mM" conserved="false">0.0</drug_Y_half_max>
+				<drug_Y_Hill_coeff type="double" units="mM" conserved="false">0.0</drug_Y_Hill_coeff>
 
-				<basal_growth_rate type="double" units="1/min">0.00209</basal_growth_rate> 
-				<hill_coeff_growth type="double" units="dimensionless">6.9505</hill_coeff_growth>
-				<K_half_growth type="double" units="dimensionless">0.0585</K_half_growth>
+				<basal_growth_rate type="double" units="1/min" conserved="false">0.00209</basal_growth_rate> 
+				<hill_coeff_growth type="double" units="dimensionless" conserved="false">6.9505</hill_coeff_growth>
+				<K_half_growth type="double" units="dimensionless" conserved="false">0.0585</K_half_growth>
 			
-				<apoptosis_rate_basal type="double" units="1/min">5.31667e-05</apoptosis_rate_basal>
-				<max_apoptosis_rate type="double" units="1/min">0.0098</max_apoptosis_rate>
-				<hill_coeff_apoptosis type="double" units="dimensionless">3.6787</hill_coeff_apoptosis>
-				<K_half_apoptosis type="double" units="dimensionless">0.0193</K_half_apoptosis>
+				<apoptosis_rate_basal type="double" units="1/min" conserved="false">5.31667e-05</apoptosis_rate_basal>
+				<max_apoptosis_rate type="double" units="1/min" conserved="false">0.0098</max_apoptosis_rate>
+				<hill_coeff_apoptosis type="double" units="dimensionless" conserved="false">3.6787</hill_coeff_apoptosis>
+				<K_half_apoptosis type="double" units="dimensionless" conserved="false">0.0193</K_half_apoptosis>
 				
-				<hill_coeff_pressure type="double" units="1/min">6.9583485811</hill_coeff_pressure>
-				<pressure_half type="double" units="1/min">4.7920543763</pressure_half> 
+				<hill_coeff_pressure type="double" units="1/min" conserved="false">6.9583485811</hill_coeff_pressure>
+				<pressure_half type="double" units="1/min" conserved="false">4.7920543763</pressure_half> 
 				
-				<w1_growth type="double" units="dimensionlaess">0.2215</w1_growth>
-				<w2_growth type="double" units="dimensionlaess">0.2574</w2_growth>
+				<w1_growth type="double" units="dimensionlaess" conserved="false">0.2215</w1_growth>
+				<w2_growth type="double" units="dimensionlaess" conserved="false">0.2574</w2_growth>
+				<w1_apoptosis type="double" units="dimensionlaess" conserved="false">0.1092</w1_apoptosis>
+				<w2_apoptosis type="double" units="dimensionlaess" conserved="false">0.3765</w2_apoptosis>
 
-				<w1_apoptosis type="double" units="dimensionlaess">0.1092</w1_apoptosis>
-				<w2_apoptosis type="double" units="dimensionlaess">0.3765</w2_apoptosis>
 
-				<reactivation_rate_mean type="double" units="1/min">0.0</reactivation_rate_mean>
-				<reactivation_rate_sd type="double" units="1/min">0.0</reactivation_rate_sd>
-				
+
 			</custom_data>
 		</cell_definition>
 	</cell_definitions>
@@ -375,19 +381,31 @@
 
 	<user_parameters>
 		<random_seed type="int" units="dimensionless">1234</random_seed>
-		 
-		<tumor_radius type="double" units="um"> 25.0 </tumor_radius> <!-- 225.0-->
+
+		<!-- Initial setup parameters -->
+
+		<tumor_radius type="double" units="um"> 500.0 </tumor_radius> 
+		<!-- 225.0 for 1200 / 400.0 for around 4993 agents -->
+
 		<cell_spacing type="double" units="um"> 1.6 </cell_spacing> <!-- 1.6 -->
-		<membrane_length type="double" units=""> 0 </membrane_length>
-    	
+		<treatment type="bool" units="dimensionless">true</treatment>
+
+		<!-- Drug params -->
 		<drug_X_pulse_period type="double" units="min"> 50 </drug_X_pulse_period> 
 		<drug_X_pulse_duration type="double" units="min"> 100 </drug_X_pulse_duration> 
 		<drug_X_pulse_concentration type="double" units="min">0.000175</drug_X_pulse_concentration>
+		<drug_X_target type="string" units="min">anti_PI3K</drug_X_target>
+		<drug_X_membrane_length type="double" units=""> 0 </drug_X_membrane_length> <!-- Not employed for now -->
 
-		<drug_Y_pulse_period type="double" units="min"> 0 </drug_Y_pulse_period> 
-		<drug_Y_pulse_duration type="double" units="min">0</drug_Y_pulse_duration> 
-		<drug_Y_pulse_concentration type="double" units="min">0.0</drug_Y_pulse_concentration>
+		<drug_Y_pulse_period type="double" units="min"> 60 </drug_Y_pulse_period> 
+		<drug_Y_pulse_duration type="double" units="min">10</drug_Y_pulse_duration> 
+		<drug_Y_pulse_concentration type="double" units="min">0.1</drug_Y_pulse_concentration>
+		<drug_Y_target type="string" units="min">anti_MEK</drug_Y_target>
+		<drug_Y_membrane_length type="double" units=""> 0 </drug_Y_membrane_length> <!-- Not employed for now -->
 
+		<!-- Heterogeneous population sampling distribution -->
+		<reactivation_rate_mean type="double" units="1/min">0.0</reactivation_rate_mean>
+		<reactivation_rate_sd type="double" units="1/min">0.0</reactivation_rate_sd>	
 		<mutation_rate_mean type="double" units="uM?"> 0 </mutation_rate_mean> <!-- from https://bionumbers.hms.harvard.edu/bionumber.aspx?s=n&v=20&id=100417 -->
 		<mutation_rate_sd type="double" units="uM?"> 0 </mutation_rate_sd>
 
