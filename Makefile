@@ -77,7 +77,7 @@ list-projects:
 	@echo ""
 	@echo "Sample intracellular projects: template_BM ode-energy-sample physiboss-cell-lines-sample"
 	@echo "                 physiboss-tnf-model physiboss-drugs-synergy-model cancer-metabolism-sample"
-	@echo "                 prostate physiboss-tutorial physiboss-tutorial-invasion"
+	@echo "                 prostate physiboss-tutorial physiboss-tutorial-invasion physiboss-drug-pump-het"
 	
 template:
 	cp ./sample_projects/template/custom_modules/* ./custom_modules/
@@ -235,6 +235,15 @@ physiboss-drugs-synergy-model:
 	cp ./sample_projects_intracellular/boolean/ags_model/Makefile .
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
 	cp ./sample_projects_intracellular/boolean/ags_model/config/* ./config/
+
+physiboss-drug-pump-het:
+	cp ./sample_projects_intracellular/boolean/drug_pump_het/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/boolean/drug_pump_het/main.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects_intracellular/boolean/drug_pump_het/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp ./sample_projects_intracellular/boolean/drug_pump_het/config/* ./config/
 
 prostate:
 	cp ./sample_projects_intracellular/boolean/prostate/custom_modules/* ./custom_modules/

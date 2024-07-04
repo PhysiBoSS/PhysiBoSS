@@ -899,7 +899,6 @@ void update_cell_and_death_parameters_O2_based( Cell* pCell, Phenotype& phenotyp
 	}	
 	
 	// now, update the necrosis rate 
-	
 	pCell->phenotype.death.rates[necrosis_index] = multiplier * pCell->parameters.max_necrosis_rate; 
 	
 	// check for deterministic necrosis 

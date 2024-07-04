@@ -93,12 +93,16 @@ void create_cell_types( void )
 	cell_defaults.functions.update_velocity = standard_update_cell_velocity;
 
 	cell_defaults.functions.update_migration_bias = NULL; 
-	cell_defaults.functions.update_phenotype = NULL; // update_cell_and_death_parameters_O2_based; 
+	cell_defaults.functions.update_phenotype = update_cell_gowth_parameters_pressure_based; // update_cell_and_death_parameters_O2_based; 
 	cell_defaults.functions.custom_cell_rule = NULL; // @oth: add here custom cell cycle function?
 	cell_defaults.functions.contact_function = NULL; 
 	
 	cell_defaults.functions.add_cell_basement_membrane_interactions = NULL; 
 	cell_defaults.functions.calculate_distance_to_membrane = NULL; 
+
+	cell_defaults.functions.pre_update_intracellular =  pre_update_intracellular_ags;
+	cell_defaults.functions.post_update_intracellular = post_update_intracellular_ags;
+
 
 	/*
 	   This parses the cell definitions in the XML config file. 
@@ -134,11 +138,6 @@ void create_cell_types( void )
 	   This is a good place to set custom functions. 
 	*/
 
-	// This sets the pre and post simulation functions
-	cell_defaults.functions.pre_update_intracellular =  pre_update_intracellular_ags;
-	cell_defaults.functions.post_update_intracellular = post_update_intracellular_ags;
-	cell_defaults.functions.update_phenotype = update_cell_gowth_parameters_pressure_based;
-
 	drug_transport_model_setup();
 	boolean_model_interface_setup();
 
@@ -169,8 +168,12 @@ void setup_microenvironment(void)
 
 void setup_tissue( void )
 {
-	// place a cluster of tumor cells at the center 
-	
+
+	// If enabled, load cells from CSV
+	load_cells_from_pugixml();
+
+
+	// If not, place a cluster of tumor cells at the center 
 	double cell_radius = cell_defaults.phenotype.geometry.radius; 
 	double cell_spacing = parameters.doubles("cell_spacing") * cell_radius; 
 	double tumor_radius = parameters.doubles( "tumor_radius" ); 
@@ -179,9 +182,10 @@ void setup_tissue( void )
 	
 	Cell* pCell = NULL; 
 
-	std::cout << "about to call basic_2D_disk_setup" << std::endl;
+	// std::cout << "about to call basic_2D_disk_setup" << std::endl;
+	// @oth: [TODO] Add 2d disk only if load cells from CSV is NOT enabled
 
-	basic_2D_disk_setup(pCell, tumor_radius, cell_spacing);
+	// basic_2D_disk_setup(pCell, tumor_radius, cell_spacing);
 
 	// PATHWAY-BASED RESISTANCE HETEROGENEITY
 	// double het_mean = parameters.doubles("heterogeneity_mean");
@@ -191,45 +195,6 @@ void setup_tissue( void )
 	return; 
 }
 
-void update_cell_gowth_parameters_pressure_based( Cell* pCell, Phenotype& phenotype, double dt ) 
-{
-	
-	if( phenotype.death.dead == true )
-	{ return; }
-
-	// First check O2 availability
-	update_cell_and_death_parameters_O2_based(pCell, phenotype, dt);
-
-	// Custom cycle exit in the phenotype
-	PhysiCell::Cycle_Model cycle_model = cell_defaults.phenotype.cycle.model();
-	static int start_phase_idx = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
-	static int end_phase_idx = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
-
-	// static int necrosis_idx = phenotype.death.find_death_model_index( PhysiCell_constants::necrosis_death_model ); // @oth: not employed, should remove
-	cycle_model.phase_link(start_phase_idx, end_phase_idx).exit_function = phase_exit_mutation_function;
-
-	
-	// PRESSURE-BASED CONTACT-INHIBITION
-	// @oth: #TODO Encapsulate this in a function?
-	// Check relative pressure to eith er number of neighbor cells or set max logistic function to number of neighbor cells
-	// pressure threshold set to 1, above this value there is no growth
-
-	double cell_pressure = pCell->state.simple_pressure; 
-	double hill_coeff_pressure = get_custom_data_variable(pCell, "hill_coeff_pressure");
-	double pressure_half = get_custom_data_variable(pCell, "pressure_half");
-	double scaling = Hill_response_function(cell_pressure, pressure_half, hill_coeff_pressure);
-	double growth_rate = phenotype.cycle.data.transition_rate(start_phase_idx, end_phase_idx);
-
-	// Pressure affects negatively
-	growth_rate *= (1 - scaling);
-	if (growth_rate < 0)
-		growth_rate = 0;
-	
-	phenotype.cycle.data.transition_rate(start_phase_idx, end_phase_idx) = growth_rate;
-
-
-	return;
-}
 
 void phase_exit_mutation_function( Cell* pCell, Phenotype& phenotype, double dt )
 {
@@ -265,6 +230,48 @@ void phase_exit_mutation_function( Cell* pCell, Phenotype& phenotype, double dt 
 		return; // If neutral 
 
 	}
+
+	return;
+}
+
+
+void update_cell_gowth_parameters_pressure_based( Cell* pCell, Phenotype& phenotype, double dt ) 
+{
+	
+	if( phenotype.death.dead == true )
+	{ return; }
+
+	// First check O2 availability
+	// update_cell_and_death_parameters_O2_based(pCell, phenotype, dt);
+
+	// Custom cycle exit in the phenotype
+	// @oth: Not applying this exit function yet -- for the heterogeneity model
+	PhysiCell::Cycle_Model cycle_model = cell_defaults.phenotype.cycle.model();
+	static int start_phase_idx = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
+	static int end_phase_idx = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
+	// static int necrosis_idx = phenotype.death.find_death_model_index( PhysiCell_constants::necrosis_death_model ); // @oth: not employed, should remove
+	// cycle_model.phase_link(start_phase_idx, end_phase_idx).exit_function = phase_exit_mutation_function;
+
+	
+	// PRESSURE-BASED CONTACT-INHIBITION
+	// @oth: #TODO Encapsulate this in a function? Or add it through PhysiCell rules?
+	// Check relative pressure to eith er number of neighbor cells or set max logistic function to number of neighbor cells
+	// pressure threshold set to 1, above this value there is no growth
+
+	double cell_pressure = pCell->state.simple_pressure; 
+	double hill_coeff_pressure = get_custom_data_variable(pCell, "hill_coeff_pressure");
+	double pressure_half = get_custom_data_variable(pCell, "pressure_half");
+	double scaling = Hill_response_function(cell_pressure, pressure_half, hill_coeff_pressure);
+	double growth_rate = phenotype.cycle.data.transition_rate(start_phase_idx, end_phase_idx);
+	// std::cout << "I am " << pCell->ID << " and my growth rate is " << growth_rate << std::endl;
+
+	// Pressure affects negatively
+	growth_rate *= (1 - scaling);
+	if (growth_rate < 0)
+		growth_rate = 0;
+	
+	phenotype.cycle.data.transition_rate(start_phase_idx, end_phase_idx) = growth_rate;
+
 
 	return;
 }
@@ -391,6 +398,8 @@ void inject_density_sphere(int density_index, double concentration, double membr
 		auto current_voxel = microenvironment.voxels(n);
 		std::vector<double> cent = {current_voxel.center[0], current_voxel.center[1], current_voxel.center[2]};
 		microenvironment.density_vector(n)[density_index] = concentration;
+
+		// std::cout << "added this conc " << concentration << "of drug " << density_index << " to this voxel: " << n << std::endl;
 
 		// if (current_voxel.center[2] >= 2)
 
@@ -541,15 +550,17 @@ std::vector<std::string> my_coloring_function_for_stroma( double concentration, 
 
 void treatment_function ()
 {
+
 	bool treatment = parameters.bools("treatment");
 
 	if (treatment){
+
 		int n_substrates = 2;
 		std::string substrate[n_substrates] = { "drug_X", "drug_Y" };
 	
 		for (int i = 0; i < n_substrates; i++){
 			std::string substrate_name = substrate[i];
-			static int substrate_idx = microenvironment.find_density_index(substrate_name);
+			int substrate_idx = microenvironment.find_density_index(substrate_name); // Watch out! This can't be a static int
 
 			// drug pulse timer
 			double drug_pulse_period 			= parameters.doubles(substrate_name + "_pulse_period");
@@ -561,12 +572,17 @@ void treatment_function ()
 			double drug_pulse_injection_timer 	= -1;
 			double time 						= PhysiCell_globals.current_time;
 
+			// std::cout << "Adding substrate " << substrate_name << " with index " << substrate_idx << " and density " << drug_pulse_concentration << std::endl;
+
 			// Option A: Follow TNF model
 			if (time >= drug_pulse_timer && time <= drug_pulse_timer + drug_pulse_duration){
-				// std::cout << substrate_name << " added at t=" << time << std::endl;
 				inject_density_sphere(substrate_idx, drug_pulse_concentration, drug_membrane_length);
+				// std::cout << substrate_name << " added at t=" << time << " with density " << drug_pulse_concentration << std::endl;
 			}
-			if (time < drug_pulse_timer){ remove_density(substrate_idx); }
+
+			// @oth: Option B: Try and do the treatment function from "BM_template" sample project
+
+			// if (time < drug_pulse_timer){ remove_density(substrate_idx); }
 
 			// Option B: Emulate the template_BM structure, based on residuals 
 			// if ((int)time % (int)drug_pulse_period == 0){

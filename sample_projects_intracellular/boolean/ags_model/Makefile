@@ -1,8 +1,8 @@
 VERSION := $(shell grep . VERSION.txt | cut -f1 -d:)
 PROGRAM_NAME := physiboss-drugs-synergy-model
 
-CC := g++ # default compilation
-# CC := g++ -g # Add "-g" for debugging
+# CC := g++ # default compilation
+CC := g++ -g # Add "-g" for debugging
 # CC := g++-mp-7 # typical macports compiler name
 # CC := g++-7 # typical homebrew compiler name 
 

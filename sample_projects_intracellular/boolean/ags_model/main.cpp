@@ -60,7 +60,7 @@
 # INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN     #
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)     #
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE  #
-# POSSIBILITY OF SUCH DAMAGE.                                                 #
+# POSSIBILITY OF SUCH DAMAGE.                  F                               #
 #                                                                             #
 ###############################################################################
 */
@@ -276,12 +276,19 @@ int main( int argc, char* argv[] )
 			// @oth: #TODO: complete function from template_BM
 			treatment_function();
 
+			// std::cout << "added treatment function" << std::endl;
 			
 			// update the microenvironment
 			microenvironment.simulate_diffusion_decay( diffusion_dt );
 
+			// std::cout << "simulated diffusion" << std::endl;
+
+
 			// update te AGS receptor model of each cell 
 			drug_transport_model_main( diffusion_dt );
+
+
+			// std::cout << "about to run pc" << std::endl;
 			
 			// run PhysiCell 
 			((Cell_Container *)microenvironment.agent_container)->update_all_cells( PhysiCell_globals.current_time );
