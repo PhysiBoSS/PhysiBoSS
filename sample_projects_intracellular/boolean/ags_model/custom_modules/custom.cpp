@@ -170,27 +170,27 @@ void setup_tissue( void )
 {
 
 	// If enabled, load cells from CSV
-	load_cells_from_pugixml();
+	if (parameters.bools("csv_setup"))
+	{
+		load_cells_from_pugixml();
+	} else {
 
+		// If not, place a cluster of tumor cells at the center 
+		double cell_radius = cell_defaults.phenotype.geometry.radius; 
+		double cell_spacing = parameters.doubles("cell_spacing") * cell_radius; 
+		double tumor_radius = parameters.doubles( "tumor_radius" ); 
+		
+		Cell* pCell = NULL; 
+		std::cout << "about to call basic_2D_disk_setup" << std::endl;
+		basic_2D_disk_setup(pCell, tumor_radius, cell_spacing);
 
-	// If not, place a cluster of tumor cells at the center 
-	double cell_radius = cell_defaults.phenotype.geometry.radius; 
-	double cell_spacing = parameters.doubles("cell_spacing") * cell_radius; 
-	double tumor_radius = parameters.doubles( "tumor_radius" ); 
-	// Parameter<double> temp; 
-	// int i = parameters.doubles.find_index( "tumor_radius" ); 
+	}
+
 	
-	Cell* pCell = NULL; 
-
-	// std::cout << "about to call basic_2D_disk_setup" << std::endl;
-	// @oth: [TODO] Add 2d disk only if load cells from CSV is NOT enabled
-
-	// basic_2D_disk_setup(pCell, tumor_radius, cell_spacing);
-
-	// PATHWAY-BASED RESISTANCE HETEROGENEITY
-	// double het_mean = parameters.doubles("heterogeneity_mean");
-	// double het_sd = parameters.doubles("heterogeneity_sd");
-	// add_heterogeneity(pCell, het_mean, het_sd, tumor_radius, cell_spacing);
+	// // PATHWAY-BASED RESISTANCE HETEROGENEITY
+	// // double het_mean = parameters.doubles("heterogeneity_mean");
+	// // double het_sd = parameters.doubles("heterogeneity_sd");
+	// // add_heterogeneity(pCell, het_mean, het_sd, tumor_radius, cell_spacing);
 
 	return; 
 }

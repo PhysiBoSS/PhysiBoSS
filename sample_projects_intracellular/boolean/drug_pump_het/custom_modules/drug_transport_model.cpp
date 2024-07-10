@@ -52,7 +52,7 @@ void update_diffusion_monitor_vars( Cell* pCell ){
 	{ return; }
 
 	int n_densities = 1;
-    std::string densities[n_densities] = {"drug_X"};
+    std::string densities[n_densities] = {"doxorubicin"};
   
     for (int i = 0; i < n_densities; i++){
         std::string density_name = densities[i];
@@ -154,8 +154,8 @@ void drug_transport_model_update( Cell* pCell, Phenotype& phenotype, double dt )
 	if( microenvironment.is_dirichlet_node(pCell->get_current_voxel_index()) )
 	{ return; }
 
-	int n_drugs = 2;
-    std::string drugs[n_drugs] = { "drug_X", "drug_Y" };
+	int n_drugs = 1;
+    std::string drugs[n_drugs] = { "doxorubicin" };
     for (int i = 0; i < n_drugs; i++){
         std::string drug_name = drugs[i];
 		int drug_idx = microenvironment.find_density_index(drug_name);

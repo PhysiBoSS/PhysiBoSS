@@ -141,13 +141,13 @@ int main( int argc, char* argv[] )
 	/* Users typically start modifying here. START USERMODS */ 
 
 	create_cell_types();
-	std::cout << "create cells OK" << std::endl;
+	// std::cout << "create cells OK" << std::endl;
 
 
 
 	// update monitoring variables too in setup_tissue();
 	setup_tissue();
-	std::cout << "setup tissue OK" << std::endl;
+	// std::cout << "setup tissue OK" << std::endl;
 
 
 

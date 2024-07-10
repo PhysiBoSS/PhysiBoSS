@@ -361,9 +361,9 @@
 	</cell_definitions>
 
 	<initial_conditions>
-        <cell_positions type="csv" enabled="false">
+        <cell_positions type="csv" enabled="true">
             <folder>./config</folder>
-            <filename>cells.csv</filename>
+            <filename>cells_2D_disk_250um_hex.csv</filename>
         </cell_positions>
     </initial_conditions>
 
@@ -381,14 +381,12 @@
 		<random_seed type="int" units="dimensionless">1234</random_seed>
 
 		<!-- Initial setup parameters -->
-
-		<tumor_radius type="double" units="um"> 25.0 </tumor_radius> 
-		<!-- 225.0 for 1200 / 500.0 for around 4993 agents -->
-
+		<csv_setup type="bool" units="dimensionless">true</csv_setup>
+		<tumor_radius type="double" units="um"> 25.0 </tumor_radius> <!-- 225.0 for 1200 / 500.0 for around 4993 agents -->
 		<cell_spacing type="double" units="um"> 1.6 </cell_spacing> <!-- 1.6 -->
-		<treatment type="bool" units="dimensionless">true</treatment>
 
 		<!-- Drug params -->
+		<treatment type="bool" units="dimensionless">true</treatment>
 		<drug_X_pulse_period type="double" units="min"> 1280 </drug_X_pulse_period> 
 		<drug_X_pulse_duration type="double" units="min"> 40 </drug_X_pulse_duration> 
 		<drug_X_pulse_concentration type="double" units="min">0.000175</drug_X_pulse_concentration>

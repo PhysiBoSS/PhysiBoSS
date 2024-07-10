@@ -1,25 +1,19 @@
-DEBUG:root:studio.py: config file is ./sample_projects_intracellular/boolean/drug_pump_het/config/PhysiCell_settings.xml
-DEBUG:root:studio.py: open_as_cb():  filePath is valid
-DEBUG:root:len(config_file) = 83
-DEBUG:root:done with args.config
-DEBUG:root:exec pgm is ./physiboss-drug-pump-het
 DEBUG:root:self.current_dir = /home/oth/BSC/MN5mount/AGS/PhysiBoSS
 DEBUG:root:cell_def_tab.py: ------- fill_substrates_comboboxes
-DEBUG:root: --> doxorubicin
+DEBUG:root: --> oxygen
+DEBUG:root: --> drug_X
+DEBUG:root: --> drug_Y
 DEBUG:root:=======================  microenv populate_tree  ======================= 
 DEBUG:root:dc_ic_units =  mmHg
 DEBUG:root:dc_bc_units = mmHg
-DEBUG:root:bv = <Element 'boundary_value' at 0x7002e37de890>
-DEBUG:root:   -------- doxorubicin:  dirichlet_xmin = 0
-DEBUG:root:bv = <Element 'boundary_value' at 0x7002e37de930>
-DEBUG:root:bv = <Element 'boundary_value' at 0x7002e37de9d0>
-DEBUG:root:bv = <Element 'boundary_value' at 0x7002e37dea70>
-DEBUG:root:bv = <Element 'boundary_value' at 0x7002e37deb10>
-DEBUG:root:bv = <Element 'boundary_value' at 0x7002e37debb0>
-DEBUG:root:------- options: <Element 'calculate_gradients' at 0x7002e37deca0>
-DEBUG:root:------- options: <Element 'track_internalized_substrates_in_each_agent' at 0x7002e37ded40>
-DEBUG:root:------- options: <Element 'initial_condition' at 0x7002e37ded90>
-DEBUG:root:------- options: <Element 'dirichlet_nodes' at 0x7002e37deed0>
+DEBUG:root:dc_ic_units =  umol
+DEBUG:root:dc_bc_units = umol
+DEBUG:root:dc_ic_units =  umol
+DEBUG:root:dc_bc_units = umol
+DEBUG:root:------- options: <Element 'calculate_gradients' at 0x7d6e82c4f970>
+DEBUG:root:------- options: <Element 'track_internalized_substrates_in_each_agent' at 0x7d6e82c4fa10>
+DEBUG:root:------- options: <Element 'initial_condition' at 0x7d6e82c4fa60>
+DEBUG:root:------- options: <Element 'dirichlet_nodes' at 0x7d6e82c4fb50>
 DEBUG:root:
 
 =======================  leaving microenv populate_tree  =====================
@@ -39,11 +33,13 @@ DEBUG:root: new stacked widget: flow cyto sep -------------> 10
 DEBUG:root: new stacked widget: duration_quiescent -------------> 11
 DEBUG:root:studio.py: first_cell_def_name= default
 DEBUG:root:cell_def_tab.py: ------- fill_substrates_comboboxes
-DEBUG:root: --> doxorubicin
+DEBUG:root: --> oxygen
 DEBUG:root:------ motility_substrate_changed_cb(): idx = 0
 DEBUG:root:       motility_substrate_changed_cb(): self.current_cell_def = None
 DEBUG:root:------ motility2_substrate_changed_cb(): idx = 0
-DEBUG:root:   text (subname) = doxorubicin
+DEBUG:root:   text (subname) = oxygen
+DEBUG:root: --> drug_X
+DEBUG:root: --> drug_Y
 DEBUG:root:=======================  populate_tree_cell_defs(): ======================= 
 DEBUG:root:    cell_def_tab.param_d = {}
 DEBUG:root:
@@ -62,30 +58,24 @@ DEBUG:root:------- new_custom_data_params() -----
 DEBUG:root:
 ===== populate_tree():  cycle
 DEBUG:root: >> cycle_path= .//cell_definition[1]//phenotype//cycle
-DEBUG:root:   cycle code= 6
+DEBUG:root:   cycle code= 5
 DEBUG:root: >> phase_transition_path 
+DEBUG:root:<Element 'rate' at 0x7d6e82c4fe70>
+DEBUG:root:--  cycle_live_trate00 0.00209
 DEBUG:root: >> phase_durations_path =.//cell_definition[1]//phenotype//cycle//phase_durations
-DEBUG:root: >> pd_uep =<Element 'phase_durations' at 0x7002e37df240>
-DEBUG:root:phase_duration= <Element 'duration' at 0x7002e37df2e0>
-DEBUG:root:------------ sval for phase duration= 300.0
-DEBUG:root:phase_duration= <Element 'duration' at 0x7002e37df380>
-DEBUG:root:------------ sval for phase duration= 480
-DEBUG:root:phase_duration= <Element 'duration' at 0x7002e37df420>
-DEBUG:root:------------ sval for phase duration= 240
-DEBUG:root:phase_duration= <Element 'duration' at 0x7002e37df4c0>
-DEBUG:root:------------ sval for phase duration= 60
+DEBUG:root: >> pd_uep =None
 DEBUG:root:
 ===== populate_tree():  death
-DEBUG:root:death_uep=<Element 'death' at 0x7002e37df600>
+DEBUG:root:death_uep=<Element 'death' at 0x7d6e82c4fec0>
 DEBUG:root:-------- parsing apoptosis!
-DEBUG:root: >> pd_uep =<Element 'phase_durations' at 0x7002e37df7e0>
-DEBUG:root:phase_duration= <Element 'duration' at 0x7002e37df880>
+DEBUG:root: >> pd_uep =<Element 'phase_durations' at 0x7d6e82c4ffb0>
+DEBUG:root:phase_duration= <Element 'duration' at 0x7d6e82c60040>
 DEBUG:root:index= 0
 DEBUG:root:-------- parsing necrosis!
-DEBUG:root: >> pd_uep =<Element 'phase_durations' at 0x7002e37f01d0>
-DEBUG:root:<Element 'duration' at 0x7002e37f0270>
+DEBUG:root: >> pd_uep =<Element 'phase_durations' at 0x7d6e82c60540>
+DEBUG:root:<Element 'duration' at 0x7d6e82c60590>
 DEBUG:root:index= 0
-DEBUG:root:<Element 'duration' at 0x7002e37f0310>
+DEBUG:root:<Element 'duration' at 0x7d6e82c605e0>
 DEBUG:root:index= 1
 DEBUG:root:volume_path=.//cell_definition[1]//phenotype//volume//
 DEBUG:root:
@@ -98,32 +88,21 @@ DEBUG:root:
 ===== populate_tree():  motility
 DEBUG:root:motility_path=.//cell_definition[1]//phenotype//motility//
 DEBUG:root:
------------ populate_tree_cell_defs.py: cell_def_name= default,  cell_def_tab.param_d[cell_def_name]["motility_chemotaxis_substrate"] = doxorubicin
+----------- populate_tree_cell_defs.py: cell_def_name= default,  cell_def_tab.param_d[cell_def_name]["motility_chemotaxis_substrate"] = oxygen
 DEBUG:root:motility_advanced_chemotaxis_path= .//cell_definition[1]//phenotype//motility//options//advanced_chemotaxis//
-DEBUG:root:chemotactic_sensitivity= {'doxorubicin': '0.0'}
-DEBUG:root:sensitivity_path= .//cell_definition[1]//phenotype//motility//options//advanced_chemotaxis//chemotactic_sensitivities
-DEBUG:root:---- found chemotactic_sensitivities: <Element 'chemotactic_sensitivities' at 0x7002e37f25c0>
-DEBUG:root:subelm=<Element 'chemotactic_sensitivity' at 0x7002e37f2660>
-DEBUG:root: chemotactic_sensitivity--> doxorubicin = 0.0
-DEBUG:root:{'doxorubicin': '0.0'}
-DEBUG:root:------ motility2_substrate_changed_cb(): idx = 0
-DEBUG:root:   text (subname) = doxorubicin
-DEBUG:root:    motility_advanced_chemotaxis_substrate= doxorubicin
-DEBUG:root:   chemotactic_sensitivity = {'doxorubicin': '0.0'}
-DEBUG:root:----- chemo_sensitivity_changed() = 0.0
-DEBUG:root:----- chemo_sensitivity_changed(): subname = doxorubicin
-DEBUG:root:     chemotactic_sensitivity (dict)= {'doxorubicin': '0.0'}
+DEBUG:root:chemotactic_sensitivity= {'oxygen': '0.0', 'drug_X': '0.0', 'drug_Y': '0.0'}
+DEBUG:root:---- no motility_advanced_chemotaxis_path found. Setting to default values
 DEBUG:root:
 ===== populate_tree():  secretion
 DEBUG:root:secretion_path = .//cell_definition[1]//phenotype//secretion//
-DEBUG:root:uep_secretion = <Element 'secretion' at 0x7002e37f2840>
-DEBUG:root:0) -- secretion substrate = doxorubicin
+DEBUG:root:uep_secretion = <Element 'secretion' at 0x7d6e82c618f0>
+DEBUG:root:0) -- secretion substrate = oxygen
 DEBUG:root:------ done parsing secretion:
 DEBUG:root:
 ===== populate_tree():  cell_interactions
 DEBUG:root:---- cell_interactions_path= .//cell_definition[1]//phenotype//cell_interactions
 DEBUG:root:---- found cell_interactions:
-DEBUG:root:uep2= <Element 'live_phagocytosis_rates' at 0x7002e37f2fc0>
+DEBUG:root:uep2= <Element 'live_phagocytosis_rates' at 0x7d6e82c61d50>
 DEBUG:root: live_phagocytosis_rate= {'default': '0'}
 DEBUG:root: attack_rate= {'default': '0'}
 DEBUG:root: fusion_rate= {'default': '0'}
@@ -138,28 +117,48 @@ DEBUG:root:
 DEBUG:root:------ done parsing intracellular:
 DEBUG:root:
 ===== populate_tree():  custom data
-DEBUG:root:uep_custom_data= <Element 'custom_data' at 0x7002e37fc090>
+DEBUG:root:uep_custom_data= <Element 'custom_data' at 0x7d6e82c627a0>
 DEBUG:root:--------------- populate_tree: (empty)custom_data = {}
-DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:var.attrib.keys() = dict_keys(['units', 'conserved'])
 DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False]}
-DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
-DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'pump_activated': ['0.0', False]}
-DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
-DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'pump_activated': ['0.0', False], 'mutation_rate': ['0.0', False]}
-DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
-DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'pump_activated': ['0.0', False], 'mutation_rate': ['0.0', False], 'pump_expression_rate': ['0.0', False]}
-DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
-DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'pump_activated': ['0.0', False], 'mutation_rate': ['0.0', False], 'pump_expression_rate': ['0.0', False], 'drug_X_permeability': ['0.00021979189', False]}
-DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
-DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'pump_activated': ['0.0', False], 'mutation_rate': ['0.0', False], 'pump_expression_rate': ['0.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False]}
-DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
-DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'pump_activated': ['0.0', False], 'mutation_rate': ['0.0', False], 'pump_expression_rate': ['0.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False]}
-DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
-DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'pump_activated': ['0.0', False], 'mutation_rate': ['0.0', False], 'pump_expression_rate': ['0.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'k2_pump': ['2.5', False]}
-DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
-DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'pump_activated': ['0.0', False], 'mutation_rate': ['0.0', False], 'pump_expression_rate': ['0.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'k2_pump': ['2.5', False], 'Km_pump': ['5.50', False]}
-DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
-DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'pump_activated': ['0.0', False], 'mutation_rate': ['0.0', False], 'pump_expression_rate': ['0.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'k2_pump': ['2.5', False], 'Km_pump': ['5.50', False], 'total_enzyme_pump': ['1.0', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': [' 0.1 ', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': [' 0.1 ', False], 'drug_Y_half_max': [' 0.005 ', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': [' 0.1 ', False], 'drug_Y_half_max': [' 0.005 ', False], 'drug_Y_Hill_coeff': [' 5.0 ', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': [' 0.1 ', False], 'drug_Y_half_max': [' 0.005 ', False], 'drug_Y_Hill_coeff': [' 5.0 ', False], 'basal_growth_rate': ['0.00209', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': [' 0.1 ', False], 'drug_Y_half_max': [' 0.005 ', False], 'drug_Y_Hill_coeff': [' 5.0 ', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': [' 0.1 ', False], 'drug_Y_half_max': [' 0.005 ', False], 'drug_Y_Hill_coeff': [' 5.0 ', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': [' 0.1 ', False], 'drug_Y_half_max': [' 0.005 ', False], 'drug_Y_Hill_coeff': [' 5.0 ', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': [' 0.1 ', False], 'drug_Y_half_max': [' 0.005 ', False], 'drug_Y_Hill_coeff': [' 5.0 ', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': [' 0.1 ', False], 'drug_Y_half_max': [' 0.005 ', False], 'drug_Y_Hill_coeff': [' 5.0 ', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False], 'hill_coeff_apoptosis': ['3.6787', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': [' 0.1 ', False], 'drug_Y_half_max': [' 0.005 ', False], 'drug_Y_Hill_coeff': [' 5.0 ', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False], 'hill_coeff_apoptosis': ['3.6787', False], 'K_half_apoptosis': ['0.0193', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': [' 0.1 ', False], 'drug_Y_half_max': [' 0.005 ', False], 'drug_Y_Hill_coeff': [' 5.0 ', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False], 'hill_coeff_apoptosis': ['3.6787', False], 'K_half_apoptosis': ['0.0193', False], 'hill_coeff_pressure': ['6.9583485811', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': [' 0.1 ', False], 'drug_Y_half_max': [' 0.005 ', False], 'drug_Y_Hill_coeff': [' 5.0 ', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False], 'hill_coeff_apoptosis': ['3.6787', False], 'K_half_apoptosis': ['0.0193', False], 'hill_coeff_pressure': ['6.9583485811', False], 'pressure_half': ['4.7920543763', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': [' 0.1 ', False], 'drug_Y_half_max': [' 0.005 ', False], 'drug_Y_Hill_coeff': [' 5.0 ', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False], 'hill_coeff_apoptosis': ['3.6787', False], 'K_half_apoptosis': ['0.0193', False], 'hill_coeff_pressure': ['6.9583485811', False], 'pressure_half': ['4.7920543763', False], 'w1_growth': ['0.2215', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': [' 0.1 ', False], 'drug_Y_half_max': [' 0.005 ', False], 'drug_Y_Hill_coeff': [' 5.0 ', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False], 'hill_coeff_apoptosis': ['3.6787', False], 'K_half_apoptosis': ['0.0193', False], 'hill_coeff_pressure': ['6.9583485811', False], 'pressure_half': ['4.7920543763', False], 'w1_growth': ['0.2215', False], 'w2_growth': ['0.2574', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': [' 0.1 ', False], 'drug_Y_half_max': [' 0.005 ', False], 'drug_Y_Hill_coeff': [' 5.0 ', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False], 'hill_coeff_apoptosis': ['3.6787', False], 'K_half_apoptosis': ['0.0193', False], 'hill_coeff_pressure': ['6.9583485811', False], 'pressure_half': ['4.7920543763', False], 'w1_growth': ['0.2215', False], 'w2_growth': ['0.2574', False], 'w1_apoptosis': ['0.1092', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['type', 'units', 'conserved'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': [' 0.1 ', False], 'drug_Y_half_max': [' 0.005 ', False], 'drug_Y_Hill_coeff': [' 5.0 ', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False], 'hill_coeff_apoptosis': ['3.6787', False], 'K_half_apoptosis': ['0.0193', False], 'hill_coeff_pressure': ['6.9583485811', False], 'pressure_half': ['4.7920543763', False], 'w1_growth': ['0.2215', False], 'w2_growth': ['0.2574', False], 'w1_apoptosis': ['0.1092', False], 'w2_apoptosis': ['0.3765', False]}
 DEBUG:root:
   ---- apoptosis_phase_transition_cb: 
 DEBUG:root:apoptosis: ------>> duration
@@ -170,15 +169,14 @@ DEBUG:root:necrosis: ------>>duration
 DEBUG:root:necrosis_phase_transition_cb: --> duration
 DEBUG:root:
 ----- update_motility_params():  cdname= default
-DEBUG:root:     setting motility_substrate_dropdown (for cdname= default ) = doxorubicin
-DEBUG:root:     setting motility2_substrate_dropdown (for cdname= default ) = doxorubicin
-DEBUG:root:    chemotactic_sensitivity= {'doxorubicin': '0.0'}
-DEBUG:root:new val = 0.0
+DEBUG:root:     setting motility_substrate_dropdown (for cdname= default ) = oxygen
+DEBUG:root:     setting motility2_substrate_dropdown (for cdname= default ) = 
+DEBUG:root:    chemotactic_sensitivity= {'oxygen': '0.0', 'drug_X': '0.0', 'drug_Y': '0.0'}
 DEBUG:root:----- leave update_motility_params()
 
 DEBUG:root:update_secretion_params(): cdname = default
-DEBUG:root:update_secretion_params(): self.current_secretion_substrate = doxorubicin
-DEBUG:root:{'doxorubicin': {'secretion_rate': '0', 'secretion_target': '1', 'uptake_rate': '0', 'net_export_rate': '0'}}
+DEBUG:root:update_secretion_params(): self.current_secretion_substrate = oxygen
+DEBUG:root:{'oxygen': {'secretion_rate': '0', 'secretion_target': '38', 'uptake_rate': '10', 'net_export_rate': '0'}}
 DEBUG:root:intracellular is boolean
 DEBUG:root:cell_def_tab.py: ------- fill_substrates_comboboxes
 DEBUG:root:------ motility_substrate_changed_cb(): idx = -1
@@ -187,17 +185,22 @@ DEBUG:root:                         text =
 DEBUG:root:------ motility2_substrate_changed_cb(): idx = -1
 DEBUG:root:   text (subname) = 
 DEBUG:root:   subname is empty, return!
-DEBUG:root: --> doxorubicin
+DEBUG:root: --> oxygen
 DEBUG:root:------ motility_substrate_changed_cb(): idx = 0
 DEBUG:root:       motility_substrate_changed_cb(): self.current_cell_def = default
-DEBUG:root:                         text = doxorubicin
+DEBUG:root:                         text = oxygen
 DEBUG:root:------ motility2_substrate_changed_cb(): idx = 0
-DEBUG:root:   text (subname) = doxorubicin
-DEBUG:root:    motility_advanced_chemotaxis_substrate= doxorubicin
-DEBUG:root:   chemotactic_sensitivity = {'doxorubicin': '0.0'}
+DEBUG:root:   text (subname) = oxygen
+DEBUG:root:    motility_advanced_chemotaxis_substrate= oxygen
+DEBUG:root:   chemotactic_sensitivity = {'oxygen': '0.0', 'drug_X': '0.0', 'drug_Y': '0.0'}
+DEBUG:root:----- chemo_sensitivity_changed() = 0.0
+DEBUG:root:----- chemo_sensitivity_changed(): subname = oxygen
+DEBUG:root:     chemotactic_sensitivity (dict)= {'oxygen': '0.0', 'drug_X': '0.0', 'drug_Y': '0.0'}
 DEBUG:root:update_secretion_params(): cdname = default
-DEBUG:root:update_secretion_params(): self.current_secretion_substrate = doxorubicin
-DEBUG:root:{'doxorubicin': {'secretion_rate': '0', 'secretion_target': '1', 'uptake_rate': '0', 'net_export_rate': '0'}}
+DEBUG:root:update_secretion_params(): self.current_secretion_substrate = oxygen
+DEBUG:root:{'oxygen': {'secretion_rate': '0', 'secretion_target': '38', 'uptake_rate': '10', 'net_export_rate': '0'}}
+DEBUG:root: --> drug_X
+DEBUG:root: --> drug_Y
 DEBUG:root:cell_def_tab.py: ------- fill_celltypes_comboboxes
 DEBUG:root:cell_def_tab.py: ------- fill_celltypes_comboboxes
 DEBUG:root:
@@ -530,62 +533,6 @@ DEBUG:matplotlib.font_manager:findfont: Matching sans\-serif:style=normal:varian
 DEBUG:root:ics_tab.py: fill_celltype_combobox(): ['default']
 DEBUG:root:ics_tab.py: fill_celltype_combobox(): ['default']
 DEBUG:root:studio.py: calling vis_tab.substrates_cbox_changed_cb(2)
-DEBUG:root:===========  run_model_cb():  ============
-DEBUG:root:run_tab.py:  doing: mkdir output_pump_het
-DEBUG:root:----------- microenv_tab.py: fill_xml(): ----------
-DEBUG:root:microenv_tab.py: fill_xml(): num subtrates = 1
-DEBUG:root:substrates_in_tree =['doxorubicin']
-DEBUG:root:microrenv_tab.py: key in param_d.keys() = doxorubicin
-DEBUG:root:matched! doxorubicin
-DEBUG:root:microrenv_tab.py: key in param_d.keys() = gradients
-DEBUG:root:microrenv_tab.py: key in param_d.keys() = track_in_agents
-DEBUG:root:
-
------------ cell_def_tab.py: fill_xml(): ----------
-DEBUG:root:num cell defs = 1
-DEBUG:root:cdefs_in_tree =['default']
-DEBUG:root:
---- key in param_d.keys() = default
-DEBUG:root:matched! default
-DEBUG:root:--- cell_adhesion_affinity= {'default': '1', '': '1.0'}
-DEBUG:root:default  --> 1
-DEBUG:root:
-
- ====================> fill_xml_motility(): doxorubicin = doxorubicin 
-
-
-DEBUG:root:fill_xml_motility(): {'doxorubicin': '0.0'}
-DEBUG:root:doxorubicin  --> 0.0
-DEBUG:root:self.substrate_list = ['doxorubicin']
-DEBUG:root:substrate = doxorubicin
-DEBUG:root:------------------- fill_xml_interactions():  cdef= default
-DEBUG:root:--- live_phagocytosis_rate= {'default': '0', '': '0'}
-DEBUG:root:  key in live_phagocytosis_rate= default
-DEBUG:root:default  --> 0
-DEBUG:root:  key in live_phagocytosis_rate= 
-DEBUG:root:--- attack_rate= {'default': '0', '': '0'}
-DEBUG:root:default  --> 0
-DEBUG:root:--- fusion_rate= {'default': '0', '': '0'}
-DEBUG:root:default  --> 0
-DEBUG:root:default  --> 0
-DEBUG:root:------------------- fill_xml_intracellular()
-DEBUG:root:------ ["intracellular"]: for default
-DEBUG:root:{'type': 'maboss', 'bnd_filename': './config/AGS_all_nodes_real.bnd', 'cfg_filename': './config/AGS_all_nodes_real.cfg', 'time_step': '100', 'scaling': '0.1', 'time_stochasticity': '0.5', 'start_time': '0.0', 'global_inheritance': 'True', 'node_inheritance': [], 'mutants': [], 'parameters': [], 'initial_values': [], 'inputs': [], 'outputs': [], 'list_nodes': ['AKT', 'p38alpha', 'GSK3', 'TAK1', 'betacatenin', 'PI3K', 'MEK', 'RTPK', 'SHC1', 'GRB2', 'SOS', 'Ras', 'Raf', 'ERK', 'DUSP6', 'MKK3', 'ASK1', 'TAB', 'DUSP1', 'MKK4', 'MKK7', 'MEKK4', 'MLK3', 'Rac', 'JNK', 'GRAP2', 'SHP2', 'GAB', 'IKKB', 'IKKA', 'IRS1', 'Caspase8', 'PTENgene', 'Caspase9', 'FOXO', 'TSC', 'pras40', 'BCL2', 'p53', 'Rheb', 'mTORC1', 'PTEN', 'BAD', 'mTORC2', 'MDM2gene', 'S6K', 'MDM2', 'CytochromeC', 'BAX', 'NFkB', 'MAP3K8', 'PDK1', 'LRP', 'ITCH', 'DKK1', 'Fz', 'Axin', 'RTPKgene', 'RSK', 'MSK', 'CFLAR', 'CK1', 'Dvl', 'SFRP1', 'SFRP1gene', 'Caspase37', 'betaTrCP', 'MMP', 'Egr1', 'LEF', 'cMYC', 'TCF', 'NLK', 'DKK1gene', 'CCND1', 'anti_AKT', 'anti_p38alpha', 'anti_GSK3', 'anti_TAK1', 'anti_betacatenin', 'anti_PI3K', 'anti_MEK'], 'list_parameters': ['$u_AKT', '$d_AKT', '$u_betacatenin', '$d_betacatenin', '$u_GSK3', '$d_GSK3', '$u_MEK', '$d_MEK', '$u_p38alpha', '$d_p38alpha', '$u_PI3K', '$d_PI3K', '$u_TAK1', '$d_TAK1', '$u_RTPK', '$d_RTPK', '$u_SHC1', '$d_SHC1', '$u_GRB2', '$d_GRB2', '$u_SOS', '$d_SOS', '$u_Ras', '$d_Ras', '$u_Raf', '$d_Raf', '$u_ERK', '$d_ERK', '$u_DUSP6', '$d_DUSP6', '$u_MKK3', '$d_MKK3', '$u_ASK1', '$d_ASK1', '$u_TAB', '$d_TAB', '$u_DUSP1', '$d_DUSP1', '$u_MKK4', '$d_MKK4', '$u_MKK7', '$d_MKK7', '$u_MEKK4', '$d_MEKK4', '$u_MLK3', '$d_MLK3', '$u_Rac', '$d_Rac', '$u_JNK', '$d_JNK', '$u_GRAP2', '$d_GRAP2', '$u_SHP2', '$d_SHP2', '$u_GAB', '$d_GAB', '$u_IKKB', '$d_IKKB', '$u_IKKA', '$d_IKKA', '$u_IRS1', '$d_IRS1', '$u_Caspase8', '$d_Caspase8', '$u_PTENgene', '$d_PTENgene', '$u_Caspase9', '$d_Caspase9', '$u_FOXO', '$d_FOXO', '$u_TSC', '$d_TSC', '$u_pras40', '$d_pras40', '$u_BCL2', '$d_BCL2', '$u_p53', '$d_p53', '$u_Rheb', '$d_Rheb', '$u_mTORC1', '$d_mTORC1', '$u_PTEN', '$d_PTEN', '$u_BAD', '$d_BAD', '$u_mTORC2', '$d_mTORC2', '$u_MDM2gene', '$d_MDM2gene', '$u_S6K', '$d_S6K', '$u_MDM2', '$d_MDM2', '$u_CytochromeC', '$d_CytochromeC', '$u_BAX', '$d_BAX', '$u_NFkB', '$d_NFkB', '$u_MAP3K8', '$d_MAP3K8', '$u_PDK1', '$d_PDK1', '$u_LRP', '$d_LRP', '$u_ITCH', '$d_ITCH', '$u_DKK1', '$d_DKK1', '$u_Fz', '$d_Fz', '$u_Axin', '$d_Axin', '$u_RTPKgene', '$d_RTPKgene', '$u_RSK', '$d_RSK', '$u_MSK', '$d_MSK', '$u_CFLAR', '$d_CFLAR', '$u_CK1', '$d_CK1', '$u_Dvl', '$d_Dvl', '$u_SFRP1', '$d_SFRP1', '$u_SFRP1gene', '$d_SFRP1gene', '$u_Caspase37', '$d_Caspase37', '$u_betaTrCP', '$d_betaTrCP', '$u_MMP', '$d_MMP', '$u_Egr1', '$d_Egr1', '$u_LEF', '$d_LEF', '$u_cMYC', '$d_cMYC', '$u_TCF', '$d_TCF', '$u_NLK', '$d_NLK', '$u_DKK1gene', '$d_DKK1gene', '$u_CCND1', '$d_CCND1']}
-DEBUG:root:
-
-DEBUG:root:------ ["custom_data"]: for default
-DEBUG:root:----------- end cell_def_tab.py: fill_xml(): ----------
-DEBUG:root:
---------- user_params_tab.py:  fill_xml(): self.count = 100
-DEBUG:root:--------- found //user_parameters
-DEBUG:root:random_seed
-DEBUG:root:number_of_cells
-DEBUG:root:pump_activated_sd
-DEBUG:root:pump_expression_rate_mean
-DEBUG:root:pump_expression_rate_sd
-DEBUG:root:mutation_rate_mean
-DEBUG:root:mutation_rate_sd
-DEBUG:root:found 7
 DEBUG:matplotlib.font_manager:findfont: Matching sans\-serif:style=normal:variant=normal:weight=normal:stretch=normal:size=7.0.
 DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizFourSymBol.ttf', name='STIXSizeFourSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
 DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono-Bold.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
@@ -908,3 +855,761 @@ DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/
 DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/malayalam/Keraleeyam-Regular.ttf', name='Keraleeyam', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
 DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWGothic-DemiOblique.otf', name='URW Gothic', style='oblique', variant='normal', weight=600, stretch='normal', size='scalable')) = 11.24
 DEBUG:matplotlib.font_manager:findfont: Matching sans\-serif:style=normal:variant=normal:weight=normal:stretch=normal:size=7.0 to DejaVu Sans ('/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans.ttf') with score of 0.050000.
+DEBUG:matplotlib.font_manager:findfont: Matching sans\-serif:style=normal:variant=normal:weight=normal:stretch=normal:size=12.0.
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizFourSymBol.ttf', name='STIXSizeFourSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono-Bold.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/cmsy10.ttf', name='cmsy10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneral.ttf', name='STIXGeneral', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/cmmi10.ttf', name='cmmi10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif-Italic.ttf', name='DejaVu Serif', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/cmex10.ttf', name='cmex10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/cmss10.ttf', name='cmss10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizTwoSymBol.ttf', name='STIXSizeTwoSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 0.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans-Oblique.ttf', name='DejaVu Sans', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 1.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneralItalic.ttf', name='STIXGeneral', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansDisplay.ttf', name='DejaVu Sans Display', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizOneSymBol.ttf', name='STIXSizeOneSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizTwoSymReg.ttf', name='STIXSizeTwoSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneralBolIta.ttf', name='STIXGeneral', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono-BoldOblique.ttf', name='DejaVu Sans Mono', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans-BoldOblique.ttf', name='DejaVu Sans', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 1.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizThreeSymReg.ttf', name='STIXSizeThreeSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif-BoldItalic.ttf', name='DejaVu Serif', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUniBol.ttf', name='STIXNonUnicode', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUni.ttf', name='STIXNonUnicode', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerifDisplay.ttf', name='DejaVu Serif Display', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUniBolIta.ttf', name='STIXNonUnicode', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/cmtt10.ttf', name='cmtt10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/cmr10.ttf', name='cmr10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono-Oblique.ttf', name='DejaVu Sans Mono', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizFiveSymReg.ttf', name='STIXSizeFiveSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizFourSymReg.ttf', name='STIXSizeFourSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/cmb10.ttf', name='cmb10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUniIta.ttf', name='STIXNonUnicode', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif-Bold.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneralBol.ttf', name='STIXGeneral', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizOneSymReg.ttf', name='STIXSizeOneSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizThreeSymBol.ttf', name='STIXSizeThreeSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans-Bold.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 0.33499999999999996
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-yrsa-rasa/Rasa-Regular.ttf', name='Rasa', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf', name='Liberation Serif', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/lohit-tamil/Lohit-Tamil.ttf', name='Lohit Tamil', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Umpush-BoldOblique.ttf', name='Umpush', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-yrsa-rasa/Yrsa-Light.ttf', name='Yrsa', style='normal', variant='normal', weight=300, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf', name='Liberation Sans', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/samyak-fonts/Samyak-Gujarati.ttf', name='Samyak Gujarati', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Waree.ttf', name='Waree', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Laksaman-BoldItalic.ttf', name='Laksaman', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/lohit-punjabi/Lohit-Gurmukhi.ttf', name='Lohit Gurmukhi', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', name='Liberation Sans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation/LiberationSansNarrow-Regular.ttf', name='Liberation Sans Narrow', style='normal', variant='normal', weight=400, stretch='condensed', size='scalable')) = 10.25
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Norasi.ttf', name='Norasi', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-yrsa-rasa/Rasa-SemiBold.ttf', name='Rasa', style='normal', variant='normal', weight=600, stretch='normal', size='scalable')) = 10.24
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Laksaman-Italic.ttf', name='Laksaman', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/malayalam/Rachana-Bold.ttf', name='Rachana', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/TlwgTypist-Bold.ttf', name='Tlwg Typist', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeMonoOblique.ttf', name='FreeMono', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/RaviPrakash.ttf', name='RaviPrakash', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/malayalam/Karumbi-Regular.ttf', name='Karumbi', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/padauk/Padauk-Bold.ttf', name='Padauk', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/lohit-tamil-classical/Lohit-Tamil-Classical.ttf', name='Lohit Tamil Classical', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/malayalam/Chilanka-Regular.otf', name='Chilanka', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Waree-BoldOblique.ttf', name='Waree', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/malayalam/AnjaliOldLipi-Regular.ttf', name='AnjaliOldLipi', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/padauk/PadaukBook-Regular.ttf', name='Padauk Book', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Loma.ttf', name='Loma', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/ubuntu/UbuntuMono-R.ttf', name='Ubuntu Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/ubuntu/Ubuntu-BI.ttf', name='Ubuntu', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/kacst/KacstFarsi.ttf', name='KacstFarsi', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Sawasdee-Bold.ttf', name='Sawasdee', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/malayalam/Dyuthi-Regular.ttf', name='Dyuthi', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation/LiberationSansNarrow-Bold.ttf', name='Liberation Sans Narrow', style='normal', variant='normal', weight=700, stretch='condensed', size='scalable')) = 10.535
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/kacst/KacstArt.ttf', name='KacstArt', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Kinnari-Oblique.ttf', name='Kinnari', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSansNarrow-BoldOblique.otf', name='Nimbus Sans Narrow', style='oblique', variant='normal', weight=700, stretch='condensed', size='scalable')) = 11.535
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-beng-extra/Muktibold.ttf', name='Mukti', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWBookman-LightItalic.otf', name='URW Bookman', style='italic', variant='normal', weight=300, stretch='normal', size='scalable')) = 11.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSans.ttf', name='FreeSans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/padauk/Padauk-Regular.ttf', name='Padauk', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeMonoBoldOblique.ttf', name='FreeMono', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/lohit-telugu/Lohit-Telugu.ttf', name='Lohit Telugu', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/Ponnala.ttf', name='Ponnala', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-guru-extra/Saab.ttf', name='Saab', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSerif-BoldItalic.ttf', name='Liberation Serif', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-yrsa-rasa/Yrsa-SemiBold.ttf', name='Yrsa', style='normal', variant='normal', weight=600, stretch='normal', size='scalable')) = 10.24
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSansNarrow-Regular.otf', name='Nimbus Sans Narrow', style='normal', variant='normal', weight=400, stretch='condensed', size='scalable')) = 10.25
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Kinnari.ttf', name='Kinnari', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/lohit-kannada/Lohit-Kannada.ttf', name='Lohit Kannada', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf', name='FreeSerif', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-yrsa-rasa/Yrsa-Regular.ttf', name='Yrsa', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/Sarai/Sarai.ttf', name='Sarai', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/Navilu/Navilu.ttf', name='Navilu', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Norasi-Bold.ttf', name='Norasi', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/malayalam/Rachana-Regular.ttf', name='Rachana', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-gujr-extra/Rekha.ttf', name='Rekha', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/TlwgTypo.ttf', name='Tlwg Typo', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/C059-Roman.otf', name='C059', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc', name='Noto Sans CJK JP', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-deva-extra/kalimati.ttf', name='Kalimati', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSans-Italic.ttf', name='Liberation Sans', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-deva-extra/samanata.ttf', name='Samanata', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/ttf-khmeros-core/KhmerOS.ttf', name='Khmer OS', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-yrsa-rasa/Yrsa-BoldItalic.ttf', name='Yrsa', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/kacst/KacstTitleL.ttf', name='KacstTitleL', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Norasi-BoldItalic.ttf', name='Norasi', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/NATS.ttf', name='NATS', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/TlwgTypo-BoldOblique.ttf', name='Tlwg Typo', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/lao/Phetsarath_OT.ttf', name='Phetsarath OT', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf', name='Ubuntu', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/LakkiReddy.ttf', name='LakkiReddy', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-yrsa-rasa/Yrsa-SemiBoldItalic.ttf', name='Yrsa', style='italic', variant='normal', weight=600, stretch='normal', size='scalable')) = 11.24
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/samyak-fonts/Samyak-Malayalam.ttf', name='Samyak Malayalam', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-telu-extra/Pothana2000.ttf', name='Pothana2000', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Laksaman-Bold.ttf', name='Laksaman', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSerif-Italic.ttf', name='Liberation Serif', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusRoman-Italic.otf', name='Nimbus Roman', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-kalapi/Kalapi.ttf', name='Kalapi', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/lohit-assamese/Lohit-Assamese.ttf', name='Lohit Assamese', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/Sahadeva/sahadeva.ttf', name='Sahadeva', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/malayalam/Uroob-Regular.ttf', name='Uroob', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWBookman-Demi.otf', name='URW Bookman', style='normal', variant='normal', weight=600, stretch='normal', size='scalable')) = 10.24
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSerif.ttf', name='FreeSerif', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-beng-extra/Ani.ttf', name='Ani', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Garuda-BoldOblique.ttf', name='Garuda', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/TlwgTypewriter.ttf', name='Tlwg Typewriter', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Garuda-Oblique.ttf', name='Garuda', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/kacst/KacstNaskh.ttf', name='KacstNaskh', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-deva-extra/chandas1-2.ttf', name='Chandas', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Purisa-Oblique.ttf', name='Purisa', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf', name='Liberation Serif', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSansNarrow-Bold.otf', name='Nimbus Sans Narrow', style='normal', variant='normal', weight=700, stretch='condensed', size='scalable')) = 10.535
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/ubuntu/Ubuntu-MI.ttf', name='Ubuntu', style='italic', variant='normal', weight=500, stretch='normal', size='scalable')) = 11.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/malayalam/Meera-Regular.ttf', name='Meera', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/kacst/KacstPen.ttf', name='KacstPen', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSerifBoldItalic.ttf', name='FreeSerif', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Kinnari-Italic.ttf', name='Kinnari', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWGothic-BookOblique.otf', name='URW Gothic', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Umpush.ttf', name='Umpush', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/NTR.ttf', name='NTR', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Waree-Oblique.ttf', name='Waree', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-yrsa-rasa/Rasa-Light.ttf', name='Rasa', style='normal', variant='normal', weight=300, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/kacst/KacstPoster.ttf', name='KacstPoster', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf', name='Liberation Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/TlwgTypist-Oblique.ttf', name='Tlwg Typist', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/Suravaram.ttf', name='Suravaram', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf', name='Ubuntu', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/TlwgTypewriter-Bold.ttf', name='Tlwg Typewriter', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/kacst/KacstDecorative.ttf', name='KacstDecorative', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/TlwgTypo-Oblique.ttf', name='Tlwg Typo', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/Ramaraja-Regular.ttf', name='Ramaraja', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/abyssinica/AbyssinicaSIL-Regular.ttf', name='Abyssinica SIL', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSansBoldOblique.ttf', name='FreeSans', style='oblique', variant='normal', weight=600, stretch='normal', size='scalable')) = 11.24
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Umpush-Bold.ttf', name='Umpush', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/kacst/KacstScreen.ttf', name='KacstScreen', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSans-Italic.otf', name='Nimbus Sans', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf', name='Noto Sans Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 0.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/malayalam/Gayathri-Thin.otf', name='Gayathri', style='normal', variant='normal', weight=100, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation/LiberationSerif-Italic.ttf', name='Liberation Serif', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/kacst-one/KacstOne-Bold.ttf', name='KacstOne', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-gujr-extra/padmaa-Medium-0.5.ttf', name='padmaa', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Sawasdee.ttf', name='Sawasdee', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSans-Bold.otf', name='Nimbus Sans', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusRoman-BoldItalic.otf', name='Nimbus Roman', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-beng-extra/LikhanNormal.ttf', name='Likhan', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWGothic-Book.otf', name='URW Gothic', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-gujr-extra/padmaa.ttf', name='padmaa', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/TlwgMono.ttf', name='Tlwg Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/mallanna.ttf', name='Mallanna', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/dhurjati.ttf', name='Dhurjati', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/StandardSymbolsPS.otf', name='Standard Symbols PS', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 0.33499999999999996
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tibetan-machine/TibetanMachineUni.ttf', name='Tibetan Machine Uni', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-yrsa-rasa/Yrsa-LightItalic.ttf', name='Yrsa', style='italic', variant='normal', weight=300, stretch='normal', size='scalable')) = 11.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Kinnari-BoldItalic.ttf', name='Kinnari', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/libreoffice/opens___.ttf', name='OpenSymbol', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/TenaliRamakrishna-Regular.ttf', name='TenaliRamakrishna', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Laksaman.ttf', name='Laksaman', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/PottiSreeramulu.ttf', name='Potti Sreeramulu', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/sinhala/lklug.ttf', name='LKLUG', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/TlwgTypewriter-BoldOblique.ttf', name='Tlwg Typewriter', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/malayalam/RaghuMalayalamSans-Regular.ttf', name='RaghuMalayalamSans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/samyak/Samyak-Devanagari.ttf', name='Samyak Devanagari', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Umpush-Light.ttf', name='Umpush', style='normal', variant='normal', weight=300, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/noto/NotoMono-Regular.ttf', name='Noto Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/suranna.ttf', name='Suranna', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusMonoPS-BoldItalic.otf', name='Nimbus Mono PS', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusRoman-Regular.otf', name='Nimbus Roman', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/lohit-oriya/Lohit-Odia.ttf', name='Lohit Odia', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Norasi-Oblique.ttf', name='Norasi', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/lohit-gujarati/Lohit-Gujarati.ttf', name='Lohit Gujarati', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/TlwgMono-Oblique.ttf', name='Tlwg Mono', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Waree-Bold.ttf', name='Waree', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/P052-BoldItalic.otf', name='P052', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-beng-extra/MitraMono.ttf', name='Mitra ', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/ubuntu/UbuntuMono-BI.ttf', name='Ubuntu Mono', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/SyamalaRamana.ttf', name='Syamala Ramana', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/Z003-MediumItalic.otf', name='Z003', style='italic', variant='normal', weight=500, stretch='normal', size='scalable')) = 11.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/malayalam/Gayathri-Regular.otf', name='Gayathri', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/TlwgMono-Bold.ttf', name='Tlwg Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeMono.ttf', name='FreeMono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSansBold.ttf', name='FreeSans', style='normal', variant='normal', weight=600, stretch='normal', size='scalable')) = 10.24
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/malayalam/Manjari-Bold.otf', name='Manjari', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusMonoPS-Italic.otf', name='Nimbus Mono PS', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf', name='Liberation Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/Gurajada.ttf', name='Gurajada', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Purisa-Bold.ttf', name='Purisa', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-yrsa-rasa/Rasa-Bold.ttf', name='Rasa', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/TlwgTypo-Bold.ttf', name='Tlwg Typo', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/lohit-bengali/Lohit-Bengali.ttf', name='Lohit Bengali', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/TimmanaRegular.ttf', name='Timmana', style='normal', variant='normal', weight=900, stretch='normal', size='scalable')) = 10.525
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusMonoPS-Bold.otf', name='Nimbus Mono PS', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/malayalam/Manjari-Thin.otf', name='Manjari', style='normal', variant='normal', weight=100, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation/LiberationMono-BoldItalic.ttf', name='Liberation Mono', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Loma-Bold.ttf', name='Loma', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-yrsa-rasa/Rasa-Medium.ttf', name='Rasa', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Kinnari-BoldOblique.ttf', name='Kinnari', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationMono-Bold.ttf', name='Liberation Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/ubuntu/UbuntuMono-RI.ttf', name='Ubuntu Mono', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation/LiberationSerif-BoldItalic.ttf', name='Liberation Serif', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf', name='Droid Sans Fallback', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/Gargi/Gargi.ttf', name='Gargi', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/Gidugu.ttf', name='Gidugu', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSans-BoldItalic.otf', name='Nimbus Sans', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWGothic-Demi.otf', name='URW Gothic', style='normal', variant='normal', weight=600, stretch='normal', size='scalable')) = 10.24
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Umpush-LightOblique.ttf', name='Umpush', style='oblique', variant='normal', weight=300, stretch='normal', size='scalable')) = 11.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/TlwgTypewriter-Oblique.ttf', name='Tlwg Typewriter', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-telu-extra/vemana2000.ttf', name='Vemana2000', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Kinnari-Bold.ttf', name='Kinnari', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-gujr-extra/padmaa-Bold.1.1.ttf', name='padmaa-Bold.1.1', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf', name='Liberation Sans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/ubuntu/Ubuntu-C.ttf', name='Ubuntu Condensed', style='normal', variant='normal', weight=400, stretch='condensed', size='scalable')) = 10.25
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc', name='Noto Sans CJK JP', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation/LiberationSans-BoldItalic.ttf', name='Liberation Sans', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSansNarrow-Oblique.otf', name='Nimbus Sans Narrow', style='oblique', variant='normal', weight=400, stretch='condensed', size='scalable')) = 11.25
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/ubuntu/UbuntuMono-B.ttf', name='Ubuntu Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation/LiberationSansNarrow-BoldItalic.ttf', name='Liberation Sans Narrow', style='italic', variant='normal', weight=700, stretch='condensed', size='scalable')) = 11.535
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-gujr-extra/aakar-medium.ttf', name='aakar', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/Nakula/nakula.ttf', name='Nakula', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/C059-Italic.otf', name='C059', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/ubuntu/Ubuntu-LI.ttf', name='Ubuntu', style='italic', variant='normal', weight=300, stretch='normal', size='scalable')) = 11.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/TlwgTypist-BoldOblique.ttf', name='Tlwg Typist', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/Mandali-Regular.ttf', name='Mandali', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/C059-Bold.otf', name='C059', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/lohit-malayalam/Lohit-Malayalam.ttf', name='Lohit Malayalam', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/ramabhadra.ttf', name='Ramabhadra', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf', name='FreeSerif', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-yrsa-rasa/Yrsa-Italic.ttf', name='Yrsa', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusMonoPS-Regular.otf', name='Nimbus Mono PS', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/ubuntu/Ubuntu-Th.ttf', name='Ubuntu', style='normal', variant='normal', weight=250, stretch='normal', size='scalable')) = 10.1925
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/P052-Roman.otf', name='P052', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/samyak-fonts/Samyak-Tamil.ttf', name='Samyak Tamil', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation/LiberationSans-Italic.ttf', name='Liberation Sans', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Sawasdee-BoldOblique.ttf', name='Sawasdee', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSans-Regular.otf', name='Nimbus Sans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Garuda.ttf', name='Garuda', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/ubuntu/Ubuntu-M.ttf', name='Ubuntu', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/D050000L.otf', name='D050000L', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/pagul/Pagul.ttf', name='Pagul', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-beng-extra/Mukti.ttf', name='Mukti', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/kacst/KacstTitle.ttf', name='KacstTitle', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/C059-BdIta.otf', name='C059', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/TlwgMono-BoldOblique.ttf', name='Tlwg Mono', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/malayalam/Gayathri-Bold.otf', name='Gayathri', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc', name='Noto Serif CJK JP', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationMono-Italic.ttf', name='Liberation Mono', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/kacst/KacstDigital.ttf', name='KacstDigital', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/kacst/KacstBook.ttf', name='KacstBook', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/TlwgTypist.ttf', name='Tlwg Typist', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/ubuntu/Ubuntu-RI.ttf', name='Ubuntu', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/padauk/PadaukBook-Bold.ttf', name='Padauk Book', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/Gubbi/Gubbi.ttf', name='Gubbi', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSansOblique.ttf', name='FreeSans', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSerif-Bold.ttf', name='Liberation Serif', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-orya-extra/utkal.ttf', name='ori1Uni', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSans-BoldItalic.ttf', name='Liberation Sans', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/malayalam/Suruma.ttf', name='Suruma', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Purisa.ttf', name='Purisa', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/kacst/mry_KacstQurn.ttf', name='mry_KacstQurn', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Norasi-BoldOblique.ttf', name='Norasi', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWBookman-Light.otf', name='URW Bookman', style='normal', variant='normal', weight=300, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Sawasdee-Oblique.ttf', name='Sawasdee', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/Peddana-Regular.ttf', name='Peddana', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/P052-Bold.otf', name='P052', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/kacst/KacstQurn.ttf', name='KacstQurn', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Umpush-Oblique.ttf', name='Umpush', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-yrsa-rasa/Yrsa-Medium.ttf', name='Yrsa', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusRoman-Bold.otf', name='Nimbus Roman', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Loma-BoldOblique.ttf', name='Loma', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation/LiberationSansNarrow-Italic.ttf', name='Liberation Sans Narrow', style='italic', variant='normal', weight=400, stretch='condensed', size='scalable')) = 11.25
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf', name='FreeMono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/malayalam/Manjari-Regular.otf', name='Manjari', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/P052-Italic.otf', name='P052', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/kacst/KacstOffice.ttf', name='KacstOffice', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/noto/NotoSansMono-Bold.ttf', name='Noto Sans Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Garuda-Bold.ttf', name='Garuda', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf', name='Liberation Sans', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/kacst-one/KacstOne.ttf', name='KacstOne', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation/LiberationMono-Italic.ttf', name='Liberation Mono', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/teluguvijayam/SreeKrushnadevaraya.ttf', name='Sree Krushnadevaraya', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Purisa-BoldOblique.ttf', name='Purisa', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-yrsa-rasa/Yrsa-MediumItalic.ttf', name='Yrsa', style='italic', variant='normal', weight=500, stretch='normal', size='scalable')) = 11.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc', name='Noto Serif CJK JP', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSerif-Regular.ttf', name='Liberation Serif', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationMono-BoldItalic.ttf', name='Liberation Mono', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Loma-Oblique.ttf', name='Loma', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/ttf-khmeros-core/KhmerOSsys.ttf', name='Khmer OS System', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationMono-Regular.ttf', name='Liberation Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/lohit-devanagari/Lohit-Devanagari.ttf', name='Lohit Devanagari', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWBookman-DemiItalic.otf', name='URW Bookman', style='italic', variant='normal', weight=600, stretch='normal', size='scalable')) = 11.24
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-beng-extra/JamrulNormal.ttf', name='Jamrul', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/kacst/KacstLetter.ttf', name='KacstLetter', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/ubuntu/Ubuntu-L.ttf', name='Ubuntu', style='normal', variant='normal', weight=300, stretch='normal', size='scalable')) = 10.145
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/tlwg/Norasi-Italic.ttf', name='Norasi', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/fonts-yrsa-rasa/Yrsa-Bold.ttf', name='Yrsa', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/truetype/malayalam/Keraleeyam-Regular.ttf', name='Keraleeyam', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+DEBUG:matplotlib.font_manager:findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWGothic-DemiOblique.otf', name='URW Gothic', style='oblique', variant='normal', weight=600, stretch='normal', size='scalable')) = 11.24
+DEBUG:matplotlib.font_manager:findfont: Matching sans\-serif:style=normal:variant=normal:weight=normal:stretch=normal:size=12.0 to DejaVu Sans ('/home/oth/.local/lib/python3.10/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans.ttf') with score of 0.050000.
+DEBUG:root:
+studio.py: open_as_cb():  full_path_model_name =/home/oth/BSC/MN5mount/AGS/PhysiBoSS/sample_projects_intracellular/boolean/ags_model/config/PhysiCell_settings_studio.xml
+DEBUG:root:     filePath is valid
+DEBUG:root:     len(full_path_model_name) = 121
+DEBUG:root:studio: show_sample_model(): self.config_file = /home/oth/BSC/MN5mount/AGS/PhysiBoSS/sample_projects_intracellular/boolean/ags_model/config/PhysiCell_settings_studio.xml
+DEBUG:root:cell_def_tab.py: ------- fill_substrates_comboboxes
+DEBUG:root: --> oxygen
+DEBUG:root: --> drug_X
+DEBUG:root: --> drug_Y
+DEBUG:root:=======================  microenv populate_tree  ======================= 
+DEBUG:root:dc_ic_units =  mmHg
+DEBUG:root:dc_bc_units = mmHg
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f60810>
+DEBUG:root:   -------- oxygen:  dirichlet_xmin = 0
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f608b0>
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f60950>
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f609f0>
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f60a90>
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f60b30>
+DEBUG:root:dc_ic_units =  umol
+DEBUG:root:dc_bc_units = umol
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f60ea0>
+DEBUG:root:   -------- drug_X:  dirichlet_xmin = 0
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f60f40>
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f60fe0>
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f61080>
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f61120>
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f611c0>
+DEBUG:root:dc_ic_units =  umol
+DEBUG:root:dc_bc_units = umol
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f61bc0>
+DEBUG:root:   -------- drug_Y:  dirichlet_xmin = 0
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f61c60>
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f61d00>
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f61da0>
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f61e40>
+DEBUG:root:bv = <Element 'boundary_value' at 0x7d6e73f61ee0>
+DEBUG:root:------- options: <Element 'calculate_gradients' at 0x7d6e73f61fd0>
+DEBUG:root:------- options: <Element 'track_internalized_substrates_in_each_agent' at 0x7d6e73f62070>
+DEBUG:root:------- options: <Element 'initial_condition' at 0x7d6e73f620c0>
+DEBUG:root:------- options: <Element 'dirichlet_nodes' at 0x7d6e73f62200>
+DEBUG:root:
+
+=======================  leaving microenv populate_tree  =====================
+DEBUG:root:cell_def_tab.py: ------- fill_substrates_comboboxes
+DEBUG:root:------ motility_substrate_changed_cb(): idx = -1
+DEBUG:root:       motility_substrate_changed_cb(): self.current_cell_def = None
+DEBUG:root:------ motility2_substrate_changed_cb(): idx = -1
+DEBUG:root:   text (subname) = 
+DEBUG:root:   subname is empty, return!
+DEBUG:root: --> oxygen
+DEBUG:root:------ motility_substrate_changed_cb(): idx = 0
+DEBUG:root:       motility_substrate_changed_cb(): self.current_cell_def = None
+DEBUG:root:------ motility2_substrate_changed_cb(): idx = 0
+DEBUG:root:   text (subname) = oxygen
+DEBUG:root: --> drug_X
+DEBUG:root: --> drug_Y
+DEBUG:root:=======================  populate_tree_cell_defs(): ======================= 
+DEBUG:root:    cell_def_tab.param_d = {}
+DEBUG:root:
+
+=======================  validate_cell_defs(): ======================= 
+DEBUG:root:Checking default
+DEBUG:root:=======================  end validate_cell_defs(): =======================
+
+
+DEBUG:root:----- cell_def.tag= cell_definition
+DEBUG:root:
+--------new_interaction_params(): cdname_new= default, reset_mapping= False
+DEBUG:root:
+--------new_intracellular_params(): cdname_new= default
+DEBUG:root:------- new_custom_data_params() -----
+DEBUG:root:
+===== populate_tree():  cycle
+DEBUG:root: >> cycle_path= .//cell_definition[1]//phenotype//cycle
+DEBUG:root:   cycle code= 5
+DEBUG:root: >> phase_transition_path 
+DEBUG:root:<Element 'rate' at 0x7d6e73f62660>
+DEBUG:root:--  cycle_live_trate00 0.00209
+DEBUG:root: >> phase_durations_path =.//cell_definition[1]//phenotype//cycle//phase_durations
+DEBUG:root: >> pd_uep =None
+DEBUG:root:
+===== populate_tree():  death
+DEBUG:root:death_uep=<Element 'death' at 0x7d6e73f627a0>
+DEBUG:root:-------- parsing apoptosis!
+DEBUG:root: >> pd_uep =<Element 'phase_durations' at 0x7d6e73f62980>
+DEBUG:root:phase_duration= <Element 'duration' at 0x7d6e73f62a20>
+DEBUG:root:index= 0
+DEBUG:root:-------- parsing necrosis!
+DEBUG:root: >> pd_uep =<Element 'phase_durations' at 0x7d6e73f63330>
+DEBUG:root:<Element 'duration' at 0x7d6e73f633d0>
+DEBUG:root:index= 0
+DEBUG:root:<Element 'duration' at 0x7d6e73f63470>
+DEBUG:root:index= 1
+DEBUG:root:volume_path=.//cell_definition[1]//phenotype//volume//
+DEBUG:root:
+===== populate_tree():  mechanics
+DEBUG:root:mechanics_path=.//cell_definition[1]//phenotype//mechanics//
+DEBUG:root:---- cell_interactions_path= .//cell_definition[1]//phenotype//mechanics//cell_adhesion_affinities
+DEBUG:root:---- found cell_adhesion_affinities_path:
+DEBUG:root:--> {'default': '1'}
+DEBUG:root:
+===== populate_tree():  motility
+DEBUG:root:motility_path=.//cell_definition[1]//phenotype//motility//
+DEBUG:root:
+----------- populate_tree_cell_defs.py: cell_def_name= default,  cell_def_tab.param_d[cell_def_name]["motility_chemotaxis_substrate"] = oxygen
+DEBUG:root:motility_advanced_chemotaxis_path= .//cell_definition[1]//phenotype//motility//options//advanced_chemotaxis//
+DEBUG:root:chemotactic_sensitivity= {'oxygen': '0.0', 'drug_X': '0.0', 'drug_Y': '0.0'}
+DEBUG:root:sensitivity_path= .//cell_definition[1]//phenotype//motility//options//advanced_chemotaxis//chemotactic_sensitivities
+DEBUG:root:---- found chemotactic_sensitivities: <Element 'chemotactic_sensitivities' at 0x7d6e80111760>
+DEBUG:root:subelm=<Element 'chemotactic_sensitivity' at 0x7d6e80111800>
+DEBUG:root: chemotactic_sensitivity--> oxygen = 0.0
+DEBUG:root:subelm=<Element 'chemotactic_sensitivity' at 0x7d6e80111850>
+DEBUG:root: chemotactic_sensitivity--> drug_X = 0.0
+DEBUG:root:subelm=<Element 'chemotactic_sensitivity' at 0x7d6e801118a0>
+DEBUG:root: chemotactic_sensitivity--> drug_Y = 0.0
+DEBUG:root:{'oxygen': '0.0', 'drug_X': '0.0', 'drug_Y': '0.0'}
+DEBUG:root:------ motility2_substrate_changed_cb(): idx = 0
+DEBUG:root:   text (subname) = oxygen
+DEBUG:root:    motility_advanced_chemotaxis_substrate= oxygen
+DEBUG:root:   chemotactic_sensitivity = {'oxygen': '0.0', 'drug_X': '0.0', 'drug_Y': '0.0'}
+DEBUG:root:
+===== populate_tree():  secretion
+DEBUG:root:secretion_path = .//cell_definition[1]//phenotype//secretion//
+DEBUG:root:uep_secretion = <Element 'secretion' at 0x7d6e80111a80>
+DEBUG:root:0) -- secretion substrate = oxygen
+DEBUG:root:1) -- secretion substrate = drug_X
+DEBUG:root:2) -- secretion substrate = drug_Y
+DEBUG:root:------ done parsing secretion:
+DEBUG:root:
+===== populate_tree():  cell_interactions
+DEBUG:root:---- cell_interactions_path= .//cell_definition[1]//phenotype//cell_interactions
+DEBUG:root:---- found cell_interactions:
+DEBUG:root:uep2= <Element 'live_phagocytosis_rates' at 0x7d6e80112a20>
+DEBUG:root: live_phagocytosis_rate= {'default': '0'}
+DEBUG:root: attack_rate= {'default': '0'}
+DEBUG:root: fusion_rate= {'default': '0'}
+DEBUG:root:------ done parsing cell_interactions:
+DEBUG:root:---- transformation_rates_path = .//cell_definition[1]//phenotype//cell_transformations//transformation_rates
+DEBUG:root: transformation_rate= {'default': '0'}
+DEBUG:root:------ done parsing cell_transformations:
+DEBUG:root:
+===== populate_tree():  molecular
+DEBUG:root:
+===== populate_tree():  intracellular
+DEBUG:root:------ done parsing intracellular:
+DEBUG:root:
+===== populate_tree():  custom data
+DEBUG:root:uep_custom_data= <Element 'custom_data' at 0x7d6e80113ab0>
+DEBUG:root:--------------- populate_tree: (empty)custom_data = {}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': ['0.003', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': ['0.003', False], 'drug_Y_half_max': ['0.00012', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': ['0.003', False], 'drug_Y_half_max': ['0.00012', False], 'drug_Y_Hill_coeff': ['7.0', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': ['0.003', False], 'drug_Y_half_max': ['0.00012', False], 'drug_Y_Hill_coeff': ['7.0', False], 'basal_growth_rate': ['0.00209', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': ['0.003', False], 'drug_Y_half_max': ['0.00012', False], 'drug_Y_Hill_coeff': ['7.0', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': ['0.003', False], 'drug_Y_half_max': ['0.00012', False], 'drug_Y_Hill_coeff': ['7.0', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': ['0.003', False], 'drug_Y_half_max': ['0.00012', False], 'drug_Y_Hill_coeff': ['7.0', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': ['0.003', False], 'drug_Y_half_max': ['0.00012', False], 'drug_Y_Hill_coeff': ['7.0', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': ['0.003', False], 'drug_Y_half_max': ['0.00012', False], 'drug_Y_Hill_coeff': ['7.0', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False], 'hill_coeff_apoptosis': ['3.6787', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': ['0.003', False], 'drug_Y_half_max': ['0.00012', False], 'drug_Y_Hill_coeff': ['7.0', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False], 'hill_coeff_apoptosis': ['3.6787', False], 'K_half_apoptosis': ['0.0193', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': ['0.003', False], 'drug_Y_half_max': ['0.00012', False], 'drug_Y_Hill_coeff': ['7.0', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False], 'hill_coeff_apoptosis': ['3.6787', False], 'K_half_apoptosis': ['0.0193', False], 'hill_coeff_pressure': ['6.9583485811', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': ['0.003', False], 'drug_Y_half_max': ['0.00012', False], 'drug_Y_Hill_coeff': ['7.0', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False], 'hill_coeff_apoptosis': ['3.6787', False], 'K_half_apoptosis': ['0.0193', False], 'hill_coeff_pressure': ['6.9583485811', False], 'pressure_half': ['4.7920543763', False]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:-------- conserved is true for <Element 'w1_growth' at 0x7d6e801249f0>
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': ['0.003', False], 'drug_Y_half_max': ['0.00012', False], 'drug_Y_Hill_coeff': ['7.0', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False], 'hill_coeff_apoptosis': ['3.6787', False], 'K_half_apoptosis': ['0.0193', False], 'hill_coeff_pressure': ['6.9583485811', False], 'pressure_half': ['4.7920543763', False], 'w1_growth': ['0.2215', True]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:-------- conserved is true for <Element 'w2_growth' at 0x7d6e80124a90>
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': ['0.003', False], 'drug_Y_half_max': ['0.00012', False], 'drug_Y_Hill_coeff': ['7.0', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False], 'hill_coeff_apoptosis': ['3.6787', False], 'K_half_apoptosis': ['0.0193', False], 'hill_coeff_pressure': ['6.9583485811', False], 'pressure_half': ['4.7920543763', False], 'w1_growth': ['0.2215', True], 'w2_growth': ['0.2574', True]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:-------- conserved is true for <Element 'w1_apoptosis' at 0x7d6e80124b30>
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': ['0.003', False], 'drug_Y_half_max': ['0.00012', False], 'drug_Y_Hill_coeff': ['7.0', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False], 'hill_coeff_apoptosis': ['3.6787', False], 'K_half_apoptosis': ['0.0193', False], 'hill_coeff_pressure': ['6.9583485811', False], 'pressure_half': ['4.7920543763', False], 'w1_growth': ['0.2215', True], 'w2_growth': ['0.2574', True], 'w1_apoptosis': ['0.1092', True]}
+DEBUG:root:var.attrib.keys() = dict_keys(['conserved', 'units', 'description'])
+DEBUG:root:-------- conserved is true for <Element 'w2_apoptosis' at 0x7d6e80124bd0>
+DEBUG:root:populate: cell_def_name= default --> custom_data: {'sample': ['1.0', False], 'drug_X_permeability': ['0.00021979189', False], 'drug_X_half_max': ['3.3857220000000006e-05', False], 'drug_X_Hill_coeff': ['5.503406625769999', False], 'drug_Y_permeability': ['0.003', False], 'drug_Y_half_max': ['0.00012', False], 'drug_Y_Hill_coeff': ['7.0', False], 'basal_growth_rate': ['0.00209', False], 'hill_coeff_growth': ['6.9505', False], 'K_half_growth': ['0.0585', False], 'apoptosis_rate_basal': ['5.31667e-05', False], 'max_apoptosis_rate': ['0.0098', False], 'hill_coeff_apoptosis': ['3.6787', False], 'K_half_apoptosis': ['0.0193', False], 'hill_coeff_pressure': ['6.9583485811', False], 'pressure_half': ['4.7920543763', False], 'w1_growth': ['0.2215', True], 'w2_growth': ['0.2574', True], 'w1_apoptosis': ['0.1092', True], 'w2_apoptosis': ['0.3765', True]}
+DEBUG:root:
+----- update_motility_params():  cdname= default
+DEBUG:root:     setting motility_substrate_dropdown (for cdname= default ) = oxygen
+DEBUG:root:     setting motility2_substrate_dropdown (for cdname= default ) = oxygen
+DEBUG:root:    chemotactic_sensitivity= {'oxygen': '0.0', 'drug_X': '0.0', 'drug_Y': '0.0'}
+DEBUG:root:new val = 0.0
+DEBUG:root:----- leave update_motility_params()
+
+DEBUG:root:update_secretion_params(): cdname = default
+DEBUG:root:update_secretion_params(): self.current_secretion_substrate = oxygen
+DEBUG:root:{'oxygen': {'secretion_rate': '0', 'secretion_target': '38', 'uptake_rate': '10', 'net_export_rate': '0'}, 'drug_X': {'secretion_rate': '0', 'secretion_target': '0', 'uptake_rate': '0', 'net_export_rate': '0'}, 'drug_Y': {'secretion_rate': '0', 'secretion_target': '0', 'uptake_rate': '0', 'net_export_rate': '0'}}
+DEBUG:root:cell_def_tab.py: ------- fill_substrates_comboboxes
+DEBUG:root:------ motility_substrate_changed_cb(): idx = -1
+DEBUG:root:       motility_substrate_changed_cb(): self.current_cell_def = default
+DEBUG:root:                         text = 
+DEBUG:root:------ motility2_substrate_changed_cb(): idx = -1
+DEBUG:root:   text (subname) = 
+DEBUG:root:   subname is empty, return!
+DEBUG:root: --> oxygen
+DEBUG:root:------ motility_substrate_changed_cb(): idx = 0
+DEBUG:root:       motility_substrate_changed_cb(): self.current_cell_def = default
+DEBUG:root:                         text = oxygen
+DEBUG:root:------ motility2_substrate_changed_cb(): idx = 0
+DEBUG:root:   text (subname) = oxygen
+DEBUG:root:    motility_advanced_chemotaxis_substrate= oxygen
+DEBUG:root:   chemotactic_sensitivity = {'oxygen': '0.0', 'drug_X': '0.0', 'drug_Y': '0.0'}
+DEBUG:root:update_secretion_params(): cdname = default
+DEBUG:root:update_secretion_params(): self.current_secretion_substrate = oxygen
+DEBUG:root:{'oxygen': {'secretion_rate': '0', 'secretion_target': '38', 'uptake_rate': '10', 'net_export_rate': '0'}, 'drug_X': {'secretion_rate': '0', 'secretion_target': '0', 'uptake_rate': '0', 'net_export_rate': '0'}, 'drug_Y': {'secretion_rate': '0', 'secretion_target': '0', 'uptake_rate': '0', 'net_export_rate': '0'}}
+DEBUG:root: --> drug_X
+DEBUG:root: --> drug_Y
+DEBUG:root:cell_def_tab.py: ------- fill_celltypes_comboboxes
+DEBUG:root:cell_def_tab.py: ------- fill_celltypes_comboboxes
+DEBUG:root:ics_tab.py: fill_celltype_combobox(): ['default']
+DEBUG:root:
+
+------------  user_params_tab: fill_gui --------------
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-300.0, 300.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-300.0, 300.0)
+DEBUG:root:----------- microenv_tab.py: fill_xml(): ----------
+DEBUG:root:microenv_tab.py: fill_xml(): num subtrates = 3
+DEBUG:root:substrates_in_tree =['oxygen', 'drug_X', 'drug_Y']
+DEBUG:root:microrenv_tab.py: key in param_d.keys() = oxygen
+DEBUG:root:matched! oxygen
+DEBUG:root:microrenv_tab.py: key in param_d.keys() = drug_X
+DEBUG:root:matched! drug_X
+DEBUG:root:microrenv_tab.py: key in param_d.keys() = drug_Y
+DEBUG:root:matched! drug_Y
+DEBUG:root:microrenv_tab.py: key in param_d.keys() = gradients
+DEBUG:root:microrenv_tab.py: key in param_d.keys() = track_in_agents
+DEBUG:root:
+
+----------- cell_def_tab.py: fill_xml(): ----------
+DEBUG:root:num cell defs = 1
+DEBUG:root:cdefs_in_tree =['default']
+DEBUG:root:
+--- key in param_d.keys() = default
+DEBUG:root:matched! default
+DEBUG:root:--- cell_adhesion_affinity= {'default': '1', '': '1.0'}
+DEBUG:root:default  --> 1
+DEBUG:root:
+
+ ====================> fill_xml_motility(): oxygen = oxygen 
+
+
+DEBUG:root:fill_xml_motility(): {'oxygen': '0.0', 'drug_X': '0.0', 'drug_Y': '0.0'}
+DEBUG:root:oxygen  --> 0.0
+DEBUG:root:drug_X  --> 0.0
+DEBUG:root:drug_Y  --> 0.0
+DEBUG:root:self.substrate_list = ['oxygen', 'drug_X', 'drug_Y']
+DEBUG:root:substrate = oxygen
+DEBUG:root:substrate = drug_X
+DEBUG:root:substrate = drug_Y
+DEBUG:root:------------------- fill_xml_interactions():  cdef= default
+DEBUG:root:--- live_phagocytosis_rate= {'default': '0', '': '0.0'}
+DEBUG:root:  key in live_phagocytosis_rate= default
+DEBUG:root:default  --> 0
+DEBUG:root:  key in live_phagocytosis_rate= 
+DEBUG:root:--- attack_rate= {'default': '0', '': '0.0'}
+DEBUG:root:default  --> 0
+DEBUG:root:--- fusion_rate= {'default': '0', '': '0.0'}
+DEBUG:root:default  --> 0
+DEBUG:root:default  --> 0
+DEBUG:root:------------------- fill_xml_intracellular()
+DEBUG:root:------ ["intracellular"]: for default
+DEBUG:root:{'type': 'maboss', 'bnd_filename': './config/AGS_all_nodes_real.bnd', 'cfg_filename': './config/AGS_all_nodes_real.cfg', 'time_step': '100', 'scaling': '0.1', 'time_stochasticity': '0.5', 'start_time': '0.0', 'global_inheritance': 'True', 'node_inheritance': [], 'mutants': [], 'parameters': [], 'initial_values': [], 'inputs': [], 'outputs': [], 'list_nodes': ['AKT', 'p38alpha', 'GSK3', 'TAK1', 'betacatenin', 'PI3K', 'MEK', 'RTPK', 'SHC1', 'GRB2', 'SOS', 'Ras', 'Raf', 'ERK', 'DUSP6', 'MKK3', 'ASK1', 'TAB', 'DUSP1', 'MKK4', 'MKK7', 'MEKK4', 'MLK3', 'Rac', 'JNK', 'GRAP2', 'SHP2', 'GAB', 'IKKB', 'IKKA', 'IRS1', 'Caspase8', 'PTENgene', 'Caspase9', 'FOXO', 'TSC', 'pras40', 'BCL2', 'p53', 'Rheb', 'mTORC1', 'PTEN', 'BAD', 'mTORC2', 'MDM2gene', 'S6K', 'MDM2', 'CytochromeC', 'BAX', 'NFkB', 'MAP3K8', 'PDK1', 'LRP', 'ITCH', 'DKK1', 'Fz', 'Axin', 'RTPKgene', 'RSK', 'MSK', 'CFLAR', 'CK1', 'Dvl', 'SFRP1', 'SFRP1gene', 'Caspase37', 'betaTrCP', 'MMP', 'Egr1', 'LEF', 'cMYC', 'TCF', 'NLK', 'DKK1gene', 'CCND1', 'anti_AKT', 'anti_p38alpha', 'anti_GSK3', 'anti_TAK1', 'anti_betacatenin', 'anti_PI3K', 'anti_MEK'], 'list_parameters': ['$u_AKT', '$d_AKT', '$u_betacatenin', '$d_betacatenin', '$u_GSK3', '$d_GSK3', '$u_MEK', '$d_MEK', '$u_p38alpha', '$d_p38alpha', '$u_PI3K', '$d_PI3K', '$u_TAK1', '$d_TAK1', '$u_RTPK', '$d_RTPK', '$u_SHC1', '$d_SHC1', '$u_GRB2', '$d_GRB2', '$u_SOS', '$d_SOS', '$u_Ras', '$d_Ras', '$u_Raf', '$d_Raf', '$u_ERK', '$d_ERK', '$u_DUSP6', '$d_DUSP6', '$u_MKK3', '$d_MKK3', '$u_ASK1', '$d_ASK1', '$u_TAB', '$d_TAB', '$u_DUSP1', '$d_DUSP1', '$u_MKK4', '$d_MKK4', '$u_MKK7', '$d_MKK7', '$u_MEKK4', '$d_MEKK4', '$u_MLK3', '$d_MLK3', '$u_Rac', '$d_Rac', '$u_JNK', '$d_JNK', '$u_GRAP2', '$d_GRAP2', '$u_SHP2', '$d_SHP2', '$u_GAB', '$d_GAB', '$u_IKKB', '$d_IKKB', '$u_IKKA', '$d_IKKA', '$u_IRS1', '$d_IRS1', '$u_Caspase8', '$d_Caspase8', '$u_PTENgene', '$d_PTENgene', '$u_Caspase9', '$d_Caspase9', '$u_FOXO', '$d_FOXO', '$u_TSC', '$d_TSC', '$u_pras40', '$d_pras40', '$u_BCL2', '$d_BCL2', '$u_p53', '$d_p53', '$u_Rheb', '$d_Rheb', '$u_mTORC1', '$d_mTORC1', '$u_PTEN', '$d_PTEN', '$u_BAD', '$d_BAD', '$u_mTORC2', '$d_mTORC2', '$u_MDM2gene', '$d_MDM2gene', '$u_S6K', '$d_S6K', '$u_MDM2', '$d_MDM2', '$u_CytochromeC', '$d_CytochromeC', '$u_BAX', '$d_BAX', '$u_NFkB', '$d_NFkB', '$u_MAP3K8', '$d_MAP3K8', '$u_PDK1', '$d_PDK1', '$u_LRP', '$d_LRP', '$u_ITCH', '$d_ITCH', '$u_DKK1', '$d_DKK1', '$u_Fz', '$d_Fz', '$u_Axin', '$d_Axin', '$u_RTPKgene', '$d_RTPKgene', '$u_RSK', '$d_RSK', '$u_MSK', '$d_MSK', '$u_CFLAR', '$d_CFLAR', '$u_CK1', '$d_CK1', '$u_Dvl', '$d_Dvl', '$u_SFRP1', '$d_SFRP1', '$u_SFRP1gene', '$d_SFRP1gene', '$u_Caspase37', '$d_Caspase37', '$u_betaTrCP', '$d_betaTrCP', '$u_MMP', '$d_MMP', '$u_Egr1', '$d_Egr1', '$u_LEF', '$d_LEF', '$u_cMYC', '$d_cMYC', '$u_TCF', '$d_TCF', '$u_NLK', '$d_NLK', '$u_DKK1gene', '$d_DKK1gene', '$u_CCND1', '$d_CCND1']}
+DEBUG:root:
+
+DEBUG:root:------ ["custom_data"]: for default
+DEBUG:root:----------- end cell_def_tab.py: fill_xml(): ----------
+DEBUG:root:
+--------- user_params_tab.py:  fill_xml(): self.count = 100
+DEBUG:root:--------- found //user_parameters
+DEBUG:root:random_seed
+DEBUG:root:tumor_radius
+DEBUG:root:cell_spacing
+DEBUG:root:treatment
+DEBUG:root:drug_X_pulse_period
+DEBUG:root:drug_X_pulse_duration
+DEBUG:root:drug_X_pulse_concentration
+DEBUG:root:drug_X_target
+DEBUG:root:drug_X_membrane_length
+DEBUG:root:drug_Y_pulse_period
+DEBUG:root:drug_Y_pulse_duration
+DEBUG:root:drug_Y_pulse_concentration
+DEBUG:root:drug_Y_target
+DEBUG:root:drug_Y_membrane_length
+DEBUG:root:reactivation_rate_mean
+DEBUG:root:reactivation_rate_sd
+DEBUG:root:mutation_rate_mean
+DEBUG:root:mutation_rate_sd
+DEBUG:root:found 18
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-500.0, 500.0)
+DEBUG:root:===========  run_model_cb():  ============
+DEBUG:root:===========  run_model_cb():  ============
+DEBUG:root:run_tab.py:  doing: mkdir output
+DEBUG:root:----------- microenv_tab.py: fill_xml(): ----------
+DEBUG:root:microenv_tab.py: fill_xml(): num subtrates = 3
+DEBUG:root:substrates_in_tree =['oxygen', 'drug_X', 'drug_Y']
+DEBUG:root:microrenv_tab.py: key in param_d.keys() = oxygen
+DEBUG:root:matched! oxygen
+DEBUG:root:microrenv_tab.py: key in param_d.keys() = drug_X
+DEBUG:root:matched! drug_X
+DEBUG:root:microrenv_tab.py: key in param_d.keys() = drug_Y
+DEBUG:root:matched! drug_Y
+DEBUG:root:microrenv_tab.py: key in param_d.keys() = gradients
+DEBUG:root:microrenv_tab.py: key in param_d.keys() = track_in_agents
+DEBUG:root:
+
+----------- cell_def_tab.py: fill_xml(): ----------
+DEBUG:root:num cell defs = 1
+DEBUG:root:cdefs_in_tree =['default']
+DEBUG:root:
+--- key in param_d.keys() = default
+DEBUG:root:matched! default
+DEBUG:root:--- cell_adhesion_affinity= {'default': '1', '': '1.0'}
+DEBUG:root:default  --> 1
+DEBUG:root:
+
+ ====================> fill_xml_motility(): oxygen = oxygen 
+
+
+DEBUG:root:fill_xml_motility(): {'oxygen': '0.0', 'drug_X': '0.0', 'drug_Y': '0.0'}
+DEBUG:root:oxygen  --> 0.0
+DEBUG:root:drug_X  --> 0.0
+DEBUG:root:drug_Y  --> 0.0
+DEBUG:root:self.substrate_list = ['oxygen', 'drug_X', 'drug_Y']
+DEBUG:root:substrate = oxygen
+DEBUG:root:substrate = drug_X
+DEBUG:root:substrate = drug_Y
+DEBUG:root:------------------- fill_xml_interactions():  cdef= default
+DEBUG:root:--- live_phagocytosis_rate= {'default': '0', '': '0.0'}
+DEBUG:root:  key in live_phagocytosis_rate= default
+DEBUG:root:default  --> 0
+DEBUG:root:  key in live_phagocytosis_rate= 
+DEBUG:root:--- attack_rate= {'default': '0', '': '0.0'}
+DEBUG:root:default  --> 0
+DEBUG:root:--- fusion_rate= {'default': '0', '': '0.0'}
+DEBUG:root:default  --> 0
+DEBUG:root:default  --> 0
+DEBUG:root:------------------- fill_xml_intracellular()
+DEBUG:root:------ ["intracellular"]: for default
+DEBUG:root:{'type': 'maboss', 'bnd_filename': './config/AGS_all_nodes_real.bnd', 'cfg_filename': './config/AGS_all_nodes_real.cfg', 'time_step': '100', 'scaling': '0.1', 'time_stochasticity': '0.5', 'start_time': '0.0', 'global_inheritance': 'True', 'node_inheritance': [], 'mutants': [], 'parameters': [], 'initial_values': [], 'inputs': [], 'outputs': [], 'list_nodes': ['AKT', 'p38alpha', 'GSK3', 'TAK1', 'betacatenin', 'PI3K', 'MEK', 'RTPK', 'SHC1', 'GRB2', 'SOS', 'Ras', 'Raf', 'ERK', 'DUSP6', 'MKK3', 'ASK1', 'TAB', 'DUSP1', 'MKK4', 'MKK7', 'MEKK4', 'MLK3', 'Rac', 'JNK', 'GRAP2', 'SHP2', 'GAB', 'IKKB', 'IKKA', 'IRS1', 'Caspase8', 'PTENgene', 'Caspase9', 'FOXO', 'TSC', 'pras40', 'BCL2', 'p53', 'Rheb', 'mTORC1', 'PTEN', 'BAD', 'mTORC2', 'MDM2gene', 'S6K', 'MDM2', 'CytochromeC', 'BAX', 'NFkB', 'MAP3K8', 'PDK1', 'LRP', 'ITCH', 'DKK1', 'Fz', 'Axin', 'RTPKgene', 'RSK', 'MSK', 'CFLAR', 'CK1', 'Dvl', 'SFRP1', 'SFRP1gene', 'Caspase37', 'betaTrCP', 'MMP', 'Egr1', 'LEF', 'cMYC', 'TCF', 'NLK', 'DKK1gene', 'CCND1', 'anti_AKT', 'anti_p38alpha', 'anti_GSK3', 'anti_TAK1', 'anti_betacatenin', 'anti_PI3K', 'anti_MEK'], 'list_parameters': ['$u_AKT', '$d_AKT', '$u_betacatenin', '$d_betacatenin', '$u_GSK3', '$d_GSK3', '$u_MEK', '$d_MEK', '$u_p38alpha', '$d_p38alpha', '$u_PI3K', '$d_PI3K', '$u_TAK1', '$d_TAK1', '$u_RTPK', '$d_RTPK', '$u_SHC1', '$d_SHC1', '$u_GRB2', '$d_GRB2', '$u_SOS', '$d_SOS', '$u_Ras', '$d_Ras', '$u_Raf', '$d_Raf', '$u_ERK', '$d_ERK', '$u_DUSP6', '$d_DUSP6', '$u_MKK3', '$d_MKK3', '$u_ASK1', '$d_ASK1', '$u_TAB', '$d_TAB', '$u_DUSP1', '$d_DUSP1', '$u_MKK4', '$d_MKK4', '$u_MKK7', '$d_MKK7', '$u_MEKK4', '$d_MEKK4', '$u_MLK3', '$d_MLK3', '$u_Rac', '$d_Rac', '$u_JNK', '$d_JNK', '$u_GRAP2', '$d_GRAP2', '$u_SHP2', '$d_SHP2', '$u_GAB', '$d_GAB', '$u_IKKB', '$d_IKKB', '$u_IKKA', '$d_IKKA', '$u_IRS1', '$d_IRS1', '$u_Caspase8', '$d_Caspase8', '$u_PTENgene', '$d_PTENgene', '$u_Caspase9', '$d_Caspase9', '$u_FOXO', '$d_FOXO', '$u_TSC', '$d_TSC', '$u_pras40', '$d_pras40', '$u_BCL2', '$d_BCL2', '$u_p53', '$d_p53', '$u_Rheb', '$d_Rheb', '$u_mTORC1', '$d_mTORC1', '$u_PTEN', '$d_PTEN', '$u_BAD', '$d_BAD', '$u_mTORC2', '$d_mTORC2', '$u_MDM2gene', '$d_MDM2gene', '$u_S6K', '$d_S6K', '$u_MDM2', '$d_MDM2', '$u_CytochromeC', '$d_CytochromeC', '$u_BAX', '$d_BAX', '$u_NFkB', '$d_NFkB', '$u_MAP3K8', '$d_MAP3K8', '$u_PDK1', '$d_PDK1', '$u_LRP', '$d_LRP', '$u_ITCH', '$d_ITCH', '$u_DKK1', '$d_DKK1', '$u_Fz', '$d_Fz', '$u_Axin', '$d_Axin', '$u_RTPKgene', '$d_RTPKgene', '$u_RSK', '$d_RSK', '$u_MSK', '$d_MSK', '$u_CFLAR', '$d_CFLAR', '$u_CK1', '$d_CK1', '$u_Dvl', '$d_Dvl', '$u_SFRP1', '$d_SFRP1', '$u_SFRP1gene', '$d_SFRP1gene', '$u_Caspase37', '$d_Caspase37', '$u_betaTrCP', '$d_betaTrCP', '$u_MMP', '$d_MMP', '$u_Egr1', '$d_Egr1', '$u_LEF', '$d_LEF', '$u_cMYC', '$d_cMYC', '$u_TCF', '$d_TCF', '$u_NLK', '$d_NLK', '$u_DKK1gene', '$d_DKK1gene', '$u_CCND1', '$d_CCND1']}
+DEBUG:root:
+
+DEBUG:root:------ ["custom_data"]: for default
+DEBUG:root:----------- end cell_def_tab.py: fill_xml(): ----------
+DEBUG:root:
+--------- user_params_tab.py:  fill_xml(): self.count = 100
+DEBUG:root:--------- found //user_parameters
+DEBUG:root:random_seed
+DEBUG:root:tumor_radius
+DEBUG:root:cell_spacing
+DEBUG:root:treatment
+DEBUG:root:drug_X_pulse_period
+DEBUG:root:drug_X_pulse_duration
+DEBUG:root:drug_X_pulse_concentration
+DEBUG:root:drug_X_target
+DEBUG:root:drug_X_membrane_length
+DEBUG:root:drug_Y_pulse_period
+DEBUG:root:drug_Y_pulse_duration
+DEBUG:root:drug_Y_pulse_concentration
+DEBUG:root:drug_Y_target
+DEBUG:root:drug_Y_membrane_length
+DEBUG:root:reactivation_rate_mean
+DEBUG:root:reactivation_rate_sd
+DEBUG:root:mutation_rate_mean
+DEBUG:root:mutation_rate_sd
+DEBUG:root:found 18
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_xmin,xmax=  (-500.0, 500.0)
+DEBUG:root:ics_tab.py: -------- ICs: reset_plot_range(): plot_ymin,ymax=  (-500.0, 500.0)

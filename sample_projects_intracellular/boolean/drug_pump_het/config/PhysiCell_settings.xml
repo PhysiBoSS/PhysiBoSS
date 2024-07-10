@@ -1,20 +1,20 @@
 <PhysiCell_settings version="devel-version">
 
     <domain>
-        <x_min>-50</x_min>
-        <x_max>50</x_max>
-        <y_min>-50</y_min>
-        <y_max>50</y_max>
-        <z_min>-10</z_min>
-        <z_max>10</z_max>
+        <x_min>-200</x_min>
+        <x_max>200</x_max>
+        <y_min>-200</y_min>
+        <y_max>200</y_max>
+        <z_min>-200</z_min>
+        <z_max>200</z_max>
         <dx>20</dx>
         <dy>20</dy>
         <dz>20</dz>
-        <use_2D>true</use_2D>
+        <use_2D>false</use_2D>
     </domain>
 
     <overall>
-        <max_time units="min">500</max_time>
+        <max_time units="min">2000</max_time>
         <time_units>min</time_units>
         <space_units>micron</space_units>
         <dt_diffusion units="min">0.01</dt_diffusion>
@@ -27,15 +27,15 @@
     </parallel>
 
     <save>
-        <folder>output_pump_het</folder>
+        <folder>output</folder>
         <full_data>
-            <interval units="min">1</interval>
+            <interval units="min">10</interval>
             <enable>true</enable>
         </full_data>
         <SVG>
-            <interval units="min">1</interval>
+            <interval units="min">10</interval>
             <enable>true</enable>
-            <plot_substrate enabled="false" limits="false">
+            <plot_substrate enabled="true" limits="false">
                 <substrate>doxorubicin</substrate>
                 <min_conc />
                 <max_conc />
@@ -87,9 +87,9 @@
                 <cycle code="6" name="Flow cytometry model (separated)">
                     <phase_durations units="min">
                         <duration index="0" fixed_duration="false">300.0</duration>
-                        <duration index="1" fixed_duration="true">480</duration>
-                        <duration index="2" fixed_duration="true">240</duration>
-                        <duration index="3" fixed_duration="true">60</duration>
+                        <duration index="1" fixed_duration="true">50</duration>
+                        <duration index="2" fixed_duration="true">400</duration>
+                        <duration index="3" fixed_duration="true">10</duration>
                     </phase_durations>
                 </cycle>
                 <death>
@@ -242,11 +242,11 @@
 
     <user_parameters>
         <random_seed type="int" units="dimensionless" description="">0</random_seed>
-        <number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">0</number_of_cells>
-        <pump_activated_sd type="double" units="dimensionless" description="">1.0</pump_activated_sd>
+        <number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">100</number_of_cells>
+        <pump_activated_sd type="double" units="dimensionless" description="">0.5</pump_activated_sd>
         <pump_expression_rate_mean type="double" units="dimensionless" description="">1.0</pump_expression_rate_mean>
-        <pump_expression_rate_sd type="double" units="dimensionless" description="">3.0</pump_expression_rate_sd>
+        <pump_expression_rate_sd type="double" units="dimensionless" description="">1.0</pump_expression_rate_sd>
         <mutation_rate_mean type="double" units="dimensionless" description=""> 1.0 </mutation_rate_mean>
-        <mutation_rate_sd type="double" units="dimensionless" description=""> 3.0 </mutation_rate_sd>
+        <mutation_rate_sd type="double" units="dimensionless" description=""> 1.0 </mutation_rate_sd>
     </user_parameters>
 </PhysiCell_settings>

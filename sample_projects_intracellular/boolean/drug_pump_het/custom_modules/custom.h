@@ -92,7 +92,7 @@ std::vector<std::string> my_coloring_function( Cell* );
 
 // custom functions can go here 
 
-void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt );
+void my_phenotype_function( Cell* pCell, Phenotype& phenotype, double dt );
 void custom_function( Cell* pCell, Phenotype& phenotype , double dt );
 void phase_exit_mutation_function( Cell* pCell, Phenotype& phenotype, double dt );
 

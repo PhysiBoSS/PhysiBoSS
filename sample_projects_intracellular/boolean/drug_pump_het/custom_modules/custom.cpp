@@ -87,9 +87,9 @@ void create_cell_types( void )
 	cell_defaults.functions.update_velocity = standard_update_cell_velocity;
 
 	cell_defaults.functions.update_migration_bias = NULL; 
-	cell_defaults.functions.update_phenotype = NULL; // update_cell_and_death_parameters_O2_based; 
-	cell_defaults.functions.custom_cell_rule = NULL; 
-	cell_defaults.functions.contact_function = NULL; 
+	cell_defaults.functions.update_phenotype = my_phenotype_function; // update_cell_and_death_parameters_O2_based; 
+	cell_defaults.functions.custom_cell_rule = custom_function; 
+	cell_defaults.functions.contact_function = contact_function; 
 	
 	cell_defaults.functions.add_cell_basement_membrane_interactions = NULL; 
 	cell_defaults.functions.calculate_distance_to_membrane = NULL;
@@ -129,9 +129,9 @@ void create_cell_types( void )
 	   This is a good place to set custom functions. 
 	*/ 
 	
-	cell_defaults.functions.update_phenotype = phenotype_function; 
-	cell_defaults.functions.custom_cell_rule = custom_function; 
-	cell_defaults.functions.contact_function = contact_function; 
+	// cell_defaults.functions.update_phenotype = phenotype_function; 
+	// cell_defaults.functions.custom_cell_rule = custom_function; 
+	// cell_defaults.functions.contact_function = contact_function; 
 	
 	/*
 	   This builds the map of cell definitions and summarizes the setup. 
@@ -162,14 +162,10 @@ void setup_tissue( void )
 	// load cells from your CSV file (if enabled)
 	load_cells_from_pugixml();
 	setup_cells_disk(); // add cells based on user params argument
-
 	add_lognorm_distro( "pump_activated" );
-
 	// Add distro of specific variables
 	add_param_from_distro( "mutation_rate" );
-
-
-
+	add_param_from_distro( "pump_expression_rate" );
 
 	return; 
 }
@@ -219,21 +215,26 @@ void setup_cells_disk( void )
 std::vector<std::string> my_coloring_function( Cell* pCell )
 { return paint_by_number_cell_coloring(pCell); }
 
-void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
+void my_phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 { 
 	if( phenotype.death.dead == true )
 	{ return; }
 
 	// First check O2 availability
-	update_cell_and_death_parameters_O2_based(pCell, phenotype, dt);
+	// update_cell_and_death_parameters_O2_based(pCell, phenotype, dt);
 
 	// Custom cycle exit in the phenotype
-	PhysiCell::Cycle_Model cycle_model = cell_defaults.phenotype.cycle.model();
+	// PhysiCell::Cycle_Model cycle_model = cell_defaults.phenotype.cycle.model();
 
 	// #TODO @oth: why are we using the same idx for the cell cycle? it should be automated to detect the start and end
-	static int start_phase_idx = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
-	static int end_phase_idx = phenotype.cycle.model().find_phase_index( PhysiCell_constants::live );
-	cycle_model.phase_link(start_phase_idx, end_phase_idx).exit_function = phase_exit_mutation_function;
+	static int start_phase_idx = phenotype.cycle.model().find_phase_index( PhysiCell_constants::G2_phase );
+	static int end_phase_idx = phenotype.cycle.model().find_phase_index( PhysiCell_constants::S_phase );
+	// std::cout << start_phase_idx << " " << end_phase_idx << std::endl;
+
+	// cycle_model.phase_link(start_phase_idx, end_phase_idx).exit_function = phase_exit_mutation_function;
+	pCell->phenotype.cycle.model().phases[0].entry_function = phase_exit_mutation_function;
+
+	// Add mutation before entering the first model phase
 
 	// Pressure affects negatively growth rate
 	double growth_rate = phenotype.cycle.data.transition_rate(start_phase_idx, end_phase_idx);
@@ -252,6 +253,8 @@ void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 		change_custom_data_var(pCell, "pump_activated", 1.0);
 	}
 
+	// std::cout << "for cell " << pCell->ID << " pump expr rate is " << pump_expression << std::endl;
+	// std::cout << "for cell " << pCell->ID << " pump state  is " << pump_state << std::endl;
 
 	return; 
 
@@ -279,9 +282,7 @@ double get_pressure_scaling(Cell* pCell)
 
 void phase_exit_mutation_function( Cell* pCell, Phenotype& phenotype, double dt )
 {
-	// std::cout << "applying mutation at exit phase on cell " << pCell->ID << std::endl;
-
-
+	std::cout << "applying mutation at exit phase on cell " << pCell->ID << std::endl;
 	bool pump_state = get_custom_data_variable(pCell, "pump_activated");
 	double expression = get_custom_data_variable(pCell, "pump_expression_rate") * dt; // Gillespie algorithm
 	double mutation = get_custom_data_variable(pCell, "mutation_rate") * dt;
@@ -382,14 +383,19 @@ void add_param_from_distro( std::string variable_name )
 	double param_sd = parameters.doubles( var_sd_name );
 
 	// generate distro
-	double param_distro = NormalRandom(param_mean, param_sd);
+	std::random_device rd;
+    std::default_random_engine generator(rd());
+
+	// double param_distro = NormalRandom(param_mean, param_sd);
 
 	// Iterate over all cells to add value from the distro to their custom data
-
 	for( int i=0; i < all_cells->size() ; i++ )
 	{
 		// to call each cell, the pointer is *all_cells)[i] instead of pCell
-		change_custom_data_var( (*all_cells)[i], variable_name, param_distro);
+		double rand_from_gaussian = NormalRandom(param_mean, param_sd);
+		if(rand_from_gaussian > 0) {
+			change_custom_data_var( (*all_cells)[i], variable_name, rand_from_gaussian);
+		}
 	}
 
 }
@@ -405,9 +411,7 @@ void add_lognorm_distro( std::string param_name )
 	// Generate a random number from a distribution
 	std::random_device rd;
     std::default_random_engine generator(rd());
-	double rand_from_gaussian = NormalRandom(0.0, 3.0);
-	double logsample = std::exp(rand_from_gaussian);
-	bool pumpsate = static_cast<bool>(logsample); // need to booleanize based on distro
+	
 	// std::lognormal_distribution<double> distribution(0.0, param_name_sd); // Always mean = 0
 	// double number = distribution(generator);
 
@@ -415,6 +419,9 @@ void add_lognorm_distro( std::string param_name )
 	for (int i = 0; i < (*all_cells).size(); i++)
 	{
 		// to call each cell, the pointer is *all_cells)[i] instead of pCell
+		double rand_from_gaussian = NormalRandom(0.0, 3.0);
+		double logsample = std::exp(rand_from_gaussian);
+		bool pumpsate = static_cast<bool>(logsample); // need to booleanize based on distro
 		change_custom_data_var( (*all_cells)[i], param_name, pumpsate);
 	}
 

@@ -1,0 +1,111 @@
+Signals: 
+=======
+0 : oxygen
+1 : drug_X
+2 : drug_Y
+3 : intracellular oxygen
+4 : intracellular drug_X
+5 : intracellular drug_Y
+6 : oxygen gradient
+7 : drug_X gradient
+8 : drug_Y gradient
+9 : pressure
+10 : volume
+11 : contact with default
+12 : contact with live cell
+13 : contact with dead cell
+14 : contact with basement membrane
+15 : damage
+16 : dead
+17 : total attack time
+18 : time
+19 : custom:sample
+20 : custom:drug_X_permeability
+21 : custom:drug_X_half_max
+22 : custom:drug_X_Hill_coeff
+23 : custom:drug_Y_permeability
+24 : custom:drug_Y_half_max
+25 : custom:drug_Y_Hill_coeff
+26 : custom:basal_growth_rate
+27 : custom:hill_coeff_growth
+28 : custom:K_half_growth
+29 : custom:apoptosis_rate_basal
+30 : custom:max_apoptosis_rate
+31 : custom:hill_coeff_apoptosis
+32 : custom:K_half_apoptosis
+33 : custom:hill_coeff_pressure
+34 : custom:pressure_half
+35 : custom:w1_growth
+36 : custom:w2_growth
+37 : custom:w1_apoptosis
+38 : custom:w2_apoptosis
+39 : apoptotic
+40 : necrotic
+
+Behaviors: 
+=========
+0 : oxygen secretion
+1 : drug_X secretion
+2 : drug_Y secretion
+3 : oxygen secretion target
+4 : drug_X secretion target
+5 : drug_Y secretion target
+6 : oxygen uptake
+7 : drug_X uptake
+8 : drug_Y uptake
+9 : oxygen export
+10 : drug_X export
+11 : drug_Y export
+12 : cycle entry
+13 : exit from cycle phase 1
+14 : exit from cycle phase 2
+15 : exit from cycle phase 3
+16 : exit from cycle phase 4
+17 : exit from cycle phase 5
+18 : apoptosis
+19 : necrosis
+20 : migration speed
+21 : migration bias
+22 : migration persistence time
+23 : chemotactic response to oxygen
+24 : chemotactic response to drug_X
+25 : chemotactic response to drug_Y
+26 : cell-cell adhesion
+27 : cell-cell adhesion elastic constant
+28 : adhesive affinity to default
+29 : relative maximum adhesion distance
+30 : cell-cell repulsion
+31 : cell-BM adhesion
+32 : cell-BM repulsion
+33 : phagocytose dead cell
+34 : phagocytose default
+35 : attack default
+36 : fuse to default
+37 : transform to default
+38 : custom:sample
+39 : custom:drug_X_permeability
+40 : custom:drug_X_half_max
+41 : custom:drug_X_Hill_coeff
+42 : custom:drug_Y_permeability
+43 : custom:drug_Y_half_max
+44 : custom:drug_Y_Hill_coeff
+45 : custom:basal_growth_rate
+46 : custom:hill_coeff_growth
+47 : custom:K_half_growth
+48 : custom:apoptosis_rate_basal
+49 : custom:max_apoptosis_rate
+50 : custom:hill_coeff_apoptosis
+51 : custom:K_half_apoptosis
+52 : custom:hill_coeff_pressure
+53 : custom:pressure_half
+54 : custom:w1_growth
+55 : custom:w2_growth
+56 : custom:w1_apoptosis
+57 : custom:w2_apoptosis
+58 : is_movable
+59 : immunogenicity to default
+60 : cell attachment rate
+61 : cell detachment rate
+62 : maximum number of cell attachments
+63 : damage rate
+

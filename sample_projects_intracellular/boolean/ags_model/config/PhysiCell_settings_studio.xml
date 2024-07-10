@@ -10,10 +10,10 @@
     </cell_rules>
 
     <domain>
-        <x_min>-800</x_min>
-        <x_max>800</x_max>
-        <y_min>-800</y_min>
-        <y_max>800</y_max>
+        <x_min>-500</x_min>
+        <x_max>500</x_max>
+        <y_min>-500</y_min>
+        <y_max>500</y_max>
         <z_min>-30</z_min>
         <z_max>30</z_max>
         <dx>20</dx>
@@ -23,7 +23,7 @@
     </domain>
 
     <overall>
-        <max_time units="min">5000</max_time>
+        <max_time units="min">6000</max_time>
         <time_units>min</time_units>
         <space_units>micron</space_units>
         <dt_diffusion units="min">0.01</dt_diffusion>
@@ -44,8 +44,8 @@
         <SVG>
             <interval units="min">40</interval>
             <enable>true</enable>
-            <plot_substrate enabled="true" limits="false">
-                <substrate>drug_X</substrate>
+            <plot_substrate enabled="false" limits="false">
+                <substrate>oxygen</substrate>
                 <min_conc />
                 <max_conc />
             </plot_substrate>
@@ -287,8 +287,8 @@
 
     <initial_conditions>
         <cell_positions type="csv" enabled="true">
-            <folder>./config</folder>
-            <filename>cells_2D_disk_hex.csv</filename>
+            <folder>/home/oth/BSC/MN5mount/AGS/PhysiBoSS/sample_projects_intracellular/boolean/ags_model/config</folder>
+            <filename>cells_2D_disk_250um_hex.csv</filename>
         </cell_positions>
     </initial_conditions>
 
