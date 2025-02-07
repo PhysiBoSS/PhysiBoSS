@@ -4,7 +4,7 @@ In this folder we provide the models presented in the PhysiBoSS tutorials
 
 ## Manuscript
 
-The manuscript of the paper is available [here](https://doi.org/10.1093/bib/bbae509), and the supplementary materials (containing the detailed instructions to build the model) is available [here](https://raw.githubusercontent.com/PhysiBoSS/PhysiBoSS/refs/heads/master/sample_projects_intracellular/boolean/tutorial/paper/PhysiBoSS_tutorial_supp_mat.pdf)
+The manuscript of the paper is available [here](https://doi.org/10.1093/bib/bbae509), and the supplementary materials (containing the detailed instructions to build the model) is available [here](https://raw.githubusercontent.com/PhysiBoSS/physiboss.github.io/e49f103bd9faeb26e5604ff4f297892f2f51c8fd/papers/supplementary_materials_revised_bbae509.pdf)
 
 ## Binary file
 
