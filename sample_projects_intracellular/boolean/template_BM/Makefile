@@ -1,14 +1,24 @@
 VERSION := $(shell grep . VERSION.txt | cut -f1 -d:)
 PROGRAM_NAME := project
 
-CC := g++
-# CC := g++-mp-7 # typical macports compiler name
-# CC := g++-7 # typical homebrew compiler name 
+ifndef CC
+	CC := gcc
+endif
+ifndef CXX
+	CXX := g++
+endif
+
+# CXX := g++-mp-7 # typical macports compiler name
+# CXX := g++-7 # typical homebrew compiler name 
 
 # Check for environment definitions of compiler 
-# e.g., on CC = g++-7 on OSX
+# e.g., on CXX = g++-7 on OSX
 ifdef PHYSICELL_CPP 
-	CC := $(PHYSICELL_CPP)
+	CXX := $(PHYSICELL_CPP)
+endif
+
+ifdef PHYSICELL_CC
+	CC := $(PHYSICELL_CC)
 endif
 
 ### MaBoSS configuration 
@@ -65,7 +75,7 @@ else
 	UNAME_S := $(shell uname -s)
 	ifeq ($(UNAME_S),Darwin)
 		UNAME_P := $(shell uname -p)
-		var := $(shell which $(CC) | xargs file)
+		var := $(shell which $(CXX) | xargs file)
 		ifeq ($(lastword $(var)),arm64)
 		  CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -fopenmp -m64 -std=c++11
 		endif
@@ -73,8 +83,8 @@ else
 endif
 
 CFLAGS_LINK := $(shell echo $(CFLAGS) | sed -e "s/-fopenmp//g")
-COMPILE_COMMAND := $(CC) $(CFLAGS)  $(EXTRA_FLAGS)
-LINK_COMMAND := $(CC) $(CFLAGS_LINK) $(EXTRA_FLAGS)
+COMPILE_COMMAND := $(CXX) $(CFLAGS)  $(EXTRA_FLAGS)
+LINK_COMMAND := $(CXX) $(CFLAGS_LINK) $(EXTRA_FLAGS)
 
 BioFVM_OBJECTS := BioFVM_vector.o BioFVM_mesh.o BioFVM_microenvironment.o BioFVM_solvers.o BioFVM_matlab.o \
 BioFVM_utilities.o BioFVM_basic_agent.o BioFVM_MultiCellDS.o BioFVM_agent_container.o 
@@ -205,7 +215,7 @@ PhysiCell_geometry.o: ./modules/PhysiCell_geometry.cpp
 # user-defined PhysiCell modules
 
 Compile_MaBoSS: ./addons/PhysiBoSS/MaBoSS/engine/src/BooleanNetwork.h
-	cd ./addons/PhysiBoSS/MaBoSS/engine/src;make CXX=$(CC) MAXNODES=$(MABOSS_MAX_NODES) install_alib;make clean; cd ../../../../..
+	cd ./addons/PhysiBoSS/MaBoSS/engine/src;make CXX=$(CXX) CC=$(CC) MAXNODES=$(MABOSS_MAX_NODES) install_alib;make clean; cd ../../../../..
 
 $(MaBoSS): 
 ifeq ($(OS), Windows_NT)
