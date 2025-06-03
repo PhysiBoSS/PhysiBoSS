@@ -32,7 +32,7 @@ def generate_xml_variants(input_file, concentrations, diffusions):
 
 # Example usage
 input_file = "PhysiCell_settings.xml"  # Replace with your actual XML file path
-concentrations = [0.0000001, 0.00000025,0.0000005,0.00000075,0.000001,0.0000025, 0.000005,0.0000075,0.00001]  # List of concentration values to use
+concentrations = [0.00001, 0.000025, 0.00005, 0.000075, 0.0001, 0.00025, 0.0005, 0.00075, 0.001, 0.0025, 0.005, 0.0075]  # List of concentration values to use
 diffusions = [2000]   # List of diffusion values to use
 
 generate_xml_variants(input_file, concentrations, diffusions)

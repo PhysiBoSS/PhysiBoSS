@@ -27,6 +27,7 @@
 using namespace BioFVM; 
 using namespace PhysiCell;
 
+#include "./submodel_data_structures.h" 
 
 void tnf_boolean_model_interface_setup();
 

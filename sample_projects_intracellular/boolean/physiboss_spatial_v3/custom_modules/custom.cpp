@@ -520,28 +520,28 @@ std::vector<std::string> regular_colors( Cell* pCell )
 	
 	std::vector<std::string> output = {"black" , "black" , "black" , "black"} ;
 
-	// color live a
+	// color live C 
 		
 	if( pCell->type == A_type )
 	{
-		 output[0] = "rgb(34,139,34)";  
-		 output[2] = "rgb(34,139,34)";  
+		 output[0] = parameters.strings("blue");  
+		 output[2] = parameters.strings("blue");  
 	}
 	
 	// color live B
 
 	if( pCell->type == B_type )
 	{
-		 output[0] = "rgb(0,0,255)";  
-		 output[2] = "rgb(0,0,255)";  
+		 output[0] = parameters.strings("orange");  
+		 output[2] = parameters.strings("orange");  
 	}
 	
 	// color live C
 
 	if( pCell->type == C_type )
 	{
-		 output[0] = "rgb(255,140,0)";  
-		 output[2] = "rgb(255,140,0)";  
+		 output[0] = parameters.strings("green");  
+		 output[2] = parameters.strings("green");  
 	}
 	
 	if( pCell->phenotype.death.dead == true )

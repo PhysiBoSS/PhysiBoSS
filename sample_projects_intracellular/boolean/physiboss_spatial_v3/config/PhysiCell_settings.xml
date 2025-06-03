@@ -71,7 +71,7 @@
 <!--
 <user_details />
 -->
-
+faaaafaffafafaaf
 <PhysiCell_settings version="devel-version">
 	<domain>
 		<x_min>-1290</x_min>
@@ -87,7 +87,7 @@
 	</domain>
 	
 	<overall>
-		<max_time units="min">300000</max_time> <!-- 1 days * 24 h * 60 min -->
+		<max_time units="min">350000</max_time> <!-- 1 days * 24 h * 60 min -->
 		<time_units>min</time_units>
 		<space_units>micron</space_units>
 	
@@ -104,12 +104,12 @@
 		<folder>%%output%%</folder> <!-- use . for root --> 
 
 		<full_data>
-			<interval units="min">500</interval>
+			<interval units="min">2000</interval>
 			<enable>true</enable>
 		</full_data>
 		
 		<SVG>
-			<interval units="min">2000</interval>
+			<interval units="min">10000</interval>
 			<enable>true</enable>
 		</SVG>
 		
@@ -121,7 +121,7 @@
 	<options>
 		<legacy_random_points_on_sphere_in_divide>false</legacy_random_points_on_sphere_in_divide>
 		<virtual_wall_at_domain_edge>true</virtual_wall_at_domain_edge>
-        <disable_automated_spring_adhesions>true</disable_automated_spring_adhesions>
+        <disable_automated_spring_adhesions>false</disable_automated_spring_adhesions>
 	</options>	
 
 	<microenvironment_setup>
@@ -131,7 +131,7 @@
 				<decay_rate units="1/min">.1</decay_rate>  
 			</physical_parameter_set>
 			<initial_condition units="mmHg">38.0</initial_condition>
-			<Dirichlet_boundary_condition units="mmHg" enabled="true">38</Dirichlet_boundary_condition>
+			<Dirichlet_boundary_condition units="mmHg" enabled="true">0</Dirichlet_boundary_condition>
 
 		<Dirichlet_options>
 			<boundary_value ID="xmin" enabled="true">38</boundary_value>
@@ -146,7 +146,7 @@
  		
  	<variable name="drug_A" units="dimensionless" ID="1">
       <physical_parameter_set>
-			<diffusion_coefficient units="micron^2/min">500</diffusion_coefficient>
+			<diffusion_coefficient units="micron^2/min">2000</diffusion_coefficient>
 			<decay_rate units="1/min">0.1</decay_rate> 
     	</physical_parameter_set>
     	<initial_condition units="mmHg">0</initial_condition>
@@ -235,10 +235,10 @@
 						</phase_durations>
 						
 						<parameters>
-							<unlysed_fluid_change_rate units="1/min">0.05</unlysed_fluid_change_rate>
-							<lysed_fluid_change_rate units="1/min">0</lysed_fluid_change_rate>
-							<cytoplasmic_biomass_change_rate units="1/min">1.66667e-02</cytoplasmic_biomass_change_rate>
-							<nuclear_biomass_change_rate units="1/min">5.83333e-3</nuclear_biomass_change_rate>
+							<unlysed_fluid_change_rate units="1/min">1.11667e-2</unlysed_fluid_change_rate>
+							<lysed_fluid_change_rate units="1/min">8.33333e-4</lysed_fluid_change_rate>
+							<cytoplasmic_biomass_change_rate units="1/min">5.33333e-5</cytoplasmic_biomass_change_rate>
+							<nuclear_biomass_change_rate units="1/min">2.16667e-3</nuclear_biomass_change_rate>
 							<calcification_rate units="1/min">0</calcification_rate>
 							<relative_rupture_volume units="dimensionless">2.0</relative_rupture_volume>
 						</parameters>
@@ -248,7 +248,7 @@
 				<volume>  
 					<total units="micron^3">2494</total>
 					<fluid_fraction units="dimensionless">0.75</fluid_fraction>
-					<nuclear units="micron^3">560</nuclear>
+					<nuclear units="micron^3">540</nuclear>
 					
 					<fluid_change_rate units="1/min">0.05</fluid_change_rate>
 					<cytoplasmic_biomass_change_rate units="1/min">0.0045</cytoplasmic_biomass_change_rate>
@@ -327,7 +327,7 @@
 					<bnd_filename>./config/Fumia2013_META_only_RNA_visium_norm_0.bnd</bnd_filename>
 					<cfg_filename>./config/Fumia2013_META_only_RNA_visium_norm_0.cfg</cfg_filename>
 					<settings>
-						<intracellular_dt>10</intracellular_dt>
+						<intracellular_dt>1</intracellular_dt>
 						<time_stochasticity>1</time_stochasticity>
 						<scaling>1</scaling>
 						<start_time>0</start_time>
@@ -401,10 +401,10 @@
 						</phase_durations>
 						
 						<parameters>
-							<unlysed_fluid_change_rate units="1/min">0.05</unlysed_fluid_change_rate>
-							<lysed_fluid_change_rate units="1/min">0</lysed_fluid_change_rate>
-							<cytoplasmic_biomass_change_rate units="1/min">1.66667e-02</cytoplasmic_biomass_change_rate>
-							<nuclear_biomass_change_rate units="1/min">5.83333e-03</nuclear_biomass_change_rate>
+							<unlysed_fluid_change_rate units="1/min">1.11667e-2</unlysed_fluid_change_rate>
+							<lysed_fluid_change_rate units="1/min">8.33333e-4</lysed_fluid_change_rate>
+							<cytoplasmic_biomass_change_rate units="1/min">5.33333e-5</cytoplasmic_biomass_change_rate>
+							<nuclear_biomass_change_rate units="1/min">2.16667e-3</nuclear_biomass_change_rate>
 							<calcification_rate units="1/min">0</calcification_rate>
 							<relative_rupture_volume units="dimensionless">2.0</relative_rupture_volume>
 						</parameters>
@@ -414,7 +414,7 @@
 				<volume>  
 					<total units="micron^3">2494</total>
 					<fluid_fraction units="dimensionless">0.75</fluid_fraction>
-					<nuclear units="micron^3">560</nuclear>
+					<nuclear units="micron^3">540</nuclear>
 					
 					<fluid_change_rate units="1/min">0.05</fluid_change_rate>
 					<cytoplasmic_biomass_change_rate units="1/min">0.0045</cytoplasmic_biomass_change_rate>
@@ -493,7 +493,7 @@
 					<bnd_filename>./config/Fumia2013_META_only_RNA_visium_norm_1.bnd</bnd_filename>
 					<cfg_filename>./config/Fumia2013_META_only_RNA_visium_norm_1.cfg</cfg_filename>
 					<settings>
-						<intracellular_dt>10</intracellular_dt>
+						<intracellular_dt>1</intracellular_dt>
 						<time_stochasticity>1</time_stochasticity>
 						<scaling>1</scaling>
 						<start_time>0</start_time>
@@ -567,10 +567,10 @@
 						</phase_durations>
 						
 						<parameters>
-							<unlysed_fluid_change_rate units="1/min">0.05</unlysed_fluid_change_rate>
-							<lysed_fluid_change_rate units="1/min">0</lysed_fluid_change_rate>
-							<cytoplasmic_biomass_change_rate units="1/min">1.66667e-02</cytoplasmic_biomass_change_rate>
-							<nuclear_biomass_change_rate units="1/min">5.83333e-3</nuclear_biomass_change_rate>
+							<unlysed_fluid_change_rate units="1/min">1.11667e-2</unlysed_fluid_change_rate>
+							<lysed_fluid_change_rate units="1/min">8.33333e-4</lysed_fluid_change_rate>
+							<cytoplasmic_biomass_change_rate units="1/min">5.33333e-5</cytoplasmic_biomass_change_rate>
+							<nuclear_biomass_change_rate units="1/min">2.16667e-3</nuclear_biomass_change_rate>
 							<calcification_rate units="1/min">0</calcification_rate>
 							<relative_rupture_volume units="dimensionless">2.0</relative_rupture_volume>
 						</parameters>
@@ -580,7 +580,7 @@
 				<volume>  
 					<total units="micron^3">2494</total>
 					<fluid_fraction units="dimensionless">0.75</fluid_fraction>
-					<nuclear units="micron^3">560</nuclear>
+					<nuclear units="micron^3">540</nuclear>
 					
 					<fluid_change_rate units="1/min">0.05</fluid_change_rate>
 					<cytoplasmic_biomass_change_rate units="1/min">0.0045</cytoplasmic_biomass_change_rate>
@@ -659,7 +659,7 @@
 					<bnd_filename>./config/Fumia2013_META_only_RNA_visium_norm_2.bnd</bnd_filename>
 					<cfg_filename>./config/Fumia2013_META_only_RNA_visium_norm_2.cfg</cfg_filename>
 					<settings>
-						<intracellular_dt>10</intracellular_dt>
+						<intracellular_dt>1</intracellular_dt>
 						<time_stochasticity>1</time_stochasticity>
 						<scaling>1</scaling>
 						<start_time>0</start_time>
@@ -705,12 +705,12 @@
 	<user_parameters>
 
 		<!-- example parameters from the template --> 
-		<read_init type="bool">true</read_init>
+				<read_init type="bool">true</read_init>
 		
 		<random_seed type="int" units="dimensionless" description="">0</random_seed>
 		
 		<blood_source_file type="string" units="">./config/cilindro_endo_doble.tsv</blood_source_file>
-		<time_remove_o2 type="double" units="" description="Time to remove O2"> 30000 </time_remove_o2>
+		<time_remove_o2 type="double" units="" description="Time to remove O2"> 15000 </time_remove_o2>
 
 
 		<o2_conc1 type="double" units="" description="O2 appearing in the blood vessels"> 38 </o2_conc1> 

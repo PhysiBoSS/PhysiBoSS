@@ -24,6 +24,29 @@
 
 using namespace PhysiCell; 
 
+//Submodel_Information tnf_bm_interface_info;
+
+// void tnf_boolean_model_interface_setup()
+// {
+//     tnf_bm_interface_info.name = "TNF Boolean model interface"; 
+//     tnf_bm_interface_info.version = "0.2.0";
+	
+//     tnf_bm_interface_info.main_function= update_phenotype_with_signaling; 
+
+//     // These are just auxiliary variables to keep track of some BN nodes
+//     // tnf_bm_interface_info.cell_variables.push_back( "tnf_node" );
+//     // tnf_bm_interface_info.cell_variables.push_back( "fadd_node" );
+//     // tnf_bm_interface_info.cell_variables.push_back( "nfkb_node" );
+
+//     tnf_bm_interface_info.cell_variables.push_back( "Hypoxia_node" );
+//     tnf_bm_interface_info.cell_variables.push_back( "Proliferation_node" );
+//     tnf_bm_interface_info.cell_variables.push_back( "Apoptosis_node" );
+//     tnf_bm_interface_info.cell_variables.push_back( "cell_pressure" );
+
+//     tnf_bm_interface_info.cell_variables.push_back( "TNFalpha_node" );
+
+//     tnf_bm_interface_info.register_model();
+// }
 
 double Hill_response_function_2( double s, double half_max , double hill_power )
 { 
@@ -59,11 +82,6 @@ double calculate_diffusion_flux(Cell* pCell, int density_idx, double permeabilit
 
 	double density_ext = pCell->nearest_density_vector()[density_idx];	 // A density (mM)
 
-	if (density_ext < 0){
-		pCell->nearest_density_vector()[density_idx] = 0;
-
-	}
-	
 	double density_int = pCell->phenotype.molecular.internalized_total_substrates[density_idx];
     //std::cout << density_int << "antes" << std::endl;
 	density_int /= cell_volume; // divide int tot substrate to get concentration
@@ -112,11 +130,7 @@ void drug_transport_model_update( Cell* pCell, Phenotype& phenotype, double dt )
 	double drug_Y_flux = calculate_diffusion_flux(pCell, drug_Y_idx, drug_X_permeability, "oxygen");
 
 	pCell->phenotype.secretion.net_export_rates[drug_X_idx] = drug_X_flux;
-	pCell->set_internal_uptake_constants(dt);
-	
 	pCell->phenotype.secretion.net_export_rates[drug_Y_idx] = drug_Y_flux;
-	
-	pCell->set_internal_uptake_constants(dt);
 	
 
 	return;
@@ -138,19 +152,34 @@ void update_boolean_model_inputs( Cell* pCell, Phenotype& phenotype, double dt )
     double pO2 = (pCell->nearest_density_vector())[oxygen_substrate_index]; // PhysiCell_constants::oxygen_index]; 
     double conc_drug = (pCell->nearest_density_vector())[drug_substrate_index];
 
+    // static int nR_EB          = pCell->custom_data.find_variable_index( "bound_external_TNFR" ); 
+    // static int nTNF_threshold = pCell->custom_data.find_variable_index( "TNFR_activation_threshold" );
+
+    // This if the step transfer function used to update the state of boolean model inputs
+    // using the state of the receptor dynamics model. The continuos value thresholded is
+    // the total TNF-recptor complex (doi:10.1016/j.cellsig.2010.08.016)
 
     if ( pO2 <= pCell->parameters.o2_hypoxic_threshold ) {
- 
+
+        
+
        pCell->phenotype.intracellular-> set_boolean_variable_value("Hypoxia", 1);
-       //std::cout << "poco o2" << std::endl;        
+       
+       //std::cout << "poco o2" << std::endl;
+        
     }
-    else {
     
+    else {
+
+        //std::cout << "oerutowerut" << std::endl;
+
         pCell->phenotype.intracellular->set_boolean_variable_value("Hypoxia", 0);
-        //std::cout << "mucho o2" << std::endl;            
+        //std::cout << "mucho o2" << std::endl;
+                
     }
-	
-	anti_node_mapping_function(pCell, "drug_A", parameters.strings("drug_X_target"), parameters.doubles("drug_X_half_max"), parameters.doubles("drug_X_Hill_coeff"));
+
+    anti_node_mapping_function(pCell, "drug_A", parameters.strings("drug_X_target"), parameters.doubles("drug_X_half_max"), parameters.doubles("drug_X_Hill_coeff"));
+
 
     return;
 }
@@ -166,7 +195,9 @@ void anti_node_mapping_function( Cell* pCell, std::string drug_name, std::string
     double target_inactivate_p = Hill_response_function_2(drug_int, drug_half_max, drug_Hill_coeff );
 
     //std::cout << "drug_int: " << drug_int << std::endl;
+
     //std::cout << "aver  num:   " << target_inactivate_p  << std::endl;
+
     //std::cout << "For drug " << drug_name << " uniform_random value " << uniform_random() << " target inactivation prob " << target_inactivate_p << std::endl;
 
     if (target_node != "none"){
@@ -200,8 +231,11 @@ void update_cell_from_boolean_model(Cell* pCell, Phenotype& phenotype, double dt
 
     if ( survival ) 
     {   
+        // int ecm_index = pCell->get_microenvironment()->find_density_index("oxygen");
         pCell->phenotype.cycle.advance_cycle(pCell, phenotype, dt); 
         //std::cout << "survival" << std::endl; 
+
+        // pCell->phenotype.secretion.uptake_rates[ecm_index] = 2;
     }
 
     if ( apoptosis ) 
@@ -214,6 +248,39 @@ void update_cell_from_boolean_model(Cell* pCell, Phenotype& phenotype, double dt
 }
 
 
+// // custom cell phenotype function to run PhysiBoSS when is needed
+// void update_phenotype_with_signaling(Cell *pCell, Phenotype &phenotype, double dt)
+// {
+// 	if( phenotype.death.dead == true )
+// 	{
+// 		pCell->functions.update_phenotype = NULL;
+// 		return;
+// 	}
+
+//     if ( pCell->phenotype.intracellular->need_update() )
+//     {
+//         // First we update the Boolean Model inputs
+//         update_boolean_model_inputs(pCell, phenotype, dt );
+        
+// 		// Run maboss to update the boolean state of the cell
+//         pCell->phenotype.intracellular->update();
+        
+// 		// update the cell fate based on the boolean outputs
+//         update_cell_from_boolean_model(pCell, phenotype, dt);
+
+//         update_cell_and_death_parameters_O2_based(pCell, phenotype, dt);
+
+//         //Add growth control by pressure
+
+//         update_cell_growth_parameters_pressure_based(pCell, phenotype, dt);
+
+//         // Get track of some boolean node values for debugging
+//         update_monitor_variables(pCell);
+//     }
+
+//     return;
+// }
+
 void update_monitor_variables(Cell* pCell )
 {
 
@@ -221,11 +288,16 @@ void update_monitor_variables(Cell* pCell )
 	static int index_prolif_node  = pCell->custom_data.find_variable_index("Proliferation_node");
     static int index_cell_pressure = pCell->custom_data.find_variable_index("cell_pressure");
     static int index_raf_node = pCell->custom_data.find_variable_index("TNFalpha_node");
-   
+    // static int index_apopt_node = pCell->custom_data.find_variable_index("Apoptosis_node");
+    // static int index_anti_raf_node = pCell->custom_data.find_variable_index("anti_Raf_node");
+    
+
+
     pCell->custom_data[index_hypoxia_node] = pCell->phenotype.intracellular->get_boolean_variable_value("Hypoxia");
     pCell->custom_data[index_prolif_node] = pCell->phenotype.intracellular->get_boolean_variable_value("Proliferation");
     pCell->custom_data[index_raf_node] = pCell->phenotype.intracellular->get_boolean_variable_value("TNFalpha");
-
+    // pCell->custom_data[index_apopt_node] = pCell->phenotype.intracellular->get_boolean_variable_value("Apoptosis");
+    // pCell->custom_data[index_anti_raf_node] = pCell->phenotype.intracellular->get_boolean_variable_value("anti_Raf_node");
     pCell->custom_data[index_cell_pressure] = pCell->state.simple_pressure; 
 
     return;
@@ -340,6 +412,9 @@ double pressure_effect_growth_rate(double pressure, double hill_coeff, double pr
     double pressure_exponential_function =  std::pow(pressure, hill_coeff) / (pressure_half + std::pow(pressure, hill_coeff));
     // if (pressure_exponential_function > 1) pressure_exponential_function = 1.0;
     return pressure_exponential_function;
+
+
+
 }
 
 void pre_update_intracellular(Cell* pCell, Phenotype& phenotype, double dt)

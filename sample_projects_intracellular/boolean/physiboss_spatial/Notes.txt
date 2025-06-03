@@ -1,0 +1,11 @@
+Dins trobarás tot per a fer els experiments que he anat fent,
+Si vols el spatial amb l'endoteli regular gasta el tsv de cilindro_endo_doble.tsv
+Si vols el spatial amb l'endoteli real a partir de la anotació gasta cilindro_endo_doble_originalrealtissue.tsv
+L'script generate_variants es per a fer variants en la concentració pero pot adaptarse fàcil per a ferlo tb amb la difussio per exemple 
+
+Blood vessel:
+<blood_source_file type="string" units="">./config/cilindro_endo_doble.tsv</blood_source_file>
+
+ECM
+<ecm_density_file type="string" units="">./config/ecm_2_walls_cilindro.tsv</ecm_density_file>
+

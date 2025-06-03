@@ -77,12 +77,8 @@ list-projects:
 	@echo "                 asymmetric-division-sample immune-function-sample episode-sample spatial"
 	@echo ""
 	@echo "Sample intracellular projects: template_BM ode-energy-sample physiboss-cell-lines-sample"
-<<<<<<< Updated upstream
-	@echo "                 cancer-metabolism-sample physiboss-tutorial physiboss-tutorial-invasion"
-=======
 	@echo "                 cancer-metabolism-sample physiboss-tutorial physiboss-tutorial-invasion physiboss_spatial"
 	@echo "					physiboss-tnf-model prostate"
->>>>>>> Stashed changes
 	@echo ""
 	
 template:
@@ -237,15 +233,6 @@ episode-sample:
 	cp Makefile Makefile-backup
 	cp ./sample_projects/episode/Makefile .
 	cp -r ./sample_projects/episode/config/* ./config
-
-spatial:
-	cp ./sample_projects/set_up_spatial/custom_modules/* ./custom_modules/
-	touch main.cpp && cp main.cpp main-backup.cpp
-	cp ./sample_projects/set_up_spatial/main-spatial.cpp ./main.cpp 
-	cp Makefile Makefile-backup
-	cp ./sample_projects/set_up_spatial/Makefile .
-	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
-	cp ./sample_projects/set_up_spatial/config/* ./config/	
 
 # ---- intracellular projects 
 ode-energy-sample:
