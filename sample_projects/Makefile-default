@@ -74,11 +74,11 @@ list-projects:
 	@echo "Sample projects: template biorobots-sample cancer-biorobots-sample cancer-immune-sample"
 	@echo "                 celltypes3-sample heterogeneity-sample pred-prey-farmer virus-macrophage-sample"
 	@echo "                 worm-sample interaction-sample mechano-sample rules-sample physimess-sample custom-division-sample"
-	@echo "                 asymmetric-division-sample immune-function-sample episode-sample spatial"
+	@echo "                 asymmetric-division-sample immune-function-sample episode-sample"
 	@echo ""
 	@echo "Sample intracellular projects: template_BM ode-energy-sample physiboss-cell-lines-sample"
-	@echo "                 cancer-metabolism-sample physiboss-tutorial physiboss-tutorial-invasion physiboss_spatial"
-	@echo "					physiboss-tnf-model prostate"
+	@echo "                 cancer-metabolism-sample physiboss-tutorial physiboss-tutorial-invasion"
+	@echo "					physiboss-tnf-model prostate physiboss_spatial physiboss_spatial_cilinder"
 	@echo ""
 	
 template:
@@ -300,16 +300,27 @@ template_BM:
 	mkdir ./scripts/
 	cp ./sample_projects_intracellular/boolean/template_BM/scripts/* ./scripts/
 
-pb_spatial:
-	cp ./sample_projects_intracellular/boolean/physiboss_spatial/custom_modules/* ./custom_modules/
+physiboss_spatial:
+	cp ./sample_projects_intracellular/boolean/spatial/custom_modules/* ./custom_modules/
 	touch main.cpp && cp main.cpp main-backup.cpp
-	cp ./sample_projects_intracellular/boolean/physiboss_spatial/main.cpp ./main.cpp 
+	cp ./sample_projects_intracellular/boolean/spatial/main.cpp ./main.cpp 
 	cp Makefile Makefile-backup
-	cp ./sample_projects_intracellular/boolean/physiboss_spatial/Makefile .
+	cp ./sample_projects_intracellular/boolean/spatial/Makefile .
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
-	cp -r ./sample_projects_intracellular/boolean/physiboss_spatial/config/* ./config/
+	cp -r ./sample_projects_intracellular/boolean/spatial/config/* ./config/
 	mkdir ./scripts/
-	cp ./sample_projects_intracellular/boolean/physiboss_spatial/scripts/* ./scripts/
+	cp ./sample_projects_intracellular/boolean/spatial/scripts/* ./scripts/
+	
+physiboss_spatial_cilinder:
+	cp ./sample_projects_intracellular/boolean/spatial_cilinder/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/boolean/spatial_cilinder/main.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects_intracellular/boolean/spatial_cilinder/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp -r ./sample_projects_intracellular/boolean/spatial_cilinder/config/* ./config/
+	mkdir ./scripts/
+	cp ./sample_projects_intracellular/boolean/spatial_cilinder/scripts/* ./scripts/
 
 # early examples for convergence testing 
 
