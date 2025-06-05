@@ -78,6 +78,7 @@ list-projects:
 	@echo ""
 	@echo "Sample intracellular projects: template_BM ode-energy-sample physiboss-cell-lines-sample"
 	@echo "                 cancer-metabolism-sample physiboss-tutorial physiboss-tutorial-invasion"
+	@echo "					physiboss-tnf-model prostate physiboss_spatial physiboss_spatial_cilinder physiboss_ags"
 	@echo ""
 	
 template:
@@ -298,6 +299,49 @@ template_BM:
 	cp -r ./sample_projects_intracellular/boolean/template_BM/config/* ./config/
 	mkdir ./scripts/
 	cp ./sample_projects_intracellular/boolean/template_BM/scripts/* ./scripts/
+	
+physiboss-tnf-model:
+	cp ./sample_projects_intracellular/boolean/spheroid_tnf_model/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/boolean/spheroid_tnf_model/main-spheroid_TNF.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects_intracellular/boolean/spheroid_tnf_model/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp ./sample_projects_intracellular/boolean/spheroid_tnf_model/config/* ./config/
+	cp -r ./sample_projects_intracellular/boolean/spheroid_tnf_model/scripts ./
+
+physiboss_spatial:
+	cp ./sample_projects_intracellular/boolean/spatial/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/boolean/spatial/main.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects_intracellular/boolean/spatial/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp -r ./sample_projects_intracellular/boolean/spatial/config/* ./config/
+	mkdir ./scripts/
+	cp ./sample_projects_intracellular/boolean/spatial/scripts/* ./scripts/
+	
+physiboss_spatial_cilinder:
+	cp ./sample_projects_intracellular/boolean/spatial_cilinder/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/boolean/spatial_cilinder/main.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects_intracellular/boolean/spatial_cilinder/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp -r ./sample_projects_intracellular/boolean/spatial_cilinder/config/* ./config/
+	mkdir ./scripts/
+	cp ./sample_projects_intracellular/boolean/spatial_cilinder/scripts/* ./scripts/
+
+physiboss_ags:
+	cp ./sample_projects_intracellular/boolean/ags_model/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/boolean/ags_model/main.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects_intracellular/boolean/ags_model/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp ./sample_projects_intracellular/boolean/ags_model/config/* ./config/
+	# cp -r ./sample_projects_intracellular/boolean/ags_model/scripts ./
+
 
 # early examples for convergence testing 
 

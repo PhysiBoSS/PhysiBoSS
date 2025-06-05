@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*
+###############################################################################
+# If you use PhysiCell in your project, please cite PhysiCell and the version #
+# number, such as below:                                                      #
+#                                                                             #
+# We implemented and solved the model using PhysiCell (Version x.y.z) [1].    #
+#                                                                             #
+# [1] A Ghaffarizadeh, R Heiland, SH Friedman, SM Mumenthaler, and P Macklin, #
+#     PhysiCell: an Open Source Physics-Based Cell Simulator for Multicellu-  #
+#     lar Systems, PLoS Comput. Biol. 14(2): e1005991, 2018                   #
+#     DOI: 10.1371/journal.pcbi.1005991                                       #
+#                                                                             #
+# See VERSION.txt or call get_PhysiCell_version() to get the current version  #
+#     x.y.z. Call display_citations() to get detailed information on all cite-#
+#     able software used in your PhysiCell application.                       #
+#                                                                             #
+# Because PhysiCell extensively uses BioFVM, we suggest you also cite BioFVM  #
+#     as below:                                                               #
+#                                                                             #
+# We implemented and solved the model using PhysiCell (Version x.y.z) [1],    #
+# with BioFVM [2] to solve the transport equations.                           #
+#                                                                             #
+# [1] A Ghaffarizadeh, R Heiland, SH Friedman, SM Mumenthaler, and P Macklin, #
+#     PhysiCell: an Open Source Physics-Based Cell Simulator for Multicellu-  #
+#     lar Systems, PLoS Comput. Biol. 14(2): e1005991, 2018                   #
+#     DOI: 10.1371/journal.pcbi.1005991                                       #
+#                                                                             #
+# [2] A Ghaffarizadeh, SH Friedman, and P Macklin, BioFVM: an efficient para- #
+#     llelized diffusive transport solver for 3-D biological simulations,     #
+#     Bioinformatics 32(8): 1256-8, 2016. DOI: 10.1093/bioinformatics/btv730  #
+#                                                                             #
+###############################################################################
+#                                                                             #
+# BSD 3-Clause License (see https://opensource.org/licenses/BSD-3-Clause)     #
+#                                                                             #
+# Copyright (c) 2015-2021, Paul Macklin and the PhysiCell Project             #
+# All rights reserved.                                                        #
+#                                                                             #
+# Redistribution and use in source and binary forms, with or without          #
+# modification, are permitted provided that the following conditions are met: #
+#                                                                             #
+# 1. Redistributions of source code must retain the above copyright notice,   #
+# this list of conditions and the following disclaimer.                       #
+#                                                                             #
+# 2. Redistributions in binary form must reproduce the above copyright        #
+# notice, this list of conditions and the following disclaimer in the         #
+# documentation and/or other materials provided with the distribution.        #
+#                                                                             #
+# 3. Neither the name of the copyright holder nor the names of its            #
+# contributors may be used to endorse or promote products derived from this   #
+# software without specific prior written permission.                         #
+#                                                                             #
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" #
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE   #
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE  #
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE   #
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR         #
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF        #
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS    #
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN     #
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)     #
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE  #
+# POSSIBILITY OF SUCH DAMAGE.                                                 #
+#                                                                             #
+###############################################################################
+*/
+--> 
+
+<!--
+<user_details />
+-->
+
+<PhysiCell_settings version="devel-version">
+
+    <cell_rules>
+        <rulesets>
+            <ruleset protocol="CBHG" version="2.0" format="csv" enabled="true">
+                <folder>config</folder>
+                <filename>rules.csv</filename>
+            </ruleset>
+        </rulesets>
+    </cell_rules>
+
+
+	<domain>
+		<x_min>-600</x_min> 
+		<x_max>600</x_max>
+		<y_min>-600</y_min>
+		<y_max>600</y_max>
+		<z_min>-30</z_min>
+		<z_max>30</z_max>
+		<dx>20</dx> 
+		<dy>20</dy> 
+		<dz>20</dz>
+		<use_2D>true</use_2D>
+	</domain>
+	
+	<overall>
+		<max_time units="min"> 4200 </max_time>  <!-- 4200 -->
+		<time_units>min</time_units>
+		<space_units>micron</space_units>
+	
+		<dt_diffusion units="min">0.01</dt_diffusion>
+		<dt_mechanics units="min">0.1</dt_mechanics>
+		<dt_phenotype units="min">6</dt_phenotype>	
+	</overall>
+	
+	<parallel>
+		<omp_num_threads>96</omp_num_threads> <!-- Much better than 6 -->
+	</parallel> 
+	
+	<save>
+		<folder>output</folder> <!-- use . for root --> 
+
+		<full_data>
+			<interval units="min">40</interval>
+			<enable>true</enable>
+		</full_data>
+		
+		<SVG>
+			<interval units="min">40</interval>
+			<enable>true</enable>
+		</SVG>
+		
+		<legacy_data>
+			<enable>true</enable>
+		</legacy_data>
+	</save>
+	
+	<options>
+		<legacy_random_points_on_sphere_in_divide>false</legacy_random_points_on_sphere_in_divide>
+		<virtual_wall_at_domain_edge>true</virtual_wall_at_domain_edge>
+        <disable_automated_spring_adhesions>false</disable_automated_spring_adhesions>
+	</options>	
+	
+	<microenvironment_setup>
+		<variable name="oxygen" units="mmHg" ID="0">
+			<physical_parameter_set>
+				<diffusion_coefficient units="micron^2/min">100000.0</diffusion_coefficient>
+				<decay_rate units="1/min">.1</decay_rate> 
+			</physical_parameter_set>
+			<initial_condition units="mmHg">38</initial_condition>
+			<Dirichlet_boundary_condition units="mmHg" enabled="true">38</Dirichlet_boundary_condition>
+		</variable>
+
+		<variable name="drug_X" units="umol" ID="1">
+			<physical_parameter_set>
+				<diffusion_coefficient units="micron^2/min">600.0</diffusion_coefficient>
+				<decay_rate units="1/min">0.0</decay_rate> 
+			</physical_parameter_set>
+			<initial_condition units="umol">0</initial_condition>
+			<Dirichlet_boundary_condition units="umol" enabled="false">0</Dirichlet_boundary_condition>
+		</variable>
+
+		<variable name="drug_Y" units="umol" ID="2">
+			<physical_parameter_set>
+				<diffusion_coefficient units="micron^2/min">600.0</diffusion_coefficient>
+				<decay_rate units="1/min">0.0</decay_rate> 
+			</physical_parameter_set>
+			<initial_condition units="umol">0</initial_condition>
+			<Dirichlet_boundary_condition units="umol" enabled="false">0</Dirichlet_boundary_condition>
+		</variable>
+
+		<options>
+			<calculate_gradients>false</calculate_gradients>
+			<track_internalized_substrates_in_each_agent>true</track_internalized_substrates_in_each_agent>
+			<!-- not yet supported --> 		 
+			<initial_condition enabled="false" type="matlab">
+				<filename>./config/initial.mat</filename>
+			</initial_condition>
+			 
+			<dirichlet_nodes enabled="false" type="matlab">
+				<filename>./config/dirichlet.mat</filename>
+			</dirichlet_nodes>
+		</options>
+	</microenvironment_setup>		
+	
+	<cell_definitions>
+		<cell_definition name="default" ID="0">
+			<phenotype>
+				<cycle code="5" name="live">  
+					<phase_transition_rates units="1/min"> 
+						<rate end_index="0" fixed_duration="false" start_index="0">0.00209</rate> 
+					</phase_transition_rates>
+				</cycle>
+				
+				<death>  
+					<model code="100" name="apoptosis"> 
+						<death_rate units="1/min">5.31667e-05</death_rate>
+						<!-- use phase_transition_rates OR phase_durations -->
+						<!--
+						<phase_transition_rates units="1/min">
+							<rate start_index="0" end_index="1" fixed_duration="true">0.00193798</rate>
+						</phase_transition_rates>
+						-->
+						<phase_durations units="min">
+							<duration index="0" fixed_duration="true">516</duration>
+						</phase_durations>
+						<parameters>
+							<unlysed_fluid_change_rate units="1/min">0.05</unlysed_fluid_change_rate>
+							<lysed_fluid_change_rate units="1/min">0</lysed_fluid_change_rate>
+							<cytoplasmic_biomass_change_rate units="1/min">1.66667e-02</cytoplasmic_biomass_change_rate>
+							<nuclear_biomass_change_rate units="1/min">5.83333e-03</nuclear_biomass_change_rate>
+							<calcification_rate units="1/min">0</calcification_rate>
+							<relative_rupture_volume units="dimensionless">2.0</relative_rupture_volume>
+						</parameters>
+					</model> 
+
+					<model code="101" name="necrosis">
+						<death_rate units="1/min">0.0</death_rate>
+						<!-- use phase_transition_rates OR phase_durations -->
+						<!-- necrosis uses phase_duration[0] = 0 so that it always immediately
+							 tries to transition and instead checks volume against the rupture
+							 volume --> 
+<!--						
+						<phase_transition_rates units="1/min">
+							<rate start_index="0" end_index="1" fixed_duration="false">9e9</rate>
+							<rate start_index="1" end_index="2" fixed_duration="true">1.15741e-5</rate>
+						</phase_transition_rates>
+-->						
+						<phase_durations units="min">
+							<duration index="0" fixed_duration="true">0</duration>
+							<duration index="1" fixed_duration="true">86400</duration>
+						</phase_durations>
+						
+						<parameters>
+							<unlysed_fluid_change_rate units="1/min">1.11667e-2</unlysed_fluid_change_rate>
+							<lysed_fluid_change_rate units="1/min">8.33333e-4</lysed_fluid_change_rate>
+							<cytoplasmic_biomass_change_rate units="1/min">5.33333e-5</cytoplasmic_biomass_change_rate>
+							<nuclear_biomass_change_rate units="1/min">2.16667e-3</nuclear_biomass_change_rate>
+							<calcification_rate units="1/min">0</calcification_rate>
+							<relative_rupture_volume units="dimensionless">2.0</relative_rupture_volume>
+						</parameters>
+					</model> 
+				</death>					
+
+				<volume>  
+					<total units="micron^3">2494</total>
+					<fluid_fraction units="dimensionless">0.75</fluid_fraction>
+					<nuclear units="micron^3">540</nuclear>
+					
+					<fluid_change_rate units="1/min">0.05</fluid_change_rate>
+					<cytoplasmic_biomass_change_rate units="1/min">0.0045</cytoplasmic_biomass_change_rate>
+					<nuclear_biomass_change_rate units="1/min">0.0055</nuclear_biomass_change_rate>
+					
+					<calcified_fraction units="dimensionless">0</calcified_fraction>
+					<calcification_rate units="1/min">0</calcification_rate>
+					
+					<relative_rupture_volume units="dimensionless">2.0</relative_rupture_volume>
+				</volume> 				
+				
+				<mechanics> 
+					<cell_cell_adhesion_strength units="micron/min">0.4</cell_cell_adhesion_strength>
+					<cell_cell_repulsion_strength units="micron/min">10.0</cell_cell_repulsion_strength>
+					<relative_maximum_adhesion_distance units="dimensionless">1.25</relative_maximum_adhesion_distance>
+  					<cell_adhesion_affinities>
+	  					<cell_adhesion_affinity name="default">1</cell_adhesion_affinity> 
+		  			</cell_adhesion_affinities>					
+					<options>
+						<set_relative_equilibrium_distance enabled="false" units="dimensionless">1.8</set_relative_equilibrium_distance>
+						<set_absolute_equilibrium_distance enabled="false" units="micron">15.12</set_absolute_equilibrium_distance>
+					</options>
+                    <cell_BM_adhesion_strength units="micron/min">4.0</cell_BM_adhesion_strength>
+                    <cell_BM_repulsion_strength units="micron/min">10.0</cell_BM_repulsion_strength>
+                    <attachment_elastic_constant type="double" units="1/min">0.01</attachment_elastic_constant> 
+                    <attachment_rate type="double" units="1/min">0.0</attachment_rate> 
+                    <detachment_rate type="double" units="1/min">0.0</detachment_rate> 
+				</mechanics>
+				
+				<motility>  
+					<speed units="micron/min">1</speed>
+					<persistence_time units="min">1</persistence_time>
+					<migration_bias units="dimensionless">.5</migration_bias>
+					
+					<options>
+						<enabled>false</enabled>
+						<use_2D>true</use_2D>
+						<chemotaxis>
+							<enabled>false</enabled>
+							<substrate>oxygen</substrate>
+							<direction>1</direction>
+						</chemotaxis>
+					</options>
+				</motility>
+								
+				<secretion>
+					<substrate name="oxygen"> 
+						<secretion_rate units="1/min">0</secretion_rate>
+						<secretion_target units="substrate density">38</secretion_target>
+						<uptake_rate units="1/min">10</uptake_rate>
+						<net_export_rate units="total substrate/min">0</net_export_rate> 
+					</substrate> 
+				</secretion>
+
+				<cell_interactions>
+				<dead_phagocytosis_rate units="1/min">0</dead_phagocytosis_rate>
+				<live_phagocytosis_rates>
+					<phagocytosis_rate name="default" units="1/min">0</phagocytosis_rate>
+				</live_phagocytosis_rates>
+				<attack_rates>
+					<attack_rate name="default" units="1/min">0</attack_rate>
+				</attack_rates>
+				<damage_rate units="1/min">1</damage_rate>
+				<fusion_rates>
+					<fusion_rate name="default" units="1/min">0</fusion_rate>
+				</fusion_rates>
+				</cell_interactions>
+				<cell_transformations>
+					<transformation_rates>
+						<transformation_rate name="default" units="1/min">0</transformation_rate>
+					</transformation_rates>
+				</cell_transformations>
+
+
+				<molecular />
+				<intracellular type="maboss">
+					<bnd_filename>./config/AGS_all_nodes_real.bnd</bnd_filename>
+					<cfg_filename>./config/AGS_all_nodes_real.cfg</cfg_filename>
+					<settings>
+                  		<intracellular_dt>10.0</intracellular_dt>
+                        <time_stochasticity>0.0</time_stochasticity> <!-- 0.0 -->
+                        <scaling>10</scaling> <!-- 10 -->
+                        <start_time>0.0</start_time>
+                        <inheritance global="True" />
+					</settings>
+				</intracellular>
+			</phenotype>
+			
+			<custom_data>
+				<sample units="dimensionless" conserved="false">1.0</sample>
+
+				<drug_X_permeability type="double" units="amol/um^3" conserved="false">0.00021979189</drug_X_permeability> 
+				<drug_X_half_max type="double" units="mM" conserved="false">3.3857220000000006e-05</drug_X_half_max>
+				<drug_X_Hill_coeff type="double" units="mM" conserved="false">5.503406625769999</drug_X_Hill_coeff>
+
+				<drug_Y_permeability type="double" units="amol/um^3" conserved="false"> 0.1 </drug_Y_permeability>
+				<drug_Y_half_max type="double" units="mM" conserved="false"> 0.005 </drug_Y_half_max>
+				<drug_Y_Hill_coeff type="double" units="mM" conserved="false"> 5.0 </drug_Y_Hill_coeff>
+
+				<basal_growth_rate type="double" units="1/min" conserved="false">0.00209</basal_growth_rate> 
+				<hill_coeff_growth type="double" units="dimensionless" conserved="false">6.9505</hill_coeff_growth>
+				<K_half_growth type="double" units="dimensionless" conserved="false">0.0585</K_half_growth>
+			
+				<apoptosis_rate_basal type="double" units="1/min" conserved="false">5.31667e-05</apoptosis_rate_basal>
+				<max_apoptosis_rate type="double" units="1/min" conserved="false">0.0098</max_apoptosis_rate>
+				<hill_coeff_apoptosis type="double" units="dimensionless" conserved="false">3.6787</hill_coeff_apoptosis>
+				<K_half_apoptosis type="double" units="dimensionless" conserved="false">0.0193</K_half_apoptosis>
+				
+				<hill_coeff_pressure type="double" units="1/min" conserved="false">6.9583485811</hill_coeff_pressure>
+				<pressure_half type="double" units="1/min" conserved="false">4.7920543763</pressure_half> 
+				
+				<w1_growth type="double" units="dimensionless" conserved="false">0.2215</w1_growth>
+				<w2_growth type="double" units="dimensionless" conserved="false">0.2574</w2_growth>
+				<w1_apoptosis type="double" units="dimensionless" conserved="false">0.1092</w1_apoptosis>
+				<w2_apoptosis type="double" units="dimensionless" conserved="false">0.3765</w2_apoptosis>
+
+			</custom_data>
+		</cell_definition>
+	</cell_definitions>
+
+	<initial_conditions>
+        <cell_positions type="csv" enabled="true">
+            <folder>./config</folder>
+            <filename>cells_2D_disk_250um_hex.csv</filename>
+        </cell_positions>
+    </initial_conditions>
+
+    <cell_rules>
+        <rulesets>
+            <ruleset protocol="CBHG" version="2.0" format="csv" enabled="false">
+                <folder>./config</folder>
+                <filename>cell_rules.csv</filename>
+            </ruleset>
+        </rulesets>
+        <settings />
+    </cell_rules>
+
+	<user_parameters>
+		<random_seed type="int" units="dimensionless">1234</random_seed>
+
+		<!-- Initial setup parameters -->
+		<csv_setup type="bool" units="dimensionless">true</csv_setup>
+		<tumor_radius type="double" units="um"> 25.0 </tumor_radius> <!-- 225.0 for 1200 / 500.0 for around 4993 agents -->
+		<cell_spacing type="double" units="um"> 1.6 </cell_spacing> <!-- 1.6 -->
+
+		<!-- Drug params -->
+		<treatment type="bool" units="dimensionless">true</treatment>
+		<drug_X_pulse_period type="double" units="min"> 1280 </drug_X_pulse_period> 
+		<drug_X_pulse_duration type="double" units="min"> 40 </drug_X_pulse_duration> 
+		<drug_X_pulse_concentration type="double" units="min">0.000175</drug_X_pulse_concentration>
+		<drug_X_target type="string" units="min">anti_PI3K</drug_X_target>
+		<drug_X_membrane_length type="double" units=""> 0 </drug_X_membrane_length> <!-- Not employed for now -->
+
+		<drug_Y_pulse_period type="double" units="min"> 1280 </drug_Y_pulse_period> 
+		<drug_Y_pulse_duration type="double" units="min"> 40 </drug_Y_pulse_duration> 
+		<drug_Y_pulse_concentration type="double" units="min">0.1</drug_Y_pulse_concentration>
+		<drug_Y_target type="string" units="min">anti_MEK</drug_Y_target>
+		<drug_Y_membrane_length type="double" units=""> 0 </drug_Y_membrane_length> <!-- Not employed for now -->
+
+		<!-- Heterogeneous population sampling distribution -->
+		<reactivation_rate_mean type="double" units="1/min">0.0</reactivation_rate_mean>
+		<reactivation_rate_sd type="double" units="1/min">0.0</reactivation_rate_sd>	
+		<mutation_rate_mean type="double" units="uM?"> 0 </mutation_rate_mean> <!-- from https://bionumbers.hms.harvard.edu/bionumber.aspx?s=n&v=20&id=100417 -->
+		<mutation_rate_sd type="double" units="uM?"> 0 </mutation_rate_sd>
+
+	</user_parameters>
+	
+	
+</PhysiCell_settings>
