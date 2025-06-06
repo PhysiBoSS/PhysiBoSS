@@ -238,9 +238,9 @@ reset:
 	touch ALL_CITATIONS.txt 
 	# touch ./core/PhysiCell_cell.cpp
 	rm ALL_CITATIONS.txt 
-	cp ./config/PhysiCell_settings-backup.xml ./config/PhysiCell_settings.xml 
-	rm -fr ./config/cells.csv ./config/cell_rules.csv
-	rm -rf ./scripts
+	rm -rf ./config/*
+	# cp ./config/PhysiCell_settings-backup.xml ./config/PhysiCell_settings.xml 
+	rm -rf ./scripts/*
 
 MaBoSS-clean:
 	rm -fr addons/PhysiBoSS/MaBoSS

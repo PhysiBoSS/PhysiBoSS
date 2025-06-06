@@ -126,12 +126,10 @@ void create_cell_types( void )
 	   This is a good place to set custom functions. 
 	*/ 
 
-
 	cell_defaults.functions.custom_cell_rule = custom_function; 
 	cell_defaults.functions.contact_function = contact_function; 
 
 	Cell_Definition* pCD = find_cell_definition( "green");
-
 
 	pCD->functions.custom_cell_rule = custom_function; 
 	pCD->functions.contact_function = contact_function; 
@@ -446,9 +444,6 @@ void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& 
 	return; 
 } 
 
-
-
-
 void add_ecm_interaction(Cell* pC, int index_ecm, int index_voxel )
 {
 	// Check if there is ECM material in given voxel
@@ -502,11 +497,6 @@ void add_ecm_interaction(Cell* pC, int index_ecm, int index_voxel )
 
 }
 
-
-
-
-
-
 std::vector<std::string> my_coloring_function( Cell* pCell )
 { return paint_by_number_cell_coloring(pCell); }
 
@@ -540,8 +530,8 @@ std::vector<std::string> regular_colors( Cell* pCell )
 
 	if( pCell->type == C_type )
 	{
-		 output[0] = "rgb(255,140,0)";  
-		 output[2] = "rgb(255,140,0)";  
+		 output[0] = "chocolate";  
+		 output[2] = "chocolate";  
 	}
 	
 	if( pCell->phenotype.death.dead == true )
@@ -551,8 +541,13 @@ std::vector<std::string> regular_colors( Cell* pCell )
 			pCell->phenotype.cycle.current_phase().code == PhysiCell_constants::necrotic_lysed || 
 			pCell->phenotype.cycle.current_phase().code == PhysiCell_constants::necrotic )
 		{
-			output[2] = "chocolate";
+			output[2] = "rgb(255,140,0)";
 		}
+		else
+		if( pCell->phenotype.cycle.current_phase().code == PhysiCell_constants::apoptotic)
+		{
+			output[2] = "rgb(255,0,0)";
+		}		
 		else
 		{
 			output[2] = "black"; 

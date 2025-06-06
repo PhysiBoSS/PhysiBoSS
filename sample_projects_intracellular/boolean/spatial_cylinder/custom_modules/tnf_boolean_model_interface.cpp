@@ -185,6 +185,7 @@ void anti_node_mapping_function( Cell* pCell, std::string drug_name, std::string
 void update_cell_from_boolean_model(Cell* pCell, Phenotype& phenotype, double dt)
 {	
 
+	// XXX death_decay calculation is not used in this model, but it is kept here for future reference
     static int death_decay_idx = pCell->custom_data.find_variable_index( "death_commitment_decay" );
     static int apoptosis_index = phenotype.death.find_death_model_index( PhysiCell_constants::apoptosis_death_model );
     static float apoptosis_rate = pCell->custom_data["apoptosis_rate"];
@@ -361,10 +362,12 @@ void post_update_intracellular(Cell* pCell, Phenotype& phenotype, double dt)
 		return;
 	}
     
-    // update the cell fate based on the boolean outputs
-    update_cell_from_boolean_model(pCell, phenotype, dt);
-    
+    // XXX repassar si cal els tres passos
+	// update the cell fate based on the boolean outputs
+	update_cell_from_boolean_model(pCell, phenotype, dt);
+	// update the growth parameters based on the oxygen availability
     update_cell_and_death_parameters_O2_based(pCell, phenotype, dt);
+	// update the growth parameters based on the pressure
     update_cell_growth_parameters_pressure_based(pCell, phenotype, dt);
 
 
