@@ -59,5 +59,9 @@
         "streambuf": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp"
+    },
+    "sonarlint.connectedMode.project": {
+        "connectionId": "physiboss",
+        "projectKey": "PhysiBoSS_PhysiBoSS"
     }
 }

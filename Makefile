@@ -78,7 +78,7 @@ list-projects:
 	@echo ""
 	@echo "Sample intracellular projects: template_BM ode-energy-sample physiboss-cell-lines-sample"
 	@echo "                 cancer-metabolism-sample physiboss-tutorial physiboss-tutorial-invasion"
-	@echo "					physiboss-tnf-model prostate physiboss_spatial physiboss_spatial_cilinder physiboss_ags"
+	@echo "					physiboss-tnf-model prostate physiboss_spatial physiboss_spatial_cylinder physiboss_ags"
 	@echo ""
 	
 template:
@@ -321,16 +321,16 @@ physiboss_spatial:
 	mkdir ./scripts/
 	cp ./sample_projects_intracellular/boolean/spatial/scripts/* ./scripts/
 	
-physiboss_spatial_cilinder:
-	cp ./sample_projects_intracellular/boolean/spatial_cilinder/custom_modules/* ./custom_modules/
+physiboss_spatial_cylinder:
+	cp ./sample_projects_intracellular/boolean/spatial_cylinder/custom_modules/* ./custom_modules/
 	touch main.cpp && cp main.cpp main-backup.cpp
-	cp ./sample_projects_intracellular/boolean/spatial_cilinder/main.cpp ./main.cpp 
+	cp ./sample_projects_intracellular/boolean/spatial_cylinder/main.cpp ./main.cpp 
 	cp Makefile Makefile-backup
-	cp ./sample_projects_intracellular/boolean/spatial_cilinder/Makefile .
+	cp ./sample_projects_intracellular/boolean/spatial_cylinder/Makefile .
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
-	cp -r ./sample_projects_intracellular/boolean/spatial_cilinder/config/* ./config/
+	cp -r ./sample_projects_intracellular/boolean/spatial_cylinder/config/* ./config/
 	mkdir ./scripts/
-	cp ./sample_projects_intracellular/boolean/spatial_cilinder/scripts/* ./scripts/
+	cp ./sample_projects_intracellular/boolean/spatial_cylinder/scripts/* ./scripts/
 
 physiboss_ags:
 	cp ./sample_projects_intracellular/boolean/ags_model/custom_modules/* ./custom_modules/

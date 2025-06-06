@@ -29,11 +29,11 @@
     <save>
         <folder>output</folder>
         <full_data>
-            <interval units="min">10</interval>
+            <interval units="min">30</interval>
             <enable>true</enable>
         </full_data>
         <SVG>
-            <interval units="min">10</interval>
+            <interval units="min">30</interval>
             <enable>true</enable>
             <legend enabled="true">
                 <cell_phase>false</cell_phase>
