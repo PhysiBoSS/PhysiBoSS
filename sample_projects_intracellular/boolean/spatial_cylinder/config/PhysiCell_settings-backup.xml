@@ -709,7 +709,7 @@
 		<random_seed type="int" units="dimensionless" description="">0</random_seed>
 
 		<blood_source_file type="string" units="">./config/cylinder_unit_endo.tsv</blood_source_file>
-		<time_remove_o2 type="double" units="" description="Time to remove O2"> 30000 </time_remove_o2>
+		<time_add_drug type="double" units="" description="Time to remove O2"> 30000 </time_add_drug>
 
 
 		<o2_conc1 type="double" units="" description="O2 appearing in the blood vessels"> 38 </o2_conc1>

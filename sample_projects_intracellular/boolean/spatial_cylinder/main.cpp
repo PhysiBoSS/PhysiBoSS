@@ -117,7 +117,7 @@ int main( int argc, char* argv[] )
 	
 	setup_microenvironment(); // modify this in the custom code 
 	
-	double time_remove_o2 = parameters.doubles("time_remove_o2");
+	double time_add_drug = parameters.doubles("time_add_drug");
 	bool done = false; 
 
 	
@@ -233,7 +233,7 @@ int main( int argc, char* argv[] )
 			
 			drug_transport_model_main( diffusion_dt );
 			
-			if (PhysiCell_globals.current_time >= time_remove_o2 && !done)
+			if (PhysiCell_globals.current_time >= time_add_drug && !done)
 			{
     			change_dirichlet_nodes();
    				done = true;

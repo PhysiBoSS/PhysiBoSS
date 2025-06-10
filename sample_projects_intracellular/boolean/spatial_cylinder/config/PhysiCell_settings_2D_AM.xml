@@ -2,7 +2,7 @@
 
 <PhysiCell_settings version="devel-version">
 	<domain>
-		<x_min>-400</x_min> <!-- 720 -->
+		<x_min>-400</x_min>		<!-- 720 -->
 		<x_max>400</x_max>
 		<y_min>-400</y_min>
 		<y_max>400</y_max>
@@ -125,13 +125,13 @@
 			<phenotype>
 				<cycle code="5" name="live_cells_cycle_model">
 					<phase_transition_rates units="1/min">
-						<rate start_index="0" end_index="0" fixed_duration="false">0.001</rate>						<!-- XXX, 0.001, 1 -->
+						<rate start_index="0" end_index="0" fixed_duration="false">0.1</rate>						<!-- XXX, 0.001, 1 -->
 					</phase_transition_rates>
 				</cycle>
 
 				<death>
 					<model code="100" name="apoptosis">
-						<!-- <death_rate units="1/min">1e-05</death_rate> --> <!-- xxx no estava comentat -->
+						<death_rate units="1/min">1e-05</death_rate> <!-- XXX, era 1e-05, el default és més alt que E-5, si es comenta hi ha un poc més de apoptosis, si és 0.0, necrosis es dispara -->
 						<!-- use phase_transition_rates OR phase_durations -->
 						<!--
 						<phase_transition_rates units="1/min">
@@ -157,12 +157,10 @@
 						<!-- necrosis uses phase_duration[0] = 0 so that it always immediately
 							 tries to transition and instead checks volume against the rupture
 							 volume -->
-						<!--						
-										<phase_transition_rates units="1/min">
+						<!-- <phase_transition_rates units="1/min">
 											<rate start_index="0" end_index="1" fixed_duration="false">9e9</rate>
 											<rate start_index="1" end_index="2" fixed_duration="true">1.15741e-5</rate>
-										</phase_transition_rates>
-				-->
+										</phase_transition_rates> -->
 						<phase_durations units="min">
 							<duration index="0" fixed_duration="true">0</duration>
 							<duration index="1" fixed_duration="true">86400</duration>
@@ -270,6 +268,7 @@
 				<death_commitment_decay type="double" units="1/min" description="Factor at which death rates decay when Boolean readout deactivate">1e-7</death_commitment_decay>
 				<Hypoxia_node units="dimensionless">0</Hypoxia_node>
 				<Proliferation_node units="dimensionless">0</Proliferation_node>
+				<Apoptosis_node units="dimensionless">0</Apoptosis_node>
 				<cell_pressure units="dimensionless">0</cell_pressure>
 				<TNFalpha_node units="dimensionless">0</TNFalpha_node>
 				<anti_Raf_node units="dimensionless">0</anti_Raf_node>
@@ -426,9 +425,10 @@
 			<custom_data>
 				<nucleus_deform type="double" units="">0</nucleus_deform>
 				<apoptosis_rate type="double" units="1/min" description="Apoptotic rate value when Apoptosis node becomes active">0.000006</apoptosis_rate>
-				<death_commitment_decay type="double" units="1/min" description="Factor at wich death rates decay when Boolean readout deactivate">1e-7</death_commitment_decay>
+				<death_commitment_decay type="double" units="1/min" description="Factor at which death rates decay when Boolean readout deactivate">1e-7</death_commitment_decay>
 				<Hypoxia_node units="dimensionless">0</Hypoxia_node>
 				<Proliferation_node units="dimensionless">0</Proliferation_node>
+				<Apoptosis_node units="dimensionless">0</Apoptosis_node>
 				<cell_pressure units="dimensionless">0</cell_pressure>
 				<TNFalpha_node units="dimensionless">0</TNFalpha_node>
 				<anti_Raf_node units="dimensionless">0</anti_Raf_node>
@@ -586,9 +586,10 @@
 			<custom_data>
 				<nucleus_deform type="double" units="">0</nucleus_deform>
 				<apoptosis_rate type="double" units="1/min" description="Apoptotic rate value when Apoptosis node becomes active">0.000006</apoptosis_rate>
-				<death_commitment_decay type="double" units="1/min" description="Factor at wich death rates decay when Boolean readout deactivate">1e-7</death_commitment_decay>
+				<death_commitment_decay type="double" units="1/min" description="Factor at which death rates decay when Boolean readout deactivate">1e-7</death_commitment_decay>
 				<Hypoxia_node units="dimensionless">0</Hypoxia_node>
 				<Proliferation_node units="dimensionless">0</Proliferation_node>
+				<Apoptosis_node units="dimensionless">0</Apoptosis_node>
 				<cell_pressure units="dimensionless">0</cell_pressure>
 				<TNFalpha_node units="dimensionless">0</TNFalpha_node>
 				<anti_Raf_node units="dimensionless">0</anti_Raf_node>
@@ -622,21 +623,21 @@
 		<!-- example parameters from the template -->
 		<read_init type="bool">true</read_init>
 		<random_seed type="int" units="dimensionless" description="">0</random_seed>
-		<blood_source_file type="string" units="">./config/initial_cond/cylinder_unit_endo_2D_40.tsv</blood_source_file>  <!--  -->
-		<time_remove_o2 type="double" units="" description="XXX Time to add drug"> 100 </time_remove_o2>		<!-- 100 -->
+		<blood_source_file type="string" units="">./config/initial_cond/cylinder_unit_endo_2D_40.tsv</blood_source_file>		<!--  -->
+		<time_add_drug type="double" units="" description="XXX Time to add drug"> 100 </time_add_drug>		<!-- 100 -->
 		<o2_conc1 type="double" units="" description="O2 appearing in the blood vessels"> 38 </o2_conc1>
-		<ecm_density_file type="string" units="">./config/initial_cond/cylinder_unit_ecm_2D_40_doble.tsv</ecm_density_file> <!-- cylinder_unit_ecm_2D -->
+		<ecm_density_file type="string" units="">./config/initial_cond/cylinder_unit_ecm_2D_40_doble.tsv</ecm_density_file>		<!-- cylinder_unit_ecm_2D -->
 		<ecm_conc type="double" units="" description=""> 20 </ecm_conc>
 		<ecm_value type="double" units="" description="density of the ECM substrate, topped at 1"> 0.01 </ecm_value>
 		<cell_ecm_repulsion type="double" units="" description="change the value of ECM repulsion"> 15 </cell_ecm_repulsion>
-		<substrate_to_monitor type="string" units="">ecm</substrate_to_monitor>
-		<drug_conc type="double" units="" description="XXX Concentration of drug">0</drug_conc>		<!-- 0.000005 -->
+		<substrate_to_monitor type="string" units="">drug_A</substrate_to_monitor>
+		<drug_conc type="double" units="" description="XXX Concentration of drug">50</drug_conc>		<!-- 0.000005 -->
 		<hill_coeff_pressure type="double" units="1/min">15.0</hill_coeff_pressure>
 		<pressure_half type="double" units="1/min">1.0</pressure_half>
 		<drug_X_target type="string" units="">TNFalpha</drug_X_target>
-		<drug_X_half_max type="double" units="mM">1e-07</drug_X_half_max> <!-- 1e-07 -->
-		<drug_X_Hill_coeff type="double" units="">2.0</drug_X_Hill_coeff> <!-- 2.0 -->
-		<drug_X_permeability type="double" units=""> 0.5</drug_X_permeability> <!-- 0.1 -->
+		<drug_X_half_max type="double" units="mM">1</drug_X_half_max>		<!-- 1e-07 -->
+		<drug_X_Hill_coeff type="double" units="">10.0</drug_X_Hill_coeff>		<!-- 2.0 -->
+		<drug_X_permeability type="double" units=""> 1 </drug_X_permeability>		<!-- 0.1 -->
 		<div_initialization type="divider" description="---Initialization settings---"/>
 		<number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">0</number_of_cells>
 	</user_parameters>

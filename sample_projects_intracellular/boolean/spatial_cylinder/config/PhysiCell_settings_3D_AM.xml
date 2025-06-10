@@ -718,7 +718,7 @@
 		<read_init type="bool">true</read_init>
 		<random_seed type="int" units="dimensionless" description="">0</random_seed>
 		<blood_source_file type="string" units="">./config/cylinder_unit_endo.tsv</blood_source_file>
-		<time_remove_o2 type="double" units="" description="XXX Time to add drug"> 100 </time_remove_o2>
+		<time_add_drug type="double" units="" description="XXX Time to add drug"> 100 </time_add_drug>
 		<o2_conc1 type="double" units="" description="O2 appearing in the blood vessels"> 38 </o2_conc1> 
 		<ecm_density_file type="string" units="">./config/cylinder_unit_ecm.tsv</ecm_density_file>
 		<ecm_conc type="double" units="" description=""> 20 </ecm_conc>

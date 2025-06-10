@@ -327,7 +327,7 @@ physiboss_spatial_cylinder:
 	cp ./sample_projects_intracellular/boolean/spatial_cylinder/main.cpp ./main.cpp 
 	cp Makefile Makefile-backup
 	cp ./sample_projects_intracellular/boolean/spatial_cylinder/Makefile .
-	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	# cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
 	cp -r ./sample_projects_intracellular/boolean/spatial_cylinder/config/* ./config/
 	mkdir ./scripts/
 	cp ./sample_projects_intracellular/boolean/spatial_cylinder/scripts/* ./scripts/
