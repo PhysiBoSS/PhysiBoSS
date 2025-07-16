@@ -1,5 +1,5 @@
 VERSION := $(shell grep . VERSION.txt | cut -f1 -d:)
-PROGRAM_NAME := spatial_cylinder
+PROGRAM_NAME := project
 
 CC := g++
 # CC := g++-mp-7 # typical macports compiler name
@@ -58,9 +58,7 @@ ARCH := native # best auto-tuning
 # ARCH := nocona #64-bit pentium 4 or later 
 
 # CFLAGS := -march=$(ARCH) -Ofast -s -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
-CFLAGS := -g -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
-# debug:
-# CFLAGS := -march=$(ARCH) -O0 -ggdb -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
+CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11 -g
 
 ifeq ($(OS),Windows_NT)
 else
@@ -236,11 +234,11 @@ reset:
 	rm -f ./custom_modules/*
 	touch ./custom_modules/empty.txt 
 	touch ALL_CITATIONS.txt 
-	# touch ./core/PhysiCell_cell.cpp
+	touch ./core/PhysiCell_cell.cpp
 	rm ALL_CITATIONS.txt 
-	rm -rf ./config/*
-	# cp ./config/PhysiCell_settings-backup.xml ./config/PhysiCell_settings.xml 
-	rm -rf ./scripts/*
+	cp ./config/PhysiCell_settings-backup.xml ./config/PhysiCell_settings.xml 
+	rm -fr ./config/cells.csv ./config/cell_rules.csv
+	rm -rf ./scripts
 
 MaBoSS-clean:
 	rm -fr addons/PhysiBoSS/MaBoSS
@@ -250,9 +248,6 @@ clean:
 	rm -f $(PROGRAM_NAME)*
 	
 data-cleanup:
-	rm -f *.mat
-	rm -f *.xml
-	rm -f *.svg
 	rm -rf ./output
 	mkdir ./output
 	touch ./output/empty.txt

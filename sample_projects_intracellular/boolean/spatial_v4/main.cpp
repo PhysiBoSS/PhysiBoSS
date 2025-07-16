@@ -117,7 +117,7 @@ int main( int argc, char* argv[] )
 	
 	setup_microenvironment(); // modify this in the custom code 
 	
-	double time_add_drug = parameters.doubles("time_add_drug");
+	double time_remove_o2 = parameters.doubles("time_remove_o2");
 	bool done = false; 
 
 	
@@ -157,8 +157,7 @@ int main( int argc, char* argv[] )
 
 	// for simplicity, set a pathology coloring function 
 	
-	// std::vector<std::string> (*cell_coloring_function)(Cell*) = regular_colors; 
-	std::vector<std::string> (*cell_coloring_function)(Cell*) = false_cell_coloring_live_dead; 
+	std::vector<std::string> (*cell_coloring_function)(Cell*) = regular_colors; 
 	
 	sprintf( filename , "%s/initial.svg" , PhysiCell_settings.folder.c_str() ); 
 	SVG_plot( filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function );
@@ -191,8 +190,7 @@ int main( int argc, char* argv[] )
 		while( PhysiCell_globals.current_time < PhysiCell_settings.max_time + 0.1*diffusion_dt )
 		{
 			// save data if it's time. 
-			// if( fabs( PhysiCell_globals.current_time - PhysiCell_globals.next_full_save_time ) < 0.01 * diffusion_dt )
-			if( PhysiCell_globals.current_time > PhysiCell_globals.next_full_save_time - 0.5 * diffusion_dt )
+			if( fabs( PhysiCell_globals.current_time - PhysiCell_globals.next_full_save_time ) < 0.01 * diffusion_dt )
 			{
 				display_simulation_status( std::cout ); 
 				if( PhysiCell_settings.enable_legacy_saves == true )
@@ -212,8 +210,7 @@ int main( int argc, char* argv[] )
 			}
 			
 			// save SVG plot if it's time
-			// if( fabs( PhysiCell_globals.current_time - PhysiCell_globals.next_SVG_save_time  ) < 0.01 * diffusion_dt )
-			if( PhysiCell_globals.current_time > PhysiCell_globals.next_SVG_save_time - 0.5 * diffusion_dt )
+			if( fabs( PhysiCell_globals.current_time - PhysiCell_globals.next_SVG_save_time  ) < 0.01 * diffusion_dt )
 			{
 				if( PhysiCell_settings.enable_SVG_saves == true )
 				{	
@@ -233,9 +230,9 @@ int main( int argc, char* argv[] )
 			
 			drug_transport_model_main( diffusion_dt );
 			
-			if (PhysiCell_globals.current_time >= time_add_drug && !done)
+			if (PhysiCell_globals.current_time >= time_remove_o2 && !done)
 			{
-    			change_dirichlet_nodes();
+    				change_dirichlet_nodes();
    				done = true;
 			}
 			

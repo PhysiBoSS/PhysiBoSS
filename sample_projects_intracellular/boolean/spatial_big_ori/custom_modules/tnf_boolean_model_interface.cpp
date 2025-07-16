@@ -60,7 +60,6 @@ double calculate_diffusion_flux(Cell *pCell, int density_idx, double permeabilit
 
 	if (density_ext < 0)
 	{
-
 		pCell->nearest_density_vector()[density_idx] = 0;
 	}
 
@@ -113,17 +112,14 @@ void drug_transport_model_update(Cell *pCell, Phenotype &phenotype, double dt)
 	// double drug_Y_permeability = parameters.doubles("drug_Y_permeability");
 
 	double drug_X_flux = calculate_diffusion_flux(pCell, drug_X_idx, drug_X_permeability, "drug_A");
-	// double drug_Y_flux = calculate_diffusion_flux(pCell, drug_Y_idx, drug_X_permeability, "oxygen");
+	double drug_Y_flux = calculate_diffusion_flux(pCell, drug_Y_idx, drug_X_permeability, "oxygen");
 
-	if (drug_X_flux > 0.0) // flux = permeability * (density_int - density_ext) * cell_surface;
-	{
-		pCell->phenotype.secretion.net_export_rates[drug_X_idx] = 0.0; // no export if flux is negative
-	}
-	else if (drug_X_flux < 0.0)
-	{
-		pCell->phenotype.secretion.net_export_rates[drug_X_idx] = drug_X_flux;
-	}
-	// pCell->phenotype.secretion.net_export_rates[drug_Y_idx] = drug_Y_flux;
+	pCell->phenotype.secretion.net_export_rates[drug_X_idx] = drug_X_flux;
+	pCell->set_internal_uptake_constants(dt);
+
+	pCell->phenotype.secretion.net_export_rates[drug_Y_idx] = drug_Y_flux;
+
+	pCell->set_internal_uptake_constants(dt);
 
 	return;
 }
@@ -181,7 +177,7 @@ void anti_node_mapping_function(Cell *pCell, std::string drug_name, std::string 
 		if (uniform_random() < target_inactivate_p)
 		{ // Added normalization by maximum rand value
 			pCell->phenotype.intracellular->set_boolean_variable_value(target_node, 1);
-			// bool nodo = pCell->phenotype.intracellular->get_boolean_variable_value("TNFalpha");
+			bool nodo = pCell->phenotype.intracellular->get_boolean_variable_value("TNFalpha");
 			// std::cout << nodo << "jj" <<std::endl;
 			// std::cout << "1" << std::endl;
 		}
@@ -198,20 +194,12 @@ void anti_node_mapping_function(Cell *pCell, std::string drug_name, std::string 
 void update_cell_from_boolean_model(Cell *pCell, Phenotype &phenotype, double dt)
 {
 
-	// XXX death_decay calculation is not used in this model, but it is kept here for future reference
 	static int death_decay_idx = pCell->custom_data.find_variable_index("death_commitment_decay");
-	static float death_commitment_decay = pCell->custom_data["death_decay_idx"];
 	static int apoptosis_index = phenotype.death.find_death_model_index(PhysiCell_constants::apoptosis_death_model);
 	static float apoptosis_rate = pCell->custom_data["apoptosis_rate"];
+	static float death_commitment_decay = pCell->custom_data["death_decay_idx"];
 
-	double cell_volume = pCell->phenotype.volume.total;
-	static int drug_idx = microenvironment.find_density_index("drug_A");
-	double drug_int = pCell->phenotype.molecular.internalized_total_substrates[drug_idx];
-	drug_int /= cell_volume; // Convert to density (mM)
-	static float apoptosis_multiplier = 1 + drug_int;
-	// std::cout << "drug_int: " << drug_int << std::endl;
-
-	// // Getting the state of the Boolean model readouts
+	// // Getting the state of the Boolean model readouts (Readout can be in the XML)
 	bool apoptosis = pCell->phenotype.intracellular->get_boolean_variable_value("Apoptosis");
 	// // bool nonACD = pCell->phenotype.intracellular->get_boolean_variable_value( "NonACD" );
 	bool survival = pCell->phenotype.intracellular->get_boolean_variable_value("Proliferation");
@@ -224,22 +212,8 @@ void update_cell_from_boolean_model(Cell *pCell, Phenotype &phenotype, double dt
 
 	if (apoptosis)
 	{
-		if (drug_int > 0.0) // if drug is present, increase apoptosis rate
-		{
-			// pCell->phenotype.death.rates[apoptosis_index] = apoptosis_rate * apoptosis_multiplier;
-			pCell->phenotype.death.rates[apoptosis_index] = apoptosis_rate * apoptosis_multiplier * 1000; // 1000 is a multiplier to increase the apoptosis rate
-			// std::cout << "apoptosis with drug" << std::endl;
-		}
-		else
-		{
-			pCell->phenotype.death.rates[apoptosis_index] = apoptosis_rate;
-			// std::cout << "apoptosis without drug" << std::endl;
-		}
+		pCell->phenotype.death.rates[apoptosis_index] = apoptosis_rate * 50;
 	}
-
-	// {
-	// pCell-> phenotype.death.rates[apoptosis_index] =  apoptosis_rate * 50;
-	// }
 
 	return;
 }
@@ -249,13 +223,11 @@ void update_monitor_variables(Cell *pCell)
 
 	static int index_hypoxia_node = pCell->custom_data.find_variable_index("Hypoxia_node");
 	static int index_prolif_node = pCell->custom_data.find_variable_index("Proliferation_node");
-	static int index_apop_node = pCell->custom_data.find_variable_index("Apoptosis_node");
 	static int index_cell_pressure = pCell->custom_data.find_variable_index("cell_pressure");
 	static int index_raf_node = pCell->custom_data.find_variable_index("TNFalpha_node");
 
 	pCell->custom_data[index_hypoxia_node] = pCell->phenotype.intracellular->get_boolean_variable_value("Hypoxia");
 	pCell->custom_data[index_prolif_node] = pCell->phenotype.intracellular->get_boolean_variable_value("Proliferation");
-	pCell->custom_data[index_apop_node] = pCell->phenotype.intracellular->get_boolean_variable_value("Apoptosis");
 	pCell->custom_data[index_raf_node] = pCell->phenotype.intracellular->get_boolean_variable_value("TNFalpha");
 
 	pCell->custom_data[index_cell_pressure] = pCell->state.simple_pressure;
@@ -397,12 +369,10 @@ void post_update_intracellular(Cell *pCell, Phenotype &phenotype, double dt)
 		return;
 	}
 
-	// XXX repassar si cal els tres passos
 	// update the cell fate based on the boolean outputs
 	update_cell_from_boolean_model(pCell, phenotype, dt);
-	// update the growth parameters based on the oxygen availability
+
 	update_cell_and_death_parameters_O2_based(pCell, phenotype, dt);
-	// update the growth parameters based on the pressure
 	update_cell_growth_parameters_pressure_based(pCell, phenotype, dt);
 
 	// Get track of some boolean node values for debugging
