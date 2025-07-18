@@ -13,7 +13,7 @@
 #                                                                           #
 # BSD 3-Clause License (see https://opensource.org/licenses/BSD-3-Clause)   #
 #                                                                           #
-# Copyright (c) 2015-2017, Paul Macklin and the BioFVM Project              #
+# Copyright (c) 2015-2025, Paul Macklin and the BioFVM Project              #
 # All rights reserved.                                                      #
 #                                                                           #
 # Redistribution and use in source and binary forms, with or without        #
@@ -55,7 +55,9 @@
 #include "BioFVM_vector.h"
 
 namespace BioFVM{
-	
+
+void reset_max_basic_agent_ID( void );
+
 class Basic_Agent
 {
  private:
@@ -111,7 +113,7 @@ class Basic_Agent
 	void update_position( double dt );
 	
 	Basic_Agent(); 
-
+	virtual ~Basic_Agent(){};
 	// simulate secretion and uptake at the nearest voxel at the indicated microenvironment.
 	// if no microenvironment indicated, use the currently selected microenvironment. 
 	void simulate_secretion_and_uptake( Microenvironment* M, double dt ); 
@@ -125,6 +127,8 @@ class Basic_Agent
 	std::vector<double>& nearest_gradient( int substrate_index );
 	// directly access a vector of gradients, one gradient per substrate 
 	std::vector<gradient>& nearest_gradient_vector( void ); 
+	
+	const std::vector<double>& get_previous_velocity( void );
 };
 
 extern std::vector<Basic_Agent*> all_basic_agents; 

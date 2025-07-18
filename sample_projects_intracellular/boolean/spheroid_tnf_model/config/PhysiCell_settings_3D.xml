@@ -228,8 +228,10 @@
 				<intracellular type="maboss">
 					<bnd_filename>./config/TNF_nodes.bnd</bnd_filename>
 					<cfg_filename>./config/TNF_conf.cfg</cfg_filename>
-					<time_step>10</time_step>
-					<time_stochasticity>1</time_stochasticity>
+					<settings>
+						<intracellular_dt>10</intracellular_dt>
+						<time_stochasticity>1</time_stochasticity>
+					</settings>
 				</intracellular>
 			</phenotype>
 			<custom_data>

@@ -33,7 +33,7 @@
 #                                                                             #
 # BSD 3-Clause License (see https://opensource.org/licenses/BSD-3-Clause)     #
 #                                                                             #
-# Copyright (c) 2015-2018, Paul Macklin and the PhysiCell Project             #
+# Copyright (c) 2015-2025, Paul Macklin and the PhysiCell Project             #
 # All rights reserved.                                                        #
 #                                                                             #
 # Redistribution and use in source and binary forms, with or without          #
@@ -89,7 +89,8 @@ namespace PhysiCell{
  	
 extern pugi::xml_node physicell_config_root; 
 
-bool load_PhysiCell_config_file( std::string filename );
+bool read_PhysiCell_config_file( std::string filename );
+bool load_PhysiCell_config_file( std::string filename  );
 
 class PhysiCell_Settings
 {
@@ -111,17 +112,37 @@ class PhysiCell_Settings
 	double full_save_interval = 60;  
 	bool enable_full_saves = true; 
 	bool enable_legacy_saves = false; 
+
+	bool disable_automated_spring_adhesions = false; 
 	
 	double SVG_save_interval = 60; 
 	bool enable_SVG_saves = true; 
 
+	bool enable_substrate_plot = false;
+	std::string substrate_to_monitor = "oxygen"; 
+	bool limits_substrate_plot = false;
+	double min_concentration = -1.0;
+	double max_concentration = -1.0;
+	std::string svg_substrate_colormap = "YlOrRd";
+
 	double intracellular_save_interval = 60; 
 	bool enable_intracellular_saves = false; 
+
+	// cell rules option
+	bool rules_enabled = false; 
+	std::string rules_protocol = "Cell Behavior Hypothesis Grammar (CBHG)"; 
+	std::string rules_protocol_version = "1.0"; 
 	
 	PhysiCell_Settings();
 	
 	void read_from_pugixml( void ); 
 };
+
+bool create_directories(const std::string &path);
+bool create_directory(const std::string &path);
+
+void create_output_directory(const std::string& path);
+void create_output_directory(void);
 
 class PhysiCell_Globals
 {
@@ -172,9 +193,7 @@ class Parameters
 	
 	void add_parameter( std::string my_name ); 
 	void add_parameter( std::string my_name , T my_value ); 
-//	void add_parameter( std::string my_name , T my_value ); 
 	void add_parameter( std::string my_name , T my_value , std::string my_units ); 
-//	void add_parameter( std::string my_name , T my_value , std::string my_units ); 
 	
 	void add_parameter( Parameter<T> param );
 	
@@ -188,7 +207,9 @@ class Parameters
 	Parameter<T>& operator[]( int i );
 	Parameter<T>& operator[]( std::string str ); 
 	
-	int size( void ) const; 
+	int size( void ) const;
+
+	void assert_not_exists(std::string search_name);
 };
 
 class User_Parameters

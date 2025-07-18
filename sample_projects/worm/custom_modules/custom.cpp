@@ -70,7 +70,10 @@
 void create_cell_types( void )
 {
 	// set the random seed 
-	SeedRandom( parameters.ints("random_seed") );  
+	if (parameters.ints.find_index("random_seed") != -1)
+	{
+		SeedRandom(parameters.ints("random_seed"));
+	}
 	
 	/* 
 	   Put any modifications to default cell definition here if you 
@@ -116,6 +119,21 @@ void create_cell_types( void )
 	*/
 		
 	build_cell_definitions_maps(); 
+
+	/*
+	   This intializes cell signal and response dictionaries 
+	*/
+
+	setup_signal_behavior_dictionaries(); 	
+
+	/*
+       Cell rule definitions 
+	*/
+
+	setup_cell_rules(); 
+
+
+
 	display_cell_definitions( std::cout ); 
 	
 	return; 

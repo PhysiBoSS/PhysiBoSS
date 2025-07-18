@@ -33,7 +33,7 @@
 #                                                                             #
 # BSD 3-Clause License (see https://opensource.org/licenses/BSD-3-Clause)     #
 #                                                                             #
-# Copyright (c) 2015-2018, Paul Macklin and the PhysiCell Project             #
+# Copyright (c) 2015-2025, Paul Macklin and the PhysiCell Project             #
 # All rights reserved.                                                        #
 #                                                                             #
 # Redistribution and use in source and binary forms, with or without          #
@@ -85,6 +85,7 @@ class Variable
 	std::string name; 
 	double value; 
 	std::string units; 
+	bool conserved_quantity; 
 	
 	Variable(); 
 };
@@ -98,6 +99,7 @@ class Vector_Variable
 	std::string name; 
 	std::vector<double> value; 
 	std::string units; 
+	bool conserved_quantity; 
 	
 	Vector_Variable(); 
 };

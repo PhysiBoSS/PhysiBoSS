@@ -67,7 +67,7 @@ def plot_cells(df_time_course, color_dict, ax):
 
 def main():
 
-    color_dict = {"live": "g", "apoptotic": "r", "necrotic":"k"}
+    color_dict = {"alive": "g", "apoptotic": "r", "necrotic":"k"}
 
 
     output_folder = sys.argv[1]
@@ -93,7 +93,7 @@ def main():
     ax2 = axes[1].twinx()
     ax2.plot(df_time_tnf.time, df_time_tnf['tnf'], 'r', label="[TNF]")
     ax2.set_ylabel("[TNF]")
-    ax2.set_ylim([0, 1000])
+    # ax2.set_ylim([0, 1000])
     axes[1].legend(loc="upper left")
     ax2.legend(loc="upper right")
 

@@ -33,7 +33,7 @@
 #                                                                             #
 # BSD 3-Clause License (see https://opensource.org/licenses/BSD-3-Clause)     #
 #                                                                             #
-# Copyright (c) 2015-2021, Paul Macklin and the PhysiCell Project             #
+# Copyright (c) 2015-2025, Paul Macklin and the PhysiCell Project             #
 # All rights reserved.                                                        #
 #                                                                             #
 # Redistribution and use in source and binary forms, with or without          #
@@ -89,14 +89,20 @@
 #include <iterator> 
 
 namespace PhysiCell{
-	
+
 std::unordered_map<std::string,Cell_Definition*> cell_definitions_by_name; 
 std::unordered_map<int,Cell_Definition*> cell_definitions_by_type; 
 std::vector<Cell_Definition*> cell_definitions_by_index;
 
+std::unordered_map<std::string,int> cell_definition_indices_by_name; 
+std::unordered_map<int,int> cell_definition_indices_by_type; 
+
 // function pointer on how to choose cell orientation at division
 // in case you want the legacy method 
 std::vector<double> (*cell_division_orientation)(void) = UniformOnUnitSphere; // LegacyRandomOnUnitSphere; 
+
+Cell* standard_instantiate_cell()
+{ return new Cell; }
 
 Cell_Parameters::Cell_Parameters()
 {
@@ -128,11 +134,16 @@ Cell_Definition::Cell_Definition()
 	if( BioFVM::get_default_microenvironment() != NULL )
 	{ pMicroenvironment = BioFVM::get_default_microenvironment(); }
 
+//	extern std::unordered_map<std::string,int> cell_definition_indices_by_name; 
+//	int number_of_cell_defs = cell_definition_indices_by_name.size(); 
+
 	// set up the default parameters 
 		// the default Cell_Parameters constructor should take care of this
 		
 	type = 0; 
 	name = "unnamed"; 
+
+	is_movable = true;
 
 	parameters.pReference_live_phenotype = &phenotype; 
 		
@@ -140,6 +151,7 @@ Cell_Definition::Cell_Definition()
 		// the default Custom_Cell_Data constructor should take care of this
 		
 	// set up the default functions 
+	functions.instantiate_cell = NULL;
 	functions.volume_update_function = NULL; // standard_volume_update_function;
 	functions.update_migration_bias = NULL; 
 	
@@ -149,14 +161,23 @@ Cell_Definition::Cell_Definition()
 	functions.update_velocity = NULL; // standard_update_cell_velocity;
 	functions.add_cell_basement_membrane_interactions = NULL; 
 	functions.calculate_distance_to_membrane = NULL; 
+
+	// bug fix July 31 2023
+	functions.plot_agent_SVG = standard_agent_SVG;
+	functions.plot_agent_legend = standard_agent_legend;
+	// bug fix July 31 2023
 	
 	functions.set_orientation = NULL;
 	
-	cell_definitions_by_index.push_back( this ); 
-	// std::cout << "--- cell_definitions_by_index(1) size= " << cell_definitions_by_index.size() << std::endl;
+	// new March 2022 : make sure Cell_Interactions and Cell_Transformations 
+	// 					are appropriately sized. Same on motiltiy. 
+	phenotype.cell_interactions.sync_to_cell_definitions(); 
+	phenotype.cell_transformations.sync_to_cell_definitions(); 
+	phenotype.cycle.asymmetric_division.sync_to_cell_definitions();
+	phenotype.motility.sync_to_current_microenvironment(); 
+	phenotype.mechanics.sync_to_cell_definitions(); 
 	
-	// if (cell_definitions_by_index.size() == 6)
-    // 	raise(SIGSEGV);   // needs #include <signal.h>
+	cell_definitions_by_index.push_back( this ); 
 
 	return; 
 }
@@ -181,7 +202,6 @@ Cell_Definition::Cell_Definition( Cell_Definition& cd )
 	parameters.pReference_live_phenotype = &phenotype; 
 	
 	cell_definitions_by_index.push_back( this ); 
-	// std::cout << "----- cell_definitions_by_index(2) size= " << cell_definitions_by_index.size() << std::endl;
 	
 	return; 
 }
@@ -211,18 +231,27 @@ Cell_Definition& Cell_Definition::operator=( const Cell_Definition& cd )
 	return *this; 
 }
 
-
 Cell_Definition cell_defaults; 
 
 Cell_State::Cell_State()
 {
 	neighbors.resize(0); 
+	spring_attachments.resize(0); 
+
 	orientation.resize( 3 , 0.0 ); 
 	
 	simple_pressure = 0.0; 
 	
 	attached_cells.clear(); 
+	spring_attachments.clear(); 
 	
+	number_of_nuclei = 1; 
+	
+	// damage = 0.0; 
+	total_attack_time = 0.0;
+	
+	contact_with_basement_membrane = false; 
+
 	return; 
 }
 
@@ -236,6 +265,7 @@ void Cell::update_motility_vector( double dt_ )
 	
 	if( UniformRandom() < dt_ / phenotype.motility.persistence_time || phenotype.motility.persistence_time < dt_ )
 	{
+		/*
 		// choose a uniformly random unit vector 
 		double temp_angle = 6.28318530717959*UniformRandom();
 		double temp_phi = 3.1415926535897932384626433832795*UniformRandom();
@@ -255,7 +285,13 @@ void Cell::update_motility_vector( double dt_ )
 		randvec[0] *= cos( temp_angle ); // cos(theta)*sin(phi)
 		randvec[1] *= sin( temp_angle ); // sin(theta)*sin(phi)
 		randvec[2] = cos_phi; //  cos(phi)
-		
+		*/
+		std::vector<double> randvec(3,0.0);
+		if( phenotype.motility.restrict_to_2D == true )
+		{ randvec = UniformOnUnitCircle(); }
+		else
+		{ randvec = UniformOnUnitSphere(); }
+
 		// if the update_bias_vector function is set, use it  
 		if( functions.update_migration_bias )
 		{
@@ -278,9 +314,34 @@ void Cell::update_motility_vector( double dt_ )
 
 void Cell::advance_bundled_phenotype_functions( double dt_ )
 {
+	// New March 2022
+	// perform transformations 
+	standard_cell_transformations( this,this->phenotype,dt_ ); 
+
+	// New March 2023 in Version 1.12.0 
+	// call the rules-based code to update the phenotype 
+	if( PhysiCell_settings.rules_enabled )
+	{ apply_ruleset( this ); }
+	if( get_single_signal(this,"necrotic") > 0.5 )
+	{
+		double rupture = this->phenotype.volume.rupture_volume; 
+		double volume = this->phenotype.volume.total; 
+		if( volume > rupture )
+		{
+			std::cout << this->phenotype.volume.total << " vs " << this->phenotype.volume.rupture_volume << 
+			" dead: " << get_single_signal( this, "dead") << 	std::endl; 
+			std::cout << this->phenotype.cycle.current_phase_index() << " " 
+			<< this->phenotype.cycle.pCycle_Model->name << std::endl; 
+		}
+
+	}
+
+//	if( functions.update_phenotype )
+//	{ functions.update_phenotype( this , phenotype , dt_ ); }
+
 	// call the custom code to update the phenotype 
 	if( functions.update_phenotype )
-	{	functions.update_phenotype( this , phenotype , dt_ ); }
+	{ functions.update_phenotype( this , phenotype , dt_ ); }
 	
 	// update volume 
 	if( functions.volume_update_function )
@@ -295,6 +356,9 @@ void Cell::advance_bundled_phenotype_functions( double dt_ )
 	
 	// update geometry
 	phenotype.geometry.update( this, phenotype, dt_ );
+
+	// update integrity 
+	phenotype.cell_integrity.advance_damage( dt_ );  
 	
 	// check for new death events 
 	if( phenotype.death.check_for_death( dt_ ) == true )
@@ -393,6 +457,11 @@ Cell::~Cell()
 		{
 			// release any attached cells (as of 1.7.2 release)
 			this->remove_all_attached_cells(); 
+			// 1.11.0
+			this->remove_all_spring_attachments(); 
+
+			// new Dec 5, 2024: 
+			this->remove_self_from_all_neighbors(); 			
 			
 			// released internalized substrates (as of 1.5.x releases)
 			this->release_internalized_substrates(); 
@@ -482,8 +551,24 @@ Cell* Cell::divide( )
 	
 	// make sure ot remove adhesions 
 	remove_all_attached_cells(); 
+	remove_all_spring_attachments(); 
+
+	// version 1.10.3: 
+	// conserved quantitites in custom data aer divided in half
+	// so that each daughter cell gets half of the original ;
+	for( int nn = 0 ; nn < custom_data.variables.size() ; nn++ )
+	{
+		if( custom_data.variables[nn].conserved_quantity == true )
+		{ custom_data.variables[nn].value *= 0.5; }
+	}
+	for( int nn = 0 ; nn < custom_data.vector_variables.size() ; nn++ )
+	{
+		if( custom_data.vector_variables[nn].conserved_quantity == true )
+		{ custom_data.vector_variables[nn].value *= 0.5; }
+	}
+
 	
-	Cell* child = create_cell();
+	Cell* child = create_cell(functions.instantiate_cell);
 	child->copy_data( this );	
 	child->copy_function_pointers(this);
 	child->parameters = parameters;
@@ -556,12 +641,25 @@ Cell* Cell::divide( )
 	// child->set_phenotype( phenotype ); 
 	child->phenotype = phenotype; 
 
-    if (child->phenotype.intracellular)
+    if (child->phenotype.intracellular){
         child->phenotype.intracellular->start();
-	
+		child->phenotype.intracellular->inherit(this);
+	}
 // #ifdef ADDON_PHYSIDFBA
 // 	child->fba_model = this->fba_model;
 // #endif
+
+
+	// changes for new phenotyp March 2022
+	// state.damage = 0.0; 
+	// phenotype.integrity.damage = 0.0; // leave alone - damage is heritable
+	state.total_attack_time = 0; 
+	// child->state.damage = 0.0; 
+	// child->phenotype.integrity.damage = 0.0; // leave alone - damage is heritable 
+	child->state.total_attack_time = 0.0; 
+
+	if( this->functions.cell_division_function )
+	{ this->functions.cell_division_function( this, child); }
 
 	return child;
 }
@@ -626,7 +724,7 @@ void Cell::set_total_volume(double volume)
 	// if( fabs( phenotype.volume.total - volume ) < 1e-16 )
 	if( fabs( phenotype.volume.total - volume ) > 1e-16 )
 	{
-		double ratio= volume/ phenotype.volume.total;
+		double ratio= volume/ (phenotype.volume.total + 1e-16);  
 		phenotype.volume.multiply_by_ratio(ratio);
 	}
 	
@@ -840,7 +938,7 @@ void Cell::update_voxel_in_container()
 
 void Cell::copy_data(Cell* copy_me)
 {
-	// phenotype=copyMe-> phenotype; //it is taken care in set_phenotype
+	// phenotype=copyMe->phenotype; //it is taken care in set_phenotype
 	type = copy_me->type; 
 	type_name = copy_me->type_name; 
 	
@@ -866,7 +964,12 @@ void Cell::add_potentials(Cell* other_agent)
 	// if( this->ID == other_agent->ID )
 	if( this == other_agent )
 	{ return; }
-
+/*
+	// new April 2022: don't interact with cells with 0 volume 
+	// does not seem to really help 
+	if( other_agent->phenotype.volume.total < 1e-15 )
+	{ std::cout << "zero size cell in mechanics!" << std::endl; return; }
+*/
 	// 12 uniform neighbors at a close packing distance, after dividing out all constants
 	static double simple_pressure_scale = 0.027288820670331; // 12 * (1 - sqrt(pi/(2*sqrt(3))))^2 
 	// 9.820170012151277; // 12 * ( 1 - sqrt(2*pi/sqrt(3)))^2
@@ -884,7 +987,7 @@ void Cell::add_potentials(Cell* other_agent)
 	//Repulsive
 	double R = phenotype.geometry.radius+ (*other_agent).phenotype.geometry.radius; 
 	
-	double RN = phenotype.geometry.nuclear_radius + (*other_agent).phenotype.geometry.nuclear_radius;	
+	// double RN = phenotype.geometry.nuclear_radius + (*other_agent).phenotype.geometry.nuclear_radius;	
 	double temp_r, c;
 	if( distance > R ) 
 	{
@@ -911,6 +1014,7 @@ void Cell::add_potentials(Cell* other_agent)
 	}
 	
 	// August 2017 - back to the original if both have same coefficient 
+
 	double effective_repulsion = sqrt( phenotype.mechanics.cell_cell_repulsion_strength * other_agent->phenotype.mechanics.cell_cell_repulsion_strength ); 
 	temp_r *= effective_repulsion; 
 	
@@ -934,10 +1038,20 @@ void Cell::add_potentials(Cell* other_agent)
 		// temp_a *= phenotype.mechanics.cell_cell_adhesion_strength; // original 
 		
 		// August 2017 - back to the original if both have same coefficient 
-		double effective_adhesion = sqrt( phenotype.mechanics.cell_cell_adhesion_strength * other_agent->phenotype.mechanics.cell_cell_adhesion_strength ); 
+		// May 2022 - back to oriinal if both affinities are 1
+		int ii = find_cell_definition_index( this->type ); 
+		int jj = find_cell_definition_index( other_agent->type ); 
+
+		double adhesion_ii = phenotype.mechanics.cell_cell_adhesion_strength * phenotype.mechanics.cell_adhesion_affinities[jj]; 
+		double adhesion_jj = other_agent->phenotype.mechanics.cell_cell_adhesion_strength * other_agent->phenotype.mechanics.cell_adhesion_affinities[ii]; 
+
+		// double effective_adhesion = sqrt( phenotype.mechanics.cell_cell_adhesion_strength * other_agent->phenotype.mechanics.cell_cell_adhesion_strength ); 
+		double effective_adhesion = sqrt( adhesion_ii*adhesion_jj ); 
 		temp_a *= effective_adhesion; 
 		
 		temp_r -= temp_a;
+
+		state.neighbors.push_back(other_agent); // move here in 1.10.2 so non-adhesive cells also added. 
 	}
 	/////////////////////////////////////////////////////////////////
 	if( fabs(temp_r) < 1e-16 )
@@ -950,15 +1064,21 @@ void Cell::add_potentials(Cell* other_agent)
 	axpy( &velocity , temp_r , displacement ); 
 	
 	
-	state.neighbors.push_back(other_agent); // new 1.8.0
+	// state.neighbors.push_back(other_agent); // new 1.8.0
 	
 	return;
 }
 
-Cell* create_cell( void )
+Cell* create_cell( Cell* (*custom_instantiate)())
 {
 	Cell* pNew; 
-	pNew = new Cell;		
+	
+	if (custom_instantiate) {
+		pNew = custom_instantiate();
+	} else {
+		pNew = standard_instantiate_cell();
+	}
+	
 	(*all_cells).push_back( pNew ); 
 	pNew->index=(*all_cells).size()-1;
 	
@@ -981,7 +1101,7 @@ Cell* create_cell( void )
 // In that "create_cell()" uses "create_cell( cell_defaults )" 
 Cell* create_cell( Cell_Definition& cd )
 {
-	Cell* pNew = create_cell(); 
+	Cell* pNew = create_cell(cd.functions.instantiate_cell); 
 	
 	// use the cell defaults; 
 	pNew->type = cd.type; 
@@ -992,7 +1112,10 @@ Cell* create_cell( Cell_Definition& cd )
 	pNew->functions = cd.functions; 
 	
 	pNew->phenotype = cd.phenotype; 
-	pNew->is_movable = true;
+	if (pNew->phenotype.intracellular)
+		pNew->phenotype.intracellular->start();
+
+	pNew->is_movable = cd.is_movable; //  true;
 	pNew->is_out_of_domain = false;
 	pNew->displacement.resize(3,0.0); // state? 
 	
@@ -1004,26 +1127,65 @@ Cell* create_cell( Cell_Definition& cd )
 }
 
 void Cell::convert_to_cell_definition( Cell_Definition& cd )
-{
-	
+{	
+	Volume cell_volume = phenotype.volume;
+	Geometry cell_geometry = phenotype.geometry;
+	Molecular cell_molecular = phenotype.molecular;
+	Custom_Cell_Data cell_custom_data = custom_data;
 	// use the cell defaults; 
 	type = cd.type; 
 	type_name = cd.name; 
 	
-	custom_data = cd.custom_data; 
+	custom_data = cd.custom_data; // this is kinda risky since users may want to be updating custom_data throughout
 	parameters = cd.parameters; 
 	functions = cd.functions; 
 	
 	phenotype = cd.phenotype; 
-	// is_movable = true;
-	// is_out_of_domain = false;
+	phenotype.volume = cell_volume; // leave the cell volume alone..
+	// ..except for the following target values
+	// phenotype.volume.target_solid_cytoplasmic = cd.phenotype.volume.target_solid_cytoplasmic; // gets set by standard_volume_update_function anyways
+	phenotype.volume.target_solid_nuclear = cd.phenotype.volume.target_solid_nuclear;
+	phenotype.volume.target_fluid_fraction = cd.phenotype.volume.target_fluid_fraction;
+	phenotype.volume.target_cytoplasmic_to_nuclear_ratio = cd.phenotype.volume.target_cytoplasmic_to_nuclear_ratio;
+	phenotype.volume.relative_rupture_volume = cd.phenotype.volume.relative_rupture_volume;
 	
-	// displacement.resize(3,0.0); // state? 
+	phenotype.geometry = cell_geometry; // leave the geometry alone
+	phenotype.molecular.internalized_total_substrates = cell_molecular.internalized_total_substrates;
 	
-	assign_orientation();	
+	for( int nn = 0 ; nn < custom_data.variables.size() ; nn++ )
+	{
+		if( custom_data.variables[nn].conserved_quantity == true )
+		{ custom_data.variables[nn].value = cell_custom_data.variables[nn].value; }
+	}
+	for( int nn = 0 ; nn < custom_data.vector_variables.size() ; nn++ )
+	{
+		if( custom_data.vector_variables[nn].conserved_quantity == true )
+		{ custom_data.vector_variables[nn].value = cell_custom_data.vector_variables[nn].value; }
+	}
+	/* things no longer done here:
+	// assign_orientation(); // not necesary since the this->state is unchanged
+	// Basic_Agent::set_total_volume(volume); // not necessary since the volume is unchanged
 	
-	set_total_volume( phenotype.volume.total ); 
-	
+	// not necessary since the volume is unchanged
+	// if( fabs( phenotype.volume.total - volume ) > 1e-16 )
+	// {
+	// 	double ratio= volume/ (phenotype.volume.total + 1e-16);  
+	// 	phenotype.volume.multiply_by_ratio(ratio);
+	// }
+
+	// phenotype.geometry.update( this, phenotype, 0.0 ); // not necessary since we copy geometry above
+	*/
+
+	// Here the current mechanics voxel index may not be initialized, when position is still unknown. 
+	if (get_current_mechanics_voxel_index() >= 0)
+    {
+        if( get_container()->max_cell_interactive_distance_in_voxel[get_current_mechanics_voxel_index()] < 
+            phenotype.geometry.radius * phenotype.mechanics.relative_maximum_adhesion_distance )
+        {
+            get_container()->max_cell_interactive_distance_in_voxel[get_current_mechanics_voxel_index()] = phenotype.geometry.radius
+                * phenotype.mechanics.relative_maximum_adhesion_distance;
+        }
+	}
 	return; 
 }
 
@@ -1036,6 +1198,11 @@ void delete_cell( int index )
 	
 	// release any attached cells (as of 1.7.2 release)
 	pDeleteMe->remove_all_attached_cells(); 
+	// 1.11.0 
+	pDeleteMe->remove_all_spring_attachments(); 
+
+	// new Dec 5, 2024: 
+	pDeleteMe->remove_self_from_all_neighbors(); 			
 	
 	// released internalized substrates (as of 1.5.x releases)
 	pDeleteMe->release_internalized_substrates(); 
@@ -1065,6 +1232,8 @@ void delete_cell_original( int index ) // before June 11, 2020
 	
 	// release any attached cells (as of 1.7.2 release)
 	(*all_cells)[index]->remove_all_attached_cells(); 
+	// 1.11.0
+	(*all_cells)[index]->remove_all_spring_attachments(); 
 	
 	// released internalized substrates (as of 1.5.x releases)
 	(*all_cells)[index]->release_internalized_substrates(); 
@@ -1162,20 +1331,45 @@ std::vector<Cell*> Cell::nearby_interacting_cells( void )
 
 void Cell::ingest_cell( Cell* pCell_to_eat )
 {
+	// don't ingest self 
+	if( pCell_to_eat == this )
+	{ return; } 
+	
 	// don't ingest a cell that's already ingested 
-	if( pCell_to_eat->phenotype.volume.total < 1e-15 || this == pCell_to_eat )
+	if( pCell_to_eat->phenotype.volume.total < 1e-15 )
 	{ return; } 
 		
 	// make this thread safe 
 	#pragma omp critical
 	{
-		bool volume_was_zero = false; 
-		if( pCell_to_eat->phenotype.volume.total < 1e-15 )
-		{
-			volume_was_zero = true; 
-			std::cout << this << " " << this->type_name << " ingests " 
-			<< pCell_to_eat << " " << pCell_to_eat->type_name << std::endl; 
-		}
+		/*
+		if( pCell_to_eat->phenotype.death.dead == true )
+		{ std::cout << this->type_name << " (" << this << ")" << " eats dead " << pCell_to_eat->type_name << " (" << pCell_to_eat 
+			<< ") of size " << pCell_to_eat->phenotype.volume.total << std::endl; }
+		else
+		{ std::cout << this->type_name << " (" << this << ")" << " eats live " << pCell_to_eat->type_name << " (" << pCell_to_eat 
+			<< ") of size " << pCell_to_eat->phenotype.volume.total << std::endl; }
+		*/
+
+		// mark it as dead 
+		pCell_to_eat->phenotype.death.dead = true; 
+		// set secretion and uptake to zero 
+		pCell_to_eat->phenotype.secretion.set_all_secretion_to_zero( );  
+		pCell_to_eat->phenotype.secretion.set_all_uptake_to_zero( ); 
+		
+		// deactivate all custom function 
+		pCell_to_eat->functions.custom_cell_rule = NULL; 
+		pCell_to_eat->functions.update_phenotype = NULL; 
+		pCell_to_eat->functions.contact_function = NULL; 
+		pCell_to_eat->functions.cell_division_function = NULL; 
+		
+		// should set volume fuction to NULL too! 
+		pCell_to_eat->functions.volume_update_function = NULL; 
+
+		// set cell as unmovable and non-secreting 
+		pCell_to_eat->is_movable = false; 
+		pCell_to_eat->is_active = false; 
+
 		// absorb all the volume(s)
 
 		// absorb fluid volume (all into the cytoplasm) 
@@ -1225,12 +1419,183 @@ void Cell::ingest_cell( Cell* pCell_to_eat )
 		// absorb the internalized substrates 
 		
 		// multiply by the fraction that is supposed to be ingested (for each substrate) 
+
 		*(pCell_to_eat->internalized_substrates) *= 
 			*(pCell_to_eat->fraction_transferred_when_ingested); // 
-		
+
 		*internalized_substrates += *(pCell_to_eat->internalized_substrates); 
 		static int n_substrates = internalized_substrates->size(); 
 		pCell_to_eat->internalized_substrates->assign( n_substrates , 0.0 ); 	
+
+		// conserved quantitites in custom data during phagocytosis
+		// so that phagocyte cell absorbs the full amount from the engulfed cell;
+		for( int nn = 0 ; nn < custom_data.variables.size() ; nn++ )
+		{
+			if( custom_data.variables[nn].conserved_quantity == true )
+			{
+				custom_data.variables[nn].value += 
+				pCell_to_eat->custom_data.variables[nn].value; 			
+			}
+		}
+		for( int nn = 0 ; nn < custom_data.vector_variables.size() ; nn++ )
+		{
+			if( custom_data.vector_variables[nn].conserved_quantity == true )
+			{
+				custom_data.vector_variables[nn].value += 
+				pCell_to_eat->custom_data.vector_variables[nn].value; 
+			}
+		}
+		
+		// trigger removal from the simulation 
+		// pCell_to_eat->die(); // I don't think this is safe if it's in an OpenMP loop 
+		
+		// flag it for removal 
+		// pCell_to_eat->flag_for_removal(); 
+
+		// remove all adhesions 
+		// pCell_to_eat->remove_all_attached_cells();
+		
+	}
+
+	// things that have their own thread safety 
+	pCell_to_eat->flag_for_removal();
+	pCell_to_eat->remove_all_attached_cells();
+	pCell_to_eat->remove_all_spring_attachments();
+	
+	return; 
+}
+
+void Cell::attack_cell( Cell* pCell_to_attack , double dt )
+{
+	// don't attack self 
+	if( pCell_to_attack == this )
+	{ return; } 
+	
+	// don't attack a dead or tiny cell 
+	if( pCell_to_attack->phenotype.death.dead == true || pCell_to_attack->phenotype.volume.total < 1e-15 )
+	{ return; } 
+	
+	// make this thread safe 
+	// WORK HERE June 2024 
+	#pragma omp critical
+	{ 
+		// std::cout << this->type_name << " attacks " << pCell_to_attack->type_name << std::endl;
+		// 
+		double new_damage = phenotype.cell_interactions.attack_damage_rate * dt; 
+
+		pCell_to_attack->phenotype.cell_integrity.damage += new_damage; 
+		pCell_to_attack->state.total_attack_time += dt; 
+
+		phenotype.cell_interactions.total_damage_delivered += new_damage; 
+	}
+	return; 
+}
+
+
+
+void Cell::fuse_cell( Cell* pCell_to_fuse )
+{
+	// don't ingest a cell that's already fused or fuse self 
+	if( pCell_to_fuse->phenotype.volume.total < 1e-15 || this == pCell_to_fuse )
+	{ return; } 
+		
+	// make this thread safe 
+	#pragma omp critical
+	{
+
+		// set new position at center of volume 
+			// x_new = (vol_B * x_B + vol_S * x_S ) / (vol_B + vol_S )
+		
+		std::vector<double> new_position = position; // x_B
+		new_position *= phenotype.volume.total; // vol_B * x_B 
+		double total_volume = phenotype.volume.total; 
+		total_volume += pCell_to_fuse->phenotype.volume.total ;  
+
+		axpy( &new_position , pCell_to_fuse->phenotype.volume.total , pCell_to_fuse->position ); // vol_B*x_B + vol_S*x_S
+		new_position /= total_volume; // (vol_B*x_B+vol_S*x_S)/(vol_B+vol_S);
+
+		static double xL = get_default_microenvironment()->mesh.bounding_box[0];		 
+		static double xU = get_default_microenvironment()->mesh.bounding_box[3]; 
+
+		static double yL = get_default_microenvironment()->mesh.bounding_box[1];		 
+		static double yU = get_default_microenvironment()->mesh.bounding_box[4]; 
+
+		static double zL = get_default_microenvironment()->mesh.bounding_box[2];		 
+		static double zU = get_default_microenvironment()->mesh.bounding_box[5]; 
+
+		if( new_position[0] < xL || new_position[0] > xU || 
+		    new_position[1] < yL || new_position[1] > yU || 
+			new_position[2] < zL || new_position[2] > zU )
+		{
+			std::cout << "cell fusion at " << new_position << " violates domain bounds" << std::endl; 
+			std::cout << get_default_microenvironment()->mesh.bounding_box << std::endl << std::endl; 
+		}
+		position = new_position; 
+		update_voxel_in_container();
+
+		// set number of nuclei 
+
+		state.number_of_nuclei += pCell_to_fuse->state.number_of_nuclei; 
+
+		// absorb all the volume(s)
+
+		// absorb fluid volume (all into the cytoplasm) 
+		phenotype.volume.cytoplasmic_fluid += pCell_to_fuse->phenotype.volume.cytoplasmic_fluid; 
+		pCell_to_fuse->phenotype.volume.cytoplasmic_fluid = 0.0; 
+
+		phenotype.volume.nuclear_fluid += pCell_to_fuse->phenotype.volume.nuclear_fluid; 
+		pCell_to_fuse->phenotype.volume.nuclear_fluid = 0.0; 
+
+		// absorb nuclear and cyto solid volume (into the cytoplasm) 
+		phenotype.volume.cytoplasmic_solid += pCell_to_fuse->phenotype.volume.cytoplasmic_solid; 
+		pCell_to_fuse->phenotype.volume.cytoplasmic_solid = 0.0; 
+		
+		phenotype.volume.nuclear_solid += pCell_to_fuse->phenotype.volume.nuclear_solid; 
+		pCell_to_fuse->phenotype.volume.nuclear_solid = 0.0; 
+
+		// consistency calculations 
+		
+		phenotype.volume.fluid = phenotype.volume.nuclear_fluid + 
+			phenotype.volume.cytoplasmic_fluid; 
+		pCell_to_fuse->phenotype.volume.fluid = 0.0; 
+		
+		phenotype.volume.solid = phenotype.volume.cytoplasmic_solid + 
+			phenotype.volume.nuclear_solid; 
+		pCell_to_fuse->phenotype.volume.solid = 0.0; 
+		
+		phenotype.volume.nuclear = phenotype.volume.nuclear_fluid + 
+			phenotype.volume.nuclear_solid; 
+		pCell_to_fuse->phenotype.volume.nuclear = 0.0; 
+
+		phenotype.volume.cytoplasmic = phenotype.volume.cytoplasmic_fluid + 
+			phenotype.volume.cytoplasmic_solid; 
+		pCell_to_fuse->phenotype.volume.cytoplasmic = 0.0; 
+		
+		phenotype.volume.total = phenotype.volume.nuclear + 
+			phenotype.volume.cytoplasmic; 
+		pCell_to_fuse->phenotype.volume.total = 0.0; 
+
+		phenotype.volume.fluid_fraction = phenotype.volume.fluid / 
+			(  phenotype.volume.total + 1e-16 ); 
+		pCell_to_fuse->phenotype.volume.fluid_fraction = 0.0; 
+
+		phenotype.volume.cytoplasmic_to_nuclear_ratio = phenotype.volume.cytoplasmic_solid / 
+			( phenotype.volume.nuclear_solid + 1e-16 );
+			
+		// update corresponding BioFVM parameters (self-consistency) 
+		set_total_volume( phenotype.volume.total ); 
+		pCell_to_fuse->set_total_volume( 0.0 ); 
+
+		// absorb the internalized substrates 
+		
+		*internalized_substrates += *(pCell_to_fuse->internalized_substrates); 
+		static int n_substrates = internalized_substrates->size(); 
+		pCell_to_fuse->internalized_substrates->assign( n_substrates , 0.0 ); 	
+
+		// set target volume(s)
+
+		phenotype.volume.target_solid_cytoplasmic += pCell_to_fuse->phenotype.volume.target_solid_cytoplasmic;
+		phenotype.volume.target_solid_nuclear += pCell_to_fuse->phenotype.volume.target_solid_nuclear;
 		
 		// trigger removal from the simulation 
 		// pCell_to_eat->die(); // I don't think this is safe if it's in an OpenMP loop 
@@ -1238,28 +1603,32 @@ void Cell::ingest_cell( Cell* pCell_to_eat )
 		// flag it for removal 
 		// pCell_to_eat->flag_for_removal(); 
 		// mark it as dead 
-		pCell_to_eat->phenotype.death.dead = true; 
+		pCell_to_fuse->phenotype.death.dead = true; 
 		// set secretion and uptake to zero 
-		pCell_to_eat->phenotype.secretion.set_all_secretion_to_zero( );  
-		pCell_to_eat->phenotype.secretion.set_all_uptake_to_zero( ); 
+		pCell_to_fuse->phenotype.secretion.set_all_secretion_to_zero( );  
+		pCell_to_fuse->phenotype.secretion.set_all_uptake_to_zero( ); 
 		
 		// deactivate all custom function 
-		pCell_to_eat->functions.custom_cell_rule = NULL; 
-		pCell_to_eat->functions.update_phenotype = NULL; 
-		pCell_to_eat->functions.contact_function = NULL; 
+		pCell_to_fuse->functions.custom_cell_rule = NULL; 
+		pCell_to_fuse->functions.update_phenotype = NULL; 
+		pCell_to_fuse->functions.contact_function = NULL; 
+		pCell_to_fuse->functions.cell_division_function = NULL; 
+		pCell_to_fuse->functions.volume_update_function = NULL; 
 
 		// remove all adhesions 
 		// pCell_to_eat->remove_all_attached_cells();
 		
 		// set cell as unmovable and non-secreting 
-		pCell_to_eat->is_movable = false; 
-		pCell_to_eat->is_active = false; 
+		pCell_to_fuse->is_movable = false; 
+		pCell_to_fuse->is_active = false; 
+
 	}
 
 	// things that have their own thread safety 
-	pCell_to_eat->flag_for_removal();
-	pCell_to_eat->remove_all_attached_cells();
-	
+	pCell_to_fuse->flag_for_removal();
+	pCell_to_fuse->remove_all_attached_cells();
+	pCell_to_fuse->remove_all_spring_attachments();
+
 	return; 
 }
 
@@ -1283,6 +1652,7 @@ void Cell::lyse_cell( void )
 	functions.custom_cell_rule = NULL; 
 	functions.update_phenotype = NULL; 
 	functions.contact_function = NULL; 
+	functions.cell_division_function = NULL; 
 	
 	// remove all adhesions 
 	
@@ -1300,6 +1670,43 @@ void Cell::lyse_cell( void )
 
 bool cell_definitions_by_name_constructed = false; 
 
+void prebuild_cell_definition_index_maps( void )
+{
+	// look in config file 
+	extern pugi::xml_node physicell_config_root; 
+	// find the start of cell definitions 
+	pugi::xml_node node = physicell_config_root.child( "cell_definitions" ); 
+	
+	// find the first cell definition 
+	node = node.child( "cell_definition" ); 
+	
+	// We won't declare and build the cell definitions just yet. 
+	// All we want to do is know in advance the IDs and names 
+	// of all cell definitions, so we can appropriately size 
+	// Cell_Interactions and Cell_Transformations in the phenotype 
+	// when we set up the cell definitions. 
+	
+	int n = 0; 
+	while( node )
+	{
+		int ID = node.attribute( "ID" ).as_int();  
+		std::string type_name = node.attribute( "name" ).value();   
+
+		std::cout << "Pre-processing type " << ID << " named " << type_name << std::endl; 
+		
+//		cell_definitions_by_name[ type_name ] = pCD; 
+//		cell_definitions_by_type[ pCD->type ] = pCD; 
+		
+		cell_definition_indices_by_name[ type_name ] = n; 
+		cell_definition_indices_by_type[ ID ] = n; 
+		
+		node = node.next_sibling( "cell_definition" ); 
+		n++; 
+	}	
+	
+	return; 
+}
+
 void build_cell_definitions_maps( void )
 {
 //	cell_definitions_by_name.
@@ -1310,6 +1717,9 @@ void build_cell_definitions_maps( void )
 		Cell_Definition* pCD = cell_definitions_by_index[n]; 
 		cell_definitions_by_name[ pCD->name ] = pCD; 
 		cell_definitions_by_type[ pCD->type ] = pCD; 
+		
+		cell_definition_indices_by_name[ pCD->name ] = n; 
+		cell_definition_indices_by_type[ pCD->type ] = n; 
 	}
 
 	cell_definitions_by_name_constructed = true; 
@@ -1326,6 +1736,14 @@ void display_ptr_as_bool( void (*ptr)(Cell*,Phenotype&,double), std::ostream& os
 }
 
 void display_ptr_as_bool( void (*ptr)(Cell*,Phenotype&,Cell*,Phenotype&,double), std::ostream& os )
+{
+	if( ptr )
+	{ os << "true"; return; }
+	os << "false"; 
+	return;
+}
+
+void display_ptr_as_bool( void (*ptr)(Cell*,Cell*), std::ostream& os )
 {
 	if( ptr )
 	{ os << "true"; return; }
@@ -1416,6 +1834,8 @@ void display_cell_definitions( std::ostream& os )
 		os << std::endl;
 		os << "\t\t contact function: "; display_ptr_as_bool( pCF->contact_function , std::cout ); 
 		os << std::endl; 
+		os << "\t\t cell division function: "; display_ptr_as_bool( pCF->cell_division_function , std::cout ); 
+		os << std::endl; 
 		
 		// summarize motility 
 		
@@ -1447,9 +1867,27 @@ void display_cell_definitions( std::ostream& os )
 		
 		
 		// mechanics
+
+		Mechanics* pMech = &(pCD->phenotype.mechanics); 
+
+		os << "\tmechanics:" << std::endl 
+			<< "\t\tcell_cell_adhesion_strength: " << pMech->cell_cell_adhesion_strength << std::endl 
+			<< "\t\tcell_cell_repulsion_strength: " << pMech->cell_cell_repulsion_strength << std::endl 
+			<< "\t\trel max adhesion dist: " << pMech->relative_maximum_adhesion_distance << std::endl 
+			<< "\t\tcell_BM_adhesion_strength: " << pMech->cell_BM_adhesion_strength << std::endl 
+			<< "\t\tcell_BM_repulsion_strength: " << pMech->cell_BM_repulsion_strength << std::endl 
+			<< "\t\tattachment_elastic_constant: " << pMech->attachment_elastic_constant << std::endl 
+			<< "\t\tattachment_rate: " << pMech->attachment_rate << std::endl 
+			<< "\t\tdetachment_rate: " << pMech->detachment_rate << std::endl;
 		
 		// size 
 	
+
+		// intracellular
+		if (pCD->phenotype.intracellular != NULL)
+		{
+			pCD->phenotype.intracellular->display(os);
+		}
 		
 		Custom_Cell_Data* pCCD = &(pCD->custom_data); 
 		os << "\tcustom data: " << std::endl; 
@@ -1576,20 +2014,79 @@ Cell_Definition* initialize_cell_definition_from_pugixml( pugi::xml_node cd_node
 	if( cd_node.attribute( "parent_type" ) )
 	{ pParent = find_cell_definition( cd_node.attribute( "parent_type" ).value() ); }
 	// if it's not the default and no parent stated, inherit from default 
+	bool use_default_as_parent_without_specifying = false; 
 	if( pParent == NULL && pCD != &cell_defaults )
-	{ pParent = &cell_defaults; } 
+	{
+		pParent = &cell_defaults; 
+		use_default_as_parent_without_specifying = true; 
+	} 
 
 	// if we found something to inherit from, then do it! 
 	if( pParent != NULL )
 	{
-		std::cout << "\tInheriting from type " << pParent->name << " ... " << std::endl; 
+		// this is where we copy data from the first cell definition, including custom_data
 		*pCD = *pParent; 
 		
 		// but recover the name and ID (type)
 		pCD->name = cd_node.attribute("name").value();
 		pCD->type = cd_node.attribute("ID").as_int(); 
 	} 
-	
+
+	/* bugfix on April 24, 2022 */ 
+	// If we copied from cell_defaults and also wrote 
+	// more properties to cell defaults, we have messed up 
+	// some of the rates that are assumed to start at zero. 
+	// So, let's overwrite with zeros. 
+	if( use_default_as_parent_without_specifying )
+	{
+
+		pugi::xml_node node_options = xml_find_node( physicell_config_root , "options" ); 
+		bool disable_bugfix = false; 
+		if( node_options )
+		{ disable_bugfix = xml_get_bool_value( node_options, "legacy_cell_defaults_copy" ); }
+
+		if( disable_bugfix == false )
+		{
+			int number_of_substrates = microenvironment.density_names.size(); 
+			int number_of_cell_defs = cell_definition_indices_by_name.size(); 
+
+			// motility 
+			pCD->phenotype.motility.is_motile = false; 
+			pCD->phenotype.motility.chemotactic_sensitivities.assign(number_of_substrates,0.0); 
+			pCD->functions.update_migration_bias = NULL; 
+
+			// secretion  
+			pCD->phenotype.secretion.secretion_rates.assign(number_of_substrates,0.0); 
+			pCD->phenotype.secretion.uptake_rates.assign(number_of_substrates,0.0); 
+			pCD->phenotype.secretion.net_export_rates.assign(number_of_substrates,0.0); 
+			pCD->phenotype.secretion.saturation_densities.assign(number_of_substrates,0.0); 
+
+			// interaction 
+			pCD->phenotype.cell_interactions.apoptotic_phagocytosis_rate = 0.0; 
+			pCD->phenotype.cell_interactions.necrotic_phagocytosis_rate = 0.0; 
+			pCD->phenotype.cell_interactions.other_dead_phagocytosis_rate = 0.0; 
+			pCD->phenotype.cell_interactions.live_phagocytosis_rates.assign(number_of_cell_defs,0.0); 
+			pCD->phenotype.cell_interactions.attack_rates.assign(number_of_cell_defs,0.0); 
+			pCD->phenotype.cell_interactions.attack_damage_rate = 1.0; 
+			pCD->phenotype.cell_interactions.fusion_rates.assign(number_of_cell_defs,0.0); 
+
+			// transformation 
+			pCD->phenotype.cell_transformations.transformation_rates.assign(number_of_cell_defs,0.0); 
+
+			// asymmetric division
+			pCD->phenotype.cycle.asymmetric_division.asymmetric_division_probabilities.assign(number_of_cell_defs,0.0);
+		}
+		else 
+		{
+			std::cout << "Warning! You have disabled a bugfix on cell definition inheritance" << std::endl 
+			<< "\tBe VERY careful that you have manually specified every parameter value" << std::endl
+			<< "\tfor every cell cell definition. Set legacy_cell_defaults_copy to false" << std::endl 
+			<< "\tin the options section of your parameter file to re-enable the bug fix. " << std::endl << std::endl
+			<< "\tSome good news: if you used the model builder, this has never affected your results." << std::endl; 
+		}
+
+	}
+
 	// sync to microenvironment
 	pCD->pMicroenvironment = NULL;
 	if( BioFVM::get_default_microenvironment() != NULL )
@@ -1610,6 +2107,13 @@ Cell_Definition* initialize_cell_definition_from_pugixml( pugi::xml_node cd_node
 	// pCD->phenotype.secretion.sync_to_current_microenvironment();
 	pCD->phenotype.secretion.sync_to_microenvironment( (pCD->pMicroenvironment) ); 
 	pCD->phenotype.molecular.sync_to_microenvironment( (pCD->pMicroenvironment) );
+	
+	// make sure that interactions and transfomations are correctly sized 
+	// this requires that prebuild_cell_definition_index_maps was already run 
+	pCD->phenotype.cell_interactions.sync_to_cell_definitions(); 
+	pCD->phenotype.cell_transformations.sync_to_cell_definitions(); 
+	pCD->phenotype.cycle.asymmetric_division.sync_to_cell_definitions();
+	pCD->phenotype.mechanics.sync_to_cell_definitions(); 
 	
 	// set the reference phenotype 
 	pCD->parameters.pReference_live_phenotype = &(pCD->phenotype); 
@@ -1681,7 +2185,6 @@ Cell_Definition* initialize_cell_definition_from_pugixml( pugi::xml_node cd_node
                 std::cout << "Warning: Unknown cycle model " << std::endl;
                 exit(-1); 
             }
-//			}
 			pCD->phenotype.cycle.sync_to_cycle_model( pCD->functions.cycle_model ); 
 		}
 		
@@ -1758,11 +2261,49 @@ Cell_Definition* initialize_cell_definition_from_pugixml( pugi::xml_node cd_node
 				
 				node = node.next_sibling( "duration" ); 
 			}
-			
 		}
 
-		
-		
+		node = cd_node.child( "phenotype" );
+		node = node.child( "cycle" );
+		node = node.child( "standard_asymmetric_division" );
+		if( node && node.attribute("enabled").as_bool() )
+		{
+			Asymmetric_Division *pAD = &(pCD->phenotype.cycle.asymmetric_division);
+
+			// asymmetric division rates
+			pugi::xml_node node_adp = node.child( "asymmetric_division_probability");
+			while (node_adp)
+			{
+				// get the name of the target cell type
+				std::string target_name = node_adp.attribute("name").value();
+				// now find its index
+				auto search = cell_definition_indices_by_name.find(target_name);
+				// safety first!
+				if( search != cell_definition_indices_by_name.end() )
+				{
+					// if the target is found, set the appropriate rate
+					int target_index = search->second;
+
+					double asymmetric_division_probability = xml_get_my_double_value(node_adp);
+					pAD->asymmetric_division_probabilities[target_index] = asymmetric_division_probability;
+				}
+				else
+				{
+					std::cout << "Error: When processing the " << pCD->name << " cell definition: " << std::endl
+						<< "\tCould not find cell type " << target_name << " for asymmetric division." << std::endl
+						<< "\tRemove this cell type from the asymmetric division probabilities!" << std::endl << std::endl;
+					exit(-1);
+				}
+				node_adp = node_adp.next_sibling("asymmetric_division_probability");
+			}
+			std::cout << "Asymmetric division probabilities for " << pCD->name << ": ";
+			for (int i = 0; i < pAD->asymmetric_division_probabilities.size(); i++)
+			{
+				std::cout << pAD->asymmetric_division_probabilities[i] << " ";
+			}
+			std::cout << std::endl;
+			pCD->functions.cell_division_function = standard_asymmetric_division_function;
+		}
 	}
 	
 	// here's what it ***should*** do: 
@@ -1777,9 +2318,11 @@ Cell_Definition* initialize_cell_definition_from_pugixml( pugi::xml_node cd_node
 	node = node.child( "death" ); 
 	if( node )
 	{
-		node = node.child( "model" );
-		while( node )
+		pugi::xml_node model_node = node.child( "model" );
+		while( model_node )
 		{
+			node = model_node;
+
 			int model; // = node.attribute("code").as_int() ; 
 			if( strlen( node.attribute("code").as_string() ) > 0 )
 			{ model = node.attribute("code").as_int(); }
@@ -1976,45 +2519,11 @@ Cell_Definition* initialize_cell_definition_from_pugixml( pugi::xml_node cd_node
 					node = node.next_sibling( "duration" ); 
 				}
 				
-				
-/*
-		if( node.child( "phase_durations" ) )
-		{ node = node.child( "phase_durations" ); }
-		if( node )
-		{
-			node = node.child( "duration");
-			while( node )
-			{
-				// which duration? 
-				int start = node.attribute("index").as_int(); 
-				// fixed duration? 
-				bool fixed = false; 
-				if( node.attribute( "fixed_duration" ) )
-				{ fixed = node.attribute("fixed_duration").as_bool(); }
-				// actual value of the duration 
-				double value = xml_get_my_double_value( node ); 
-				
-				// set the transition rate 
-				pCD->phenotype.cycle.data.exit_rate(start) = 1.0 / (value+1e-16); 
-				// set it to fixed / non-fixed 
-				pCD->phenotype.cycle.model().phase_links[start][0].fixed_duration = fixed; 
-				
-				node = node.next_sibling( "duration" ); 
-			}
-			
-		}
-
-*/				
-				
-				
 				node = node.parent(); // phase_durations 
 				node = node.parent(); // model 
 			}				
 			
-			// node = node.parent(); 
-			
-			node = node.next_sibling( "model" ); 
-//			death_model_index++; 
+			model_node = model_node.next_sibling( "model" ); 
 		}
 		
 	}
@@ -2100,13 +2609,43 @@ Cell_Definition* initialize_cell_definition_from_pugixml( pugi::xml_node cd_node
 		if( node_mech )
 		{ pM->cell_cell_adhesion_strength = xml_get_my_double_value( node_mech ); }	
 
+		node_mech = node.child( "cell_BM_adhesion_strength" );
+		if( node_mech )
+		{ pM->cell_BM_adhesion_strength = xml_get_my_double_value( node_mech ); }	
+
 		node_mech = node.child( "cell_cell_repulsion_strength" );
 		if( node_mech )
 		{ pM->cell_cell_repulsion_strength = xml_get_my_double_value( node_mech ); }	
 
+		node_mech = node.child( "cell_BM_repulsion_strength" );
+		if( node_mech )
+		{ pM->cell_BM_repulsion_strength = xml_get_my_double_value( node_mech ); }	
+
 		node_mech = node.child( "relative_maximum_adhesion_distance" );
 		if( node_mech )
 		{ pM->relative_maximum_adhesion_distance = xml_get_my_double_value( node_mech ); }	
+
+		// cell adhesion affinities 
+		node_mech = node.child( "cell_adhesion_affinities" );
+		if( node_mech )
+		{
+			node_mech = node_mech.child("cell_adhesion_affinity"); 
+			while( node_mech )
+			{
+				std::string target = node_mech.attribute("name").value(); 
+				double value = xml_get_my_double_value( node_mech ) ; 
+
+				// find the target
+				// if found, assign taht affinity 
+				int ind = find_cell_definition_index( target ); 
+				if( ind > -1 )
+				{ pM->cell_adhesion_affinities[ind] = value; }
+				else
+				{ std::cout << "what?!?" << std::endl; }
+
+				node_mech = node_mech.next_sibling( "cell_adhesion_affinity"); 
+			}
+		}	
 
 		node_mech = node.child( "options" );
 		if( node_mech )
@@ -2131,6 +2670,23 @@ Cell_Definition* initialize_cell_definition_from_pugixml( pugi::xml_node cd_node
 				}
 			}
 		}
+
+        node_mech = node.child( "attachment_elastic_constant" );
+		if( node_mech )
+		{ pM->attachment_elastic_constant = xml_get_my_double_value( node_mech ); }
+		std::cout << "  --------- attachment_elastic_constant = " << pM->attachment_elastic_constant << std::endl;
+
+        node_mech = node.child( "attachment_rate" );
+		if( node_mech )
+		{ pM->attachment_rate = xml_get_my_double_value( node_mech ); }	
+
+        node_mech = node.child( "detachment_rate" );
+		if( node_mech )
+		{ pM->detachment_rate = xml_get_my_double_value( node_mech ); }	
+
+		node_mech = node.child( "maximum_number_of_attachments" );
+		if ( node_mech )
+		{ pM->maximum_number_of_attachments = xml_get_my_int_value( node_mech ); }
 	}
 	
 	// motility 
@@ -2157,17 +2713,22 @@ Cell_Definition* initialize_cell_definition_from_pugixml( pugi::xml_node cd_node
 		{
 			// enable motility? 
 			pugi::xml_node node_mot1 = node_mot.child( "enabled" ); 
-			pMot->is_motile = xml_get_my_bool_value( node_mot1 ); 
+			if( node_mot1 )
+			{
+				pMot->is_motile = xml_get_my_bool_value( node_mot1 ); 
+			}
 			
 			// restrict to 2D? 
 			node_mot1 = node_mot.child( "use_2D" ); 
-			pMot->restrict_to_2D = xml_get_my_bool_value( node_mot1 ); 
-			
-			if( default_microenvironment_options.simulate_2D )
+			if( node_mot1 )
 			{
-				std::cout << "Note: Overriding to set cell motility to 2D based on " 
-							<< "microenvironment domain settings ... "
-				<< std::endl; 				
+				pMot->restrict_to_2D = xml_get_my_bool_value( node_mot1 ); 
+			}
+			
+			if( default_microenvironment_options.simulate_2D && pMot->restrict_to_2D == false )
+			{
+				std::cout << "Note: Overriding to set cell motility for " << pCD->name << " to 2D based on " 
+						  << "microenvironment domain settings ... " << std::endl; 				
 				pMot->restrict_to_2D = true; 
 			}
 			
@@ -2207,11 +2768,107 @@ Cell_Definition* initialize_cell_definition_from_pugixml( pugi::xml_node cd_node
 				
 				pMot->chemotaxis_direction = xml_get_int_value( node_mot1 , "direction" ); 
 				
-				std::cout << pMot->chemotaxis_direction << " * grad( " << actual_name << " )" << std::endl; 
+				// std::cout << pMot->chemotaxis_direction << " * grad( " << actual_name << " )" << std::endl; 
 
 			}
+
+			// automated advanced chemotaxis setup 
+			node_mot1 = node_mot.child( "advanced_chemotaxis" ); 
+			if( node_mot1 )
+			{
+				// enabled? if so, set the standard chemotaxis function
+				if( xml_get_bool_value( node_mot1, "enabled" ) )
+				{
+					if( pCD->functions.update_migration_bias == chemotaxis_function )
+					{
+						std::cout << "Warning: when processing motility for " << pCD->name << " cells: " << std::endl 
+								 << "\tBoth chemotaxis and advanced_chemotaxis are enabled." << std::endl
+						          << "\tThe settings for advanced_chemotaxis override those of chemotaxis." << std::endl; 
+					}
+					pCD->functions.update_migration_bias = advanced_chemotaxis_function;
+					if( xml_get_bool_value( node_mot1, "normalize_each_gradient" ) )
+					{ pCD->functions.update_migration_bias = advanced_chemotaxis_function_normalized; }
+				}	
+
+				// now process the chemotactic sensitivities 
+
+				pugi::xml_node node_cs = node_mot1.child( "chemotactic_sensitivities"); 
+				if( node_cs  )
+				{
+					node_cs = node_cs.child("chemotactic_sensitivity"); 
+
+					while( node_cs )
+					{
+						std::string substrate_name = node_cs.attribute( "substrate").value(); 
+						int index = microenvironment.find_density_index( substrate_name ); 
+						std::string actual_name = ""; 
+						if( index > -1 )
+						{ actual_name = microenvironment.density_names[ index ]; }
+			
+						// error check 
+						if( std::strcmp( substrate_name.c_str() , actual_name.c_str() ) != 0 )						
+						{
+							std::cout << "Warning: when processing advanced chemotaxis for " << pCD->name << " cells: " << std::endl 
+									  << "\tInvalid substrate " << substrate_name << " specified." << std::endl
+						          	  << "\tIgnoring this invalid substrate in the chemotaxis function .. " << std::endl; 
+						}
+						else
+						{ pCD->phenotype.motility.chemotactic_sensitivities[index] = xml_get_my_double_value(node_cs); }
+						node_cs = node_cs.next_sibling( "chemotactic_sensitivity" ); 
+					}
+
+				}
+				else
+				{
+					std::cout << "Warning: when processing motility for " << pCD->name << " cells: " << std::endl 
+								<< "\tAdvanced chemotaxis requries chemotactic_sensitivities." << std::endl
+								<< "\tBut you have none. Your migration bias will be the zero vector." << std::endl; 
+				}
+
+			}
+
+
+
 		}
-	}	
+
+		// display summary for diagnostic help 
+		if( pCD->functions.update_migration_bias == chemotaxis_function && pMot->is_motile == true )
+		{
+			std::cout << "Cells of type " << pCD->name << " use standard chemotaxis: " << std::endl 
+			<< "\t d_bias (before normalization) = " << pMot->chemotaxis_direction << " * grad(" 
+			<< microenvironment.density_names[pMot->chemotaxis_index] << ")" << std::endl; 
+		}
+
+		if( pCD->functions.update_migration_bias == advanced_chemotaxis_function && pMot->is_motile == true )
+		{
+			int number_of_substrates = microenvironment.density_names.size(); 
+
+			std::cout << "Cells of type " << pCD->name << " use advanced chemotaxis: " << std::endl 
+			<< "\t d_bias (before normalization) = " 
+			<< pMot->chemotactic_sensitivities[0] << " * grad(" << microenvironment.density_names[0] << ")"; 
+
+			for( int n=1; n < number_of_substrates; n++ )
+			{ std::cout << " + " << pMot->chemotactic_sensitivities[n] << " * grad(" << microenvironment.density_names[n] << ")"; }
+			std::cout << std::endl; 
+		}		
+
+		if( pCD->functions.update_migration_bias == advanced_chemotaxis_function_normalized && pMot->is_motile == true )
+		{
+			int number_of_substrates = microenvironment.density_names.size(); 
+
+			std::cout << "Cells of type " << pCD->name << " use normalized advanced chemotaxis: " << std::endl 
+			<< "\t d_bias (before normalization) = " 
+			<< pMot->chemotactic_sensitivities[0] << " * grad(" << microenvironment.density_names[0] << ")" 
+			<< " / ||grad(" << microenvironment.density_names[0] << ")||"; 
+
+			for( int n=1; n < number_of_substrates; n++ )
+			{
+				std::cout << " + " << pMot->chemotactic_sensitivities[n] << " * grad(" << microenvironment.density_names[n] << ")"
+				<< " / ||grad(" << microenvironment.density_names[n] << ")||"; 
+			}
+			std::cout << std::endl; 
+		}		
+	}
 
 	// secretion
 	
@@ -2264,14 +2921,209 @@ Cell_Definition* initialize_cell_definition_from_pugixml( pugi::xml_node cd_node
 		}
 	}	
 
-    	// intracellular
-	
+	// cell interactions 
+
+	node = cd_node.child( "phenotype" );
+	node = node.child( "cell_interactions" ); 
+	if( node )
+	{
+		Cell_Interactions* pCI = &(pCD->phenotype.cell_interactions);
+
+		// dead_phagocytosis_rate
+		pugi::xml_node node_dpr = node.child("dead_phagocytosis_rate");
+		double dead_phagocytosis_rate = 0.0; 
+		if( node_dpr )
+		{
+			// pCI->dead_phagocytosis_rate = xml_get_my_double_value(node_dpr); 
+			dead_phagocytosis_rate = xml_get_my_double_value(node_dpr); 
+		}
+/*
+		pCI->apoptotic_phagocytosis_rate = pCI->dead_phagocytosis_rate; 
+		pCI->necrotic_phagocytosis_rate = pCI->dead_phagocytosis_rate; 
+		pCI->other_dead_phagocytosis_rate = pCI->dead_phagocytosis_rate; 
+*/
+		pCI->apoptotic_phagocytosis_rate = dead_phagocytosis_rate; 
+		pCI->necrotic_phagocytosis_rate = dead_phagocytosis_rate; 
+		pCI->other_dead_phagocytosis_rate = dead_phagocytosis_rate; 
+
+		// if specific apoptotic rate is specified, overwrite 
+		pugi::xml_node node_apr = node.child("apoptotic_phagocytosis_rate"); 
+		if( node_apr )
+		{ pCI->apoptotic_phagocytosis_rate = xml_get_my_double_value(node_apr);  }
+
+		// if specific necrotic rate is specified, overwrite 
+		pugi::xml_node node_npr = node.child("necrotic_phagocytosis_rate"); 
+		if( node_npr )
+		{ pCI->necrotic_phagocytosis_rate = xml_get_my_double_value(node_npr);  }
+
+		// if specific necrotic rate is specified, overwrite 
+		pugi::xml_node node_odpr = node.child("other_dead_phagocytosis_rate"); 
+		if( node_odpr )
+		{ pCI->other_dead_phagocytosis_rate = xml_get_my_double_value(node_odpr);  }
+
+		// live phagocytosis rates 
+		pugi::xml_node node_lpcr = node.child( "live_phagocytosis_rates");
+		if( node_lpcr )
+		{ node_lpcr = node_lpcr.child( "phagocytosis_rate"); }
+		while( node_lpcr )
+		{
+			// get the name of the target cell type
+			std::string target_name = node_lpcr.attribute( "name").value(); 
+			// now find its index 
+			auto search = cell_definition_indices_by_name.find( target_name );
+			// safety first! 
+			if( search != cell_definition_indices_by_name.end() )
+			{
+				// if the target is found, set the appropriate rate 
+				int target_index = search->second; 
+				std::string target_name_check = search->first; 
+				pCI->live_phagocytosis_rates[target_index] = xml_get_my_double_value(node_lpcr); 
+			}
+			else
+			{
+				std::cout << "Warning: When processing the " << pCD->name << " cell definition: " << std::endl 
+				<< "\tCould not find cell type " << target_name << " for phagocytosis." << std::endl
+				<< "\tIgnoring this live phagocytosis rate!" << std::endl << std::endl; 
+			}
+			node_lpcr = node_lpcr.next_sibling( "phagocytosis_rate" ); 
+		}
+
+		// effector attack rates 
+		pugi::xml_node node_ar = node.child( "attack_rates");
+		if( node_ar )
+		{ node_ar = node_ar.child( "attack_rate"); }
+		while( node_ar )
+		{
+			// get the name of the target cell type
+			std::string target_name = node_ar.attribute( "name").value(); 
+			// now find its index 
+			auto search = cell_definition_indices_by_name.find( target_name );
+			// safety first! 
+			if( search != cell_definition_indices_by_name.end() )
+			{
+				// if the target is found, set the appropriate rate 
+				int target_index = search->second; 
+				std::string target_name_check = search->first; 
+				pCI->attack_rates[target_index] = xml_get_my_double_value(node_ar); 
+			}
+			else
+			{
+				std::cout << "Warning: When processing the " << pCD->name << " cell definition: " << std::endl 
+				<< "\tCould not find cell type " << target_name << " for cell attack." << std::endl
+				<< "\tIgnoring this cell attack rate!" << std::endl << std::endl; 
+			}
+			node_ar = node_ar.next_sibling( "attack_rate" ); 
+		}
+
+		// damage_rate
+		pugi::xml_node node_dr = node.child("attack_damage_rate");
+		pCI->attack_damage_rate = xml_get_my_double_value(node_dr); 
+
+		// attack_duration
+		pugi::xml_node node_ad = node.child("attack_duration");
+		pCI->attack_duration = xml_get_my_double_value(node_ad);
+
+		// fusion_rates 
+		pugi::xml_node node_fr = node.child( "fusion_rates");
+		if( node_fr )
+		{ node_fr = node_fr.child( "fusion_rate"); }
+		while( node_fr )
+		{
+			// get the name of the target cell type
+			std::string target_name = node_fr.attribute( "name").value(); 
+			// now find its index 
+			auto search = cell_definition_indices_by_name.find( target_name );
+			// safety first! 
+			if( search != cell_definition_indices_by_name.end() )
+			{
+				// if the target is found, set the appropriate rate 
+				int target_index = search->second; 
+				std::string target_name_check = search->first; 
+				pCI->fusion_rates[target_index] = xml_get_my_double_value(node_fr); 
+			}
+			else
+			{
+				std::cout << "Warning: When processing the " << pCD->name << " cell definition: " << std::endl 
+				<< "\tCould not find cell type " << target_name << " for cell fusion." << std::endl
+				<< "\tIgnoring this cell fusion rate!" << std::endl << std::endl; 
+			}
+			node_fr = node_fr.next_sibling( "fusion_rate" ); 
+		}
+	}	
+
+	// cell_transformations>
+    //            <transformation_rate
+
+	node = cd_node.child( "phenotype" );
+	node = node.child( "cell_transformations" ); 
+	if( node )
+	{
+		Cell_Transformations * pCT = &(pCD->phenotype.cell_transformations);
+
+		// transformation rates 
+		pugi::xml_node node_tr = node.child( "transformation_rates");
+		if( node_tr )
+		{ node_tr = node_tr.child( "transformation_rate"); }
+		while( node_tr )
+		{
+			// get the name of the target cell type
+			std::string target_name = node_tr.attribute( "name").value(); 
+			// now find its index 
+			auto search = cell_definition_indices_by_name.find( target_name );
+			// safety first! 
+			if( search != cell_definition_indices_by_name.end() )
+			{
+				// if the target is found, set the appropriate rate 
+				int target_index = search->second; 
+				std::string target_name_check = search->first; 
+
+				double transformation_rate = xml_get_my_double_value(node_tr);
+				if( target_name == pCD->name && transformation_rate > 1e-16 )
+				{
+					std::cout << "Warning: When processing the " << pCD->name << " cell definition: " << std::endl 
+					<< "\tTransformation from " << pCD->name << " to " << target_name << " is not allowed." << std::endl
+					<< "\tIgnoring this cell transformation rate!" << std::endl << std::endl; 
+				}
+				else
+				{ pCT->transformation_rates[target_index] = transformation_rate; }
+			}
+			else
+			{
+				std::cout << "Warning: When processing the " << pCD->name << " cell definition: " << std::endl 
+				<< "\tCould not find cell type " << target_name << " for cell transformation." << std::endl
+				<< "\tIgnoring this cell transformation rate!" << std::endl << std::endl; 
+			}
+			node_tr = node_tr.next_sibling( "transformation_rate" ); 
+		}
+
+	}
+
+	// cell integrity 
+	node = cd_node.child( "phenotype" );
+	node = node.child( "cell_integrity" ); 
+	if( node )
+	{
+		Cell_Integrity *pCI = &(pCD->phenotype.cell_integrity);
+
+		pugi::xml_node node_dr = node.child("damage_rate");
+		if( node_dr )
+		{ pCI->damage_rate = xml_get_my_double_value( node_dr ); }
+
+		pugi::xml_node node_drr = node.child("damage_repair_rate");
+		if( node_drr )
+		{ pCI->damage_repair_rate = xml_get_my_double_value( node_drr ); }
+	}
+
+	node = cd_node.child( "phenotype" );
+
+		// intracellular
 	node = cd_node.child( "phenotype" );
 	node = node.child( "intracellular" ); 
 	if( node )
 	{
 		std::string model_type = node.attribute( "type" ).value(); 
 		
+
 #ifdef ADDON_PHYSIBOSS
 		if (model_type == "maboss") {
 			// If it has already be copied
@@ -2320,8 +3172,12 @@ Cell_Definition* initialize_cell_definition_from_pugixml( pugi::xml_node cd_node
 		}
 #endif
 
-	}	
-	
+	} else{
+
+		pCD->phenotype.intracellular = NULL;
+
+	}
+
 	// set up custom data 
 	node = cd_node.child( "custom_data" );
 	pugi::xml_node node1 = node.first_child(); 
@@ -2331,10 +3187,12 @@ Cell_Definition* initialize_cell_definition_from_pugixml( pugi::xml_node cd_node
 		std::string name = xml_get_my_name( node1 ); 
 		
 		// units 
-		std::string units = node1.attribute( "units").value(); 
-		
+		std::string units = node1.attribute( "units").value(); 		
 		std::vector<double> values; // ( length, 0.0 ); 
-		
+
+		// conserved quantity 
+		bool conserved = node1.attribute( "conserved").as_bool(); 
+
 		// get value(s)
 		std::string str_values = xml_get_my_string_value( node1 ); 
 		csv_to_vector( str_values.c_str() , values ); 
@@ -2352,6 +3210,9 @@ Cell_Definition* initialize_cell_definition_from_pugixml( pugi::xml_node cd_node
 			// otherwise, add 
 			else
 			{ pCD->custom_data.add_variable( name, units, values[0] ); }
+
+			n = pCD->custom_data.find_variable_index( name ); 
+			pCD->custom_data.variables[n].conserved_quantity = conserved;
 		}
 		// or vector 
 		else
@@ -2364,8 +3225,12 @@ Cell_Definition* initialize_cell_definition_from_pugixml( pugi::xml_node cd_node
 			// otherwise, add 
 			else
 			{ pCD->custom_data.add_vector_variable( name, units, values ); }
+
+			n = pCD->custom_data.find_vector_variable_index( name ); 
+			pCD->custom_data.vector_variables[n].conserved_quantity = conserved;
 		}
-		
+
+		// set conserved attribute 
 		node1 = node1.next_sibling(); 
 	}
 	
@@ -2386,7 +3251,11 @@ void initialize_cell_definitions_from_pugixml( pugi::xml_node root )
 			std::cout << "virtual_wall_at_domain_edge: enabled" << std::endl; 
 			cell_defaults.functions.add_cell_basement_membrane_interactions = standard_domain_edge_avoidance_interactions;
 		}
+
 	}
+	
+	// first, let's pre-build the map. 
+	prebuild_cell_definition_index_maps(); 
 	
 	pugi::xml_node node = root.child( "cell_definitions" ); 
 	
@@ -2401,6 +3270,13 @@ void initialize_cell_definitions_from_pugixml( pugi::xml_node root )
 		
 		node = node.next_sibling( "cell_definition" ); 
 	}
+	
+/*	
+	// now, make sure cell_defaults gets synced correctly. 
+	// It was declared long before we built this map, so it's not synced. 
+	cell_defaults.phenotype.cell_interactions.sync_to_cell_definitions(); 
+	cell_defaults.phenotype.cell_transformations.sync_to_cell_definitions(); 
+*/	
 	
 //	build_cell_definitions_maps(); 
 //	display_cell_definitions( std::cout ); 
@@ -2434,6 +3310,23 @@ void Cell::attach_cell( Cell* pAddMe )
 	return; 
 }
 
+void Cell::attach_cell_as_spring( Cell* pAddMe )
+{
+	#pragma omp critical
+	{
+		bool already_attached = false; 
+		for( int i=0 ; i < state.spring_attachments.size() ; i++ )
+		{
+			if( state.spring_attachments[i] == pAddMe )
+			{ already_attached = true; }
+		}
+		if( already_attached == false )
+		{ state.spring_attachments.push_back( pAddMe ); }
+	}
+	// pAddMe->attach_cell( this ); 
+	return; 
+}
+
 void Cell::detach_cell( Cell* pRemoveMe )
 {
 	#pragma omp critical
@@ -2458,6 +3351,60 @@ void Cell::detach_cell( Cell* pRemoveMe )
 	return; 
 }
 
+void Cell::detach_cell_as_spring( Cell* pRemoveMe )
+{
+	#pragma omp critical
+	{
+		bool found = false; 
+		int i = 0; 
+		while( !found && i < state.spring_attachments.size() )
+		{
+			// if pRemoveMe is in the cell's list, remove it
+			if( state.spring_attachments[i] == pRemoveMe )
+			{
+				int n = state.spring_attachments.size(); 
+				// copy last entry to current position 
+				state.spring_attachments[i] = state.spring_attachments[n-1]; 
+				// shrink by one 
+				state.spring_attachments.pop_back(); 
+				found = true; 
+			}
+			i++; 
+		}
+	}
+	return; 
+}
+
+void Cell::remove_self_from_all_neighbors( void )
+{
+	Cell* pCell = this; 
+	// go through all neighbors (pN) of this (pC)
+
+	for( int j = 0 ; j < pCell->state.neighbors.size(); j++ )
+	{
+	 	Cell* pN = pCell->state.neighbors[j]; 
+
+		// for each pN, remove pC from list of neighbors 
+			// find pC in neighbors 
+
+
+			auto SearchResult = std::find( 
+				pN->state.neighbors.begin(),pN->state.neighbors.end(),pCell );  		
+
+			// if pC is indeed found, remove it  
+			// erase pC from neighbors 
+			if( SearchResult != pN->state.neighbors.end() )
+			{
+				// if the target is found, set the appropriate rate 
+				pN->state.neighbors.erase( SearchResult ); 
+			}
+			else
+			{ /* future error message */  }
+	}
+
+	return; 
+}
+
 void Cell::remove_all_attached_cells( void )
 {
 	{
@@ -2472,6 +3419,21 @@ void Cell::remove_all_attached_cells( void )
 	return; 
 }
 
+void Cell::remove_all_spring_attachments( void )
+{
+	{
+		// remove self from any attached cell's list. 
+		for( int i = 0; i < state.spring_attachments.size() ; i++ )
+		{
+			state.spring_attachments[i]->detach_cell_as_spring( this ); 
+		}
+		// clear my list 
+		state.spring_attachments.clear(); 
+	}
+	return; 
+}
+
+
 void attach_cells( Cell* pCell_1, Cell* pCell_2 )
 {
 	pCell_1->attach_cell( pCell_2 );
@@ -2479,10 +3441,24 @@ void attach_cells( Cell* pCell_1, Cell* pCell_2 )
 	return; 
 }
 
+void attach_cells_as_spring( Cell* pCell_1, Cell* pCell_2 )
+{
+	pCell_1->attach_cell_as_spring( pCell_2 );
+	pCell_2->attach_cell_as_spring( pCell_1 );
+	return; 
+}
+
 void detach_cells( Cell* pCell_1 , Cell* pCell_2 )
 {
 	pCell_1->detach_cell( pCell_2 );
 	pCell_2->detach_cell( pCell_1 );
+	return; 
+}
+
+void detach_cells_as_spring( Cell* pCell_1 , Cell* pCell_2 )
+{
+	pCell_1->detach_cell_as_spring( pCell_2 );
+	pCell_2->detach_cell_as_spring( pCell_1 );
 	return; 
 }
 
@@ -2560,8 +3536,31 @@ std::vector<Cell*> find_nearby_interacting_cells( Cell* pCell )
 }
 
 
+int find_cell_definition_index( std::string search_string )
+{
+	auto search = cell_definition_indices_by_name.find( search_string );
+	// safety first! 
+	if( search != cell_definition_indices_by_name.end() )
+	{
+		// if the target is found, set the appropriate rate 
+		return search->second; 
+	}
+	return -1; 
+}
+
+
+int find_cell_definition_index( int search_type )
+{	
+	auto search = cell_definition_indices_by_type.find( search_type );
+	// safety first! 
+	if( search != cell_definition_indices_by_type.end() )
+	{
+		// if the target is found, set the appropriate rate 
+		return search->second; 
+	}
+	return -1; 
+}  
 
 
 
 };
-

@@ -154,7 +154,7 @@
 					<!-- using higher than normal significant digits to match divisions in default code -->
 					<phase_transition_rates units="1/min"> 
 						<!-- Cycle duration -->
-						<rate start_index="0" end_index="0" fixed_duration="false">0.00075</rate>
+						<rate start_index="0" end_index="0" fixed_duration="false">0.0011</rate>
 					</phase_transition_rates>
 				</cycle>
 				
@@ -225,8 +225,10 @@
 				<intracellular type="maboss">
 					<bnd_filename>./config/TNF_nodes.bnd</bnd_filename>
 					<cfg_filename>./config/TNF_conf.cfg</cfg_filename>
-					<time_step>10</time_step>
-					<time_stochasticity>1</time_stochasticity>
+					<settings>
+						<intracellular_dt>10.0</intracellular_dt>
+						<time_stochasticity>0.01</time_stochasticity>
+					</settings>
 				</intracellular>
 			</phenotype>
 			<custom_data>
@@ -246,9 +248,10 @@
 				<external_tnf units="TNF/um^3">0</external_tnf>
 				
 				<!-- Rates that are set when the corresponding node is active-->
-				<necrosis_rate type="double" units="1/min" description="Necrotic rate value when NonACD node becomes active">0.0027</necrosis_rate>
-                <apoptosis_rate type="double" units="1/min" description="Apoptotic rate value when Apoptosis node becomes active">0.0055</apoptosis_rate>
-				<death_commitment_decay type="double" units="1/min" description="Factor at wich death rates deacy when boolean deadout deactivate">1e-7</death_commitment_decay>
+				<!-- 0.0027 -->
+				<necrosis_rate type="double" units="1/min" description="Necrotic rate value when NonACD node becomes active">0.0035</necrosis_rate>
+                <apoptosis_rate type="double" units="1/min" description="Apoptotic rate value when Apoptosis node becomes active">0.0035</apoptosis_rate>
+				<death_commitment_decay type="double" units="1/min" description="Factor at wich death rates deacy when boolean dead out deactivate">1.0</death_commitment_decay>
 			</custom_data>
 		</cell_definition>
 	</cell_definitions>
@@ -258,6 +261,14 @@
 		<read_init type="bool">false</read_init>
 		<init_cells_filename type="string" units="">./config/init.tsv</init_cells_filename>
 		<tumor_radius type="double" units="um">100.0</tumor_radius>
+
+		<membrane_length type="double" units="">120</membrane_length>
+		
+		<tnf_pulse_period type="double" units="min">600.0</tnf_pulse_period> 
+		<tnf_pulse_duration type="double" units="min">10.0</tnf_pulse_duration> 
+		<tnf_pulse_concentration type="double" units="TNF/um^3">0.001</tnf_pulse_concentration> 
+		<time_remove_tnf type="double" units="min">999999</time_remove_tnf> 
+		
 		
 		<!-- <TNFR_binding_rate_std type="double" units="dimensionless" description="TNF receptor binding rate std">0.237</TNFR_binding_rate_std> -->
 		<TNFR_binding_rate_std type="double" units="dimensionless" description="TNF receptor binding rate std">0.0</TNFR_binding_rate_std>
@@ -273,12 +284,9 @@
 		<TNFR_recycling_rate_std type="double" units="dimensionless" description="TNF receptor recycling std">0.0</TNFR_recycling_rate_std>
 		<TNFR_recycling_rate_min type="double" units="dimensionless" description="TNF receptor recycling min">0.05</TNFR_recycling_rate_min>
 		<TNFR_recycling_rate_max type="double" units="dimensionless" description="TNF receptor recycling max">0.95</TNFR_recycling_rate_max>
+		
 
-		<tnf_pulse_period type="double" units="min">150.0</tnf_pulse_period> 
-		<tnf_pulse_duration type="double" units="min">10.0</tnf_pulse_duration> 
-		<tnf_pulse_concentration type="double" units="TNF/um^3">0.0015</tnf_pulse_concentration> 
-		<time_remove_tnf type="double" units="min">999999</time_remove_tnf> 
-		<membrane_length type="double" units="">120</membrane_length>
+
 	</user_parameters>
 	
 	

@@ -13,7 +13,7 @@
 #                                                                           #
 # BSD 3-Clause License (see https://opensource.org/licenses/BSD-3-Clause)   #
 #                                                                           #
-# Copyright (c) 2015-2017, Paul Macklin and the BioFVM Project              #
+# Copyright (c) 2015-2025, Paul Macklin and the BioFVM Project              #
 # All rights reserved.                                                      #
 #                                                                           #
 # Redistribution and use in source and binary forms, with or without        #
@@ -515,14 +515,20 @@ void set_save_biofvm_cell_data_as_custom_matlab( bool newvalue )
 
 /* writing parts of BioFVM to a MultiCellDS file */ 
 
+static bool BioFVM_substrates_initialized_in_dom = false;
+
+void reset_BioFVM_substrates_initialized_in_dom( void )
+{
+	BioFVM_substrates_initialized_in_dom = false;
+}
+
+
 void add_BioFVM_substrates_to_open_xml_pugi( pugi::xml_document& xml_dom , std::string filename_base, Microenvironment& M )
 {
 	add_MultiCellDS_main_structure_to_open_xml_pugi( xml_dom ); 
 	
 	pugi::xml_node root = biofvm_doc.child( "MultiCellDS" );
 	pugi::xml_node node = root.child( "microenvironment" ); 
-	
-	static bool BioFVM_substrates_initialized_in_dom = false; 
 	
 	// if the TME has not yet been initialized in the DOM, create all the 
 	// right data elements, and populate the meshes. 
@@ -564,36 +570,9 @@ void add_BioFVM_substrates_to_open_xml_pugi( pugi::xml_document& xml_dom , std::
 		// if Cartesian, add the x, y, and z coordinates 
 		if( M.mesh.Cartesian_mesh == true )
 		{
-			char temp [10240];
-			int position = 0; 
-			for( unsigned int k=0 ; k < M.mesh.x_coordinates.size()-1 ; k++ )
-			{ position += sprintf( temp+position, "%f " , M.mesh.x_coordinates[k] ); }
-			sprintf( temp+position , "%f" , M.mesh.x_coordinates[ M.mesh.x_coordinates.size()-1] ); 
-			node = node.append_child( "x_coordinates" ); 
-			node.append_child( pugi::node_pcdata ).set_value( temp ); 
-			attrib = node.append_attribute("delimiter");
-			attrib.set_value( " " ); 
-			
-			node = node.parent();
-			position = 0; 
-			for( unsigned int k=0 ; k < M.mesh.y_coordinates.size()-1 ; k++ )
-			{ position += sprintf( temp+position, "%f " , M.mesh.y_coordinates[k] ); }
-			sprintf( temp+position , "%f" , M.mesh.y_coordinates[ M.mesh.y_coordinates.size()-1] ); 
-			node = node.append_child( "y_coordinates" ); 
-			node.append_child( pugi::node_pcdata ).set_value( temp ); 
-			attrib = node.append_attribute("delimiter");
-			attrib.set_value( " " ); 
-			
-			node = node.parent();
-			position = 0; 
-			for( unsigned int k=0 ; k < M.mesh.z_coordinates.size()-1 ; k++ )
-			{ position += sprintf( temp+position, "%f " , M.mesh.z_coordinates[k] ); }
-			sprintf( temp+position , "%f" , M.mesh.z_coordinates[ M.mesh.z_coordinates.size()-1] ); 
-			node = node.append_child( "z_coordinates" ); 
-			node.append_child( pugi::node_pcdata ).set_value( temp ); 
-			attrib = node.append_attribute("delimiter");
-			attrib.set_value( " " ); 
-			node = node.parent(); 
+			write_coordinates_node(node, M.mesh.x_coordinates, "x_coordinates");
+			write_coordinates_node(node, M.mesh.y_coordinates, "y_coordinates");
+			write_coordinates_node(node, M.mesh.z_coordinates, "z_coordinates");
 		}
 		// write out the voxels -- minimal data, even if redundant for cartesian 
 		if( save_mesh_as_matlab == false )
@@ -744,7 +723,7 @@ void add_BioFVM_substrates_to_open_xml_pugi( pugi::xml_document& xml_dom , std::
 			{ filename_start++; } 
 			strcpy( filename_without_pathing , filename_start ); 
 			
-			node.append_child( pugi::node_pcdata ).set_value( filename_without_pathing ); // filename );				
+			node.append_child( pugi::node_pcdata ).set_value( filename_without_pathing ); // filename ); 
 			
 			node = node.parent(); 
 		}
@@ -810,6 +789,21 @@ void add_BioFVM_substrates_to_open_xml_pugi( pugi::xml_document& xml_dom , std::
 	}
 	
 	return; 
+}
+
+void write_coordinates_node(pugi::xml_node &node, const std::vector<double> &coordinates, std::string name)
+{
+    std::ostringstream oss;
+    for (size_t i = 0; i < coordinates.size(); ++i)
+    {
+        if (i != 0)
+        { oss << " "; }
+        oss << coordinates[i];
+    }
+    pugi::xml_node coord_node = node.append_child(name.c_str());
+    coord_node.append_child(pugi::node_pcdata).set_value(oss.str().c_str());
+    pugi::xml_attribute attrib = coord_node.append_attribute("delimiter");
+    attrib.set_value(" ");
 }
 
 // not yet implemented 
@@ -1386,5 +1380,49 @@ void read_microenvironment_from_MultiCellDS_xml( Microenvironment& M_destination
 	std::cout << "done!" << std::endl; 
 	return; 
 } 
+
+bool read_microenvironment_from_matlab( std::string mat_filename )
+{
+	std::cout << std::endl << "Attempting to load the microenvironment from " << mat_filename << " ... " << std::endl; 
+
+	std::vector< std::vector<double> > mat = read_matlab( mat_filename ); 
+
+	// row 0 : x
+	// row 1 : y
+	// row 2 : z 
+	// row 3 : vol 
+	// row 4-n : substrate 
+	int num_rows = mat.size(); 
+	int num_cols = mat[0].size(); 
+
+	int number_of_mat_voxels = num_cols; 
+	int number_of_mat_substrates = num_rows - 3 -1; 
+
+	if( number_of_mat_substrates != microenvironment.number_of_densities() )
+	{
+		std::cout << "Error reading microenvironment from " << mat_filename << "! ";  
+		std::cout << "Expected " << microenvironment.number_of_densities() << " substrates but only detected "
+			<< number_of_mat_substrates << std::endl; 
+		return false; 
+	}
+
+	if( number_of_mat_voxels != microenvironment.number_of_voxels() )
+	{
+		std::cout << "Error reading microenvironment from " << mat_filename << "! ";  
+		std::cout << "Expected " << microenvironment.number_of_voxels() << " voxels but only detected "
+			<< number_of_mat_voxels << std::endl; 
+		return false; 
+	}
+
+	for( int n=0 ; n < number_of_mat_voxels ; n++ )
+	{
+		// std::cout << microenvironment.mesh.voxels[n].center << " vs " << mat[0][n] << " " << mat[1][n] << " " << mat[2][n] << std::endl; 	
+		for( int k=4; k < num_rows ; k++ )
+		{ microenvironment(n)[k-4] = mat[k][n]; }
+	}
+
+	std::cout << "done!" << std::endl << std::endl; 
+	return true; 
+}
 
 };

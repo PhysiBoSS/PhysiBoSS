@@ -70,7 +70,10 @@
 void create_cell_types( void )
 {
 	// set the random seed 
-	SeedRandom( parameters.ints("random_seed") );  
+	if (parameters.ints.find_index("random_seed") != -1)
+	{
+		SeedRandom(parameters.ints("random_seed"));
+	}
 	
 	/* 
 	   Put any modifications to default cell definition here if you 
@@ -98,7 +101,25 @@ void create_cell_types( void )
 	*/
 	
 	initialize_cell_definitions_from_pugixml(); 
-	
+
+	/*
+	   This builds the map of cell definitions and summarizes the setup. 
+	*/
+		
+	build_cell_definitions_maps(); 
+
+	/*
+	   This intializes cell signal and response dictionaries 
+	*/
+
+	setup_signal_behavior_dictionaries(); 	
+
+	/*
+       Cell rule definitions 
+	*/
+
+	setup_cell_rules(); 
+
 	/* 
 	   Put any modifications to individual cell definitions here. 
 	   
@@ -113,7 +134,6 @@ void create_cell_types( void )
 	   This builds the map of cell definitions and summarizes the setup. 
 	*/
 		
-	build_cell_definitions_maps(); 
 	display_cell_definitions( std::cout ); 
 	
 	return; 
@@ -175,7 +195,8 @@ void setup_tissue( void )
 	std::cout << std::endl; 
 	
 	// load cells from your CSV file (if enabled)
-	load_cells_from_pugixml(); 	
+	load_cells_from_pugixml();
+	set_parameters_from_distributions();
 	
 	return; 
 }

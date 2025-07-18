@@ -33,7 +33,7 @@
 #                                                                             #
 # BSD 3-Clause License (see https://opensource.org/licenses/BSD-3-Clause)     #
 #                                                                             #
-# Copyright (c) 2015-2021, Paul Macklin and the PhysiCell Project             #
+# Copyright (c) 2015-2025, Paul Macklin and the PhysiCell Project             #
 # All rights reserved.                                                        #
 #                                                                             #
 # Redistribution and use in source and binary forms, with or without          #
@@ -302,7 +302,7 @@ void Cycle_Model::advance_model( Cell* pCell, Phenotype& phenotype, double dt )
 			bool continue_transition = false; 
 			if( phase_links[i][k].fixed_duration )
 			{
-				if( phenotype.cycle.data.elapsed_time_in_phase > 1.0/phenotype.cycle.data.transition_rates[i][k] )
+				if( phenotype.cycle.data.elapsed_time_in_phase > ((1.0/phenotype.cycle.data.transition_rates[i][k]) - 0.5 * dt) )
 				{
 					continue_transition = true; 
 				}
@@ -310,7 +310,7 @@ void Cycle_Model::advance_model( Cell* pCell, Phenotype& phenotype, double dt )
 			else
 			{
 				double prob = phenotype.cycle.data.transition_rates[i][k]*dt; 
-				if( UniformRandom() <= prob )
+				if( UniformRandom() < prob )
 				{
 					continue_transition = true; 
 				}
@@ -495,6 +495,19 @@ Cycle_Model& Death::current_model( void )
 	return *models[current_death_model_index]; 
 }
 
+double& Death::apoptosis_rate(void)
+{
+	static int nApoptosis = find_death_model_index( PhysiCell_constants::apoptosis_death_model ); 
+	return rates[nApoptosis];
+}
+
+double& Death::necrosis_rate(void)
+{
+	static int nNecrosis = find_death_model_index( PhysiCell_constants::necrosis_death_model ); 
+	return rates[nNecrosis];
+}
+
+
 Cycle::Cycle()
 {
 	pCycle_Model = NULL; 
@@ -665,21 +678,69 @@ Mechanics::Mechanics()
 	cell_BM_adhesion_strength = 4.0;
 	
 	cell_cell_repulsion_strength = 10.0; 
-	cell_BM_repulsion_strength = 10.0; 
+	cell_BM_repulsion_strength = 100.0; 
+
+	cell_adhesion_affinities = {1}; 
 	
 	// this is a multiple of the cell (equivalent) radius
 	relative_maximum_adhesion_distance = 1.25; 
 	// maximum_adhesion_distance = 0.0; 
-	
-	
-	relative_maximum_attachment_distance = relative_maximum_adhesion_distance;
-	relative_detachment_distance = relative_maximum_adhesion_distance;
+
+	/* for spring attachments */
 	maximum_number_of_attachments = 12;
 	attachment_elastic_constant = 0.01; 
+
+	attachment_rate = 0; // 10.0 prior ot March 2023
+	detachment_rate = 0; 
+
+	/* to be deprecated */ 
+	relative_maximum_attachment_distance = relative_maximum_adhesion_distance;
+	relative_detachment_distance = relative_maximum_adhesion_distance;
+
 	maximum_attachment_rate = 1.0; 
-	
+		
 	return; 
 }
+
+void Mechanics::sync_to_cell_definitions()
+{
+	extern std::unordered_map<std::string,int> cell_definition_indices_by_name; 
+	int number_of_cell_defs = cell_definition_indices_by_name.size(); 
+	
+	if( cell_adhesion_affinities.size() != number_of_cell_defs )
+	{ cell_adhesion_affinities.resize( number_of_cell_defs, 1.0); }
+	return; 
+}
+
+double& Mechanics::cell_adhesion_affinity( std::string type_name )
+{
+	extern std::unordered_map<std::string,int> cell_definition_indices_by_name; 
+	int n = cell_definition_indices_by_name[type_name]; 
+	return cell_adhesion_affinities[n]; 
+}
+
+void Mechanics::set_fully_heterotypic( void )
+{
+	extern std::unordered_map<std::string,int> cell_definition_indices_by_name; 
+	int number_of_cell_defs = cell_definition_indices_by_name.size(); 	
+
+	cell_adhesion_affinities.assign( number_of_cell_defs, 1.0);
+	return; 
+}
+
+void Mechanics::set_fully_homotypic( Cell* pC )
+{
+	extern std::unordered_map<std::string,int> cell_definition_indices_by_name; 
+	int number_of_cell_defs = cell_definition_indices_by_name.size(); 	
+
+	cell_adhesion_affinities.assign( number_of_cell_defs, 0.0);
+
+	// now find my type and set to 1 
+//	cell_adhesion_affinity( pC->type_name ) = 1.0; 
+
+	return; 
+}
+
 
 // new on July 29, 2018
 // change the ratio without changing the repulsion strength or equilibrium spacing 
@@ -796,7 +857,32 @@ Motility::Motility()
 	chemotaxis_index = 0; 
 	chemotaxis_direction = 1; 
 	
+	sync_to_current_microenvironment(); 
+	
 	return; 
+}
+
+void Motility::sync_to_current_microenvironment( void )
+{
+	Microenvironment* pMicroenvironment = get_default_microenvironment(); 
+	if( pMicroenvironment )
+	{ sync_to_microenvironment( pMicroenvironment ); } 
+	else
+	{ chemotactic_sensitivities.resize( 1 , 0.0 ); }
+
+	return; 
+}
+
+void Motility::sync_to_microenvironment( Microenvironment* pNew_Microenvironment )
+{
+	chemotactic_sensitivities.resize( pNew_Microenvironment->number_of_densities() , 0.0 ); 
+	return; 
+}
+
+double& Motility::chemotactic_sensitivity( std::string name )
+{
+	int n = microenvironment.find_density_index(name); 
+	return chemotactic_sensitivities[n]; 
 }
 
 Secretion::Secretion()
@@ -920,6 +1006,31 @@ void Secretion::scale_all_uptake_by_factor( double factor )
 	return; 
 }
 
+// ease of access
+double& Secretion::secretion_rate( std::string name )
+{
+	int index = microenvironment.find_density_index(name); 
+	return secretion_rates[index]; 
+}
+
+double& Secretion::uptake_rate( std::string name ) 
+{
+	int index = microenvironment.find_density_index(name); 
+	return uptake_rates[index]; 
+}
+
+double& Secretion::saturation_density( std::string name ) 
+{
+	int index = microenvironment.find_density_index(name); 
+	return saturation_densities[index]; 
+}
+
+double& Secretion::net_export_rate( std::string name )  
+{
+	int index = microenvironment.find_density_index(name); 
+	return net_export_rates[index]; 
+}
+
 Molecular::Molecular()
 {
 	pMicroenvironment = get_default_microenvironment(); 
@@ -938,7 +1049,7 @@ void Molecular::sync_to_current_microenvironment( void )
 	{
 		internalized_total_substrates.resize( 0 , 0.0 ); 
 		fraction_released_at_death.resize( 0 , 0.0 ); 
-		fraction_transferred_when_ingested.resize( 0, 0.0 ); 
+		fraction_transferred_when_ingested.resize( 0, 1.0 ); 
 	}
 	return; 
 }
@@ -951,7 +1062,7 @@ void Molecular::sync_to_microenvironment( Microenvironment* pNew_Microenvironmen
 
 	internalized_total_substrates.resize( number_of_densities , 0.0 ); 
 	fraction_released_at_death.resize( number_of_densities , 0.0 ); 
-	fraction_transferred_when_ingested.resize( number_of_densities , 0.0 ); 
+	fraction_transferred_when_ingested.resize( number_of_densities , 1.0 ); 
 	
 	return; 
 }
@@ -970,6 +1081,12 @@ void Molecular::sync_to_cell( Basic_Agent* pCell )
 	return; 
 }
 
+// ease of access 
+double&  Molecular::internalized_total_substrate( std::string name )
+{
+	int index = microenvironment.find_density_index(name); 
+	return internalized_total_substrates[index]; 
+}
 
 /*
 void Molecular::advance( Basic_Agent* pCell, Phenotype& phenotype , double dt )
@@ -1024,12 +1141,17 @@ void Molecular::advance( Basic_Agent* pCell, Phenotype& phenotype , double dt )
 
 Cell_Functions::Cell_Functions()
 {
+	instantiate_cell = NULL;
+	
 	volume_update_function = NULL; 
 	update_migration_bias = NULL; 
 	
 	update_phenotype = NULL; 
 	custom_cell_rule = NULL; 
 	
+	pre_update_intracellular = NULL;
+	post_update_intracellular = NULL;
+
 	update_velocity = NULL; 
 	add_cell_basement_membrane_interactions = NULL; 
 	calculate_distance_to_membrane = NULL; 
@@ -1088,13 +1210,18 @@ Phenotype& Phenotype::operator=(const Phenotype &p ) {
 	secretion = p.secretion;
 	
 	molecular = p.molecular;
+
+	cell_integrity = p.cell_integrity; 
 	
 	delete intracellular;
 	
 	if (p.intracellular != NULL)
-		intracellular = p.intracellular->clone();
+	{ intracellular = p.intracellular->clone(); }
 	else
-		intracellular = NULL;
+	{ intracellular = NULL; }
+	
+	cell_interactions = p.cell_interactions; 
+	cell_transformations = p.cell_transformations; 
 	
 	return *this;
 }
@@ -1134,5 +1261,206 @@ void Phenotype::sync_to_microenvironment( Microenvironment* pMicroenvironment )
 
 	return; 
 }
+
+Cell_Interactions::Cell_Interactions()
+{
+	// dead_phagocytosis_rate = 0.0; 
+
+	apoptotic_phagocytosis_rate = 0.0; 
+	necrotic_phagocytosis_rate = 0.0; 
+	other_dead_phagocytosis_rate = 0.0; 
+
+	live_phagocytosis_rates = {0.0}; 
+
+	attack_damage_rate = 1.0; 
+	attack_rates = {0.0}; 
+	immunogenicities = {1}; 
+
+	pAttackTarget = NULL; 
+	total_damage_delivered = 0.0; 
+
+	attack_duration = 30.0; // a typical attack duration for a T cell using perforin/granzyme is ~30 minutes
+
+	fusion_rates = {0.0}; 
+	
+	return; 
+}
+
+void Cell_Interactions::sync_to_cell_definitions()
+{
+	extern std::unordered_map<std::string,int> cell_definition_indices_by_name; 
+	int number_of_cell_defs = cell_definition_indices_by_name.size(); 
+	
+	if( live_phagocytosis_rates.size() != number_of_cell_defs )
+	{
+		live_phagocytosis_rates.resize( number_of_cell_defs, 0.0); 
+		attack_rates.resize( number_of_cell_defs, 0.0); 
+		fusion_rates.resize( number_of_cell_defs, 0.0); 
+		immunogenicities.resize( number_of_cell_defs , 1.0 ); 
+	}
+	
+	return; 
+}
+
+// ease of access 
+double& Cell_Interactions::live_phagocytosis_rate( std::string type_name )
+{
+	extern std::unordered_map<std::string,int> cell_definition_indices_by_name; 
+	int n = cell_definition_indices_by_name[type_name]; 
+	// std::cout << type_name << " " << n << std::endl; 
+	return live_phagocytosis_rates[n]; 
+}
+
+double& Cell_Interactions::attack_rate( std::string type_name ) 
+{
+	extern std::unordered_map<std::string,int> cell_definition_indices_by_name; 
+	int n = cell_definition_indices_by_name[type_name]; 
+	return attack_rates[n]; 
+}
+
+double& Cell_Interactions::fusion_rate( std::string type_name )
+{
+	extern std::unordered_map<std::string,int> cell_definition_indices_by_name; 
+	int n = cell_definition_indices_by_name[type_name]; 
+	return fusion_rates[n]; 
+}
+
+double& Cell_Interactions::immunogenicity( std::string type_name )
+{
+	extern std::unordered_map<std::string,int> cell_definition_indices_by_name; 
+	int n = cell_definition_indices_by_name[type_name]; 
+	return immunogenicities[n]; 
+}
+
+Cell_Transformations::Cell_Transformations()
+{
+	transformation_rates = {0.0}; 
+	
+	return; 
+}
+
+void Cell_Transformations::sync_to_cell_definitions()
+{
+	extern std::unordered_map<std::string,int> cell_definition_indices_by_name; 	
+	int number_of_cell_defs = cell_definition_indices_by_name.size();  
+	
+	if( transformation_rates.size() != number_of_cell_defs )
+	{ transformation_rates.resize( number_of_cell_defs, 0.0); }
+	
+	return; 
+}
+
+// ease of access 
+double& Cell_Transformations::transformation_rate( std::string type_name )
+{
+	extern std::unordered_map<std::string,int> cell_definition_indices_by_name; 
+	int n = cell_definition_indices_by_name[type_name]; 
+	return transformation_rates[n]; 
+}
+
+Asymmetric_Division::Asymmetric_Division()
+{
+	asymmetric_division_probabilities = {0.0};
+}
+
+void Asymmetric_Division::sync_to_cell_definitions()
+{
+	extern std::unordered_map<std::string,int> cell_definition_indices_by_name; 
+	int number_of_cell_defs = cell_definition_indices_by_name.size(); 
+	
+	if( asymmetric_division_probabilities.size() != number_of_cell_defs )
+	{ asymmetric_division_probabilities.resize( number_of_cell_defs, 0.0); }
+	
+	return; 
+}
+
+double Asymmetric_Division::probabilities_total( void )
+{
+	double total = 0.0; 
+	for( int i=0; i < asymmetric_division_probabilities.size(); i++ )
+	{ total += asymmetric_division_probabilities[i]; }
+	return total; 
+}
+
+// ease of access
+double& Asymmetric_Division::asymmetric_division_probability( std::string type_name )
+{
+	extern std::unordered_map<std::string,int> cell_definition_indices_by_name; 
+	int n = cell_definition_indices_by_name[type_name]; 
+	return asymmetric_division_probabilities[n]; 
+}
+
+// beta functionality in 1.10.3 
+Cell_Integrity::Cell_Integrity()
+{
+ 	damage = 0;  
+	damage_rate = 0.0; 
+	damage_repair_rate = 0.0; 
+
+/*
+	lipid_damage = 0.0; 
+	lipid_damage_rate = 0.0; 
+	lipid_damage_repair_rate = 0.0; 
+
+	// DNA damage 
+	DNA_damage = 0.0; 
+	DNA_damage_rate = 0.0; 
+	DNA_damage_repair_rate = 0.0; 
+*/
+
+	return; 
+}
+
+void Cell_Integrity::advance_damage( double dt )
+{
+	double temp1;
+	double temp2; 
+	static double tol = 1e-8; 
+
+	// general damage 
+	if( damage_rate > tol || damage_repair_rate > tol )
+	{
+		temp1 = dt; 
+		temp2 = dt; 
+		temp1 *= damage_rate;  
+		temp2 *= damage_repair_rate; 
+		temp2 += 1; 
+
+		damage += temp1; 
+		damage /= temp2; 
+	}
+/*
+	// lipid damage 
+	if( lipid_damage_rate > tol || lipid_damage_repair_rate > tol )
+	{
+		temp1 = dt;
+		temp2 = dt;
+		temp1 *= lipid_damage_rate;  
+		temp2 *= lipid_damage_repair_rate; 
+		temp2 += 1; 
+	
+		lipid_damage += temp1; 
+		lipid_damage /= temp2; 
+	}
+
+	// DNA damage 
+	if( DNA_damage_rate > tol || DNA_damage_repair_rate > tol )
+	{
+		temp1 = dt;
+		temp2 = dt;
+		temp1 *= DNA_damage_rate;  
+		temp2 *= DNA_damage_repair_rate; 
+		temp2 += 1; 
+
+		DNA_damage += temp1; 
+		DNA_damage /= temp2; 
+	}
+*/	
+
+//	std::cout << "damage: " << damage << std::endl; 
+
+	return; 
+}
+
 
 };

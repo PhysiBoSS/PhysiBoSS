@@ -33,7 +33,7 @@
 #                                                                             #
 # BSD 3-Clause License (see https://opensource.org/licenses/BSD-3-Clause)     #
 #                                                                             #
-# Copyright (c) 2015-2021, Paul Macklin and the PhysiCell Project             #
+# Copyright (c) 2015-2025, Paul Macklin and the PhysiCell Project             #
 # All rights reserved.                                                        #
 #                                                                             #
 # Redistribution and use in source and binary forms, with or without          #
@@ -70,6 +70,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 #include "../core/PhysiCell.h"
 #include "./PhysiCell_settings.h"
@@ -79,13 +80,36 @@ namespace PhysiCell
 {
 // loaders 
 	
-void load_cells_csv( std::string filename ); // done 
+void load_cells_csv_v1( std::string filename ); // done 
+
+
+std::vector<std::string> split_csv_labels( std::string labels_line ); // done 
+Cell* process_csv_v2_line( std::string line , std::vector<std::string> labels ); // done 
+void load_cells_csv_v2( std::string filename ); // done 
+
+
+void load_cells_csv( std::string filename ); 
+
+
+
 void load_cells_mat( std::string filename ); 
 void load_cells_physicell( std::string filename ); 
 
 bool load_cells_from_pugixml( pugi::xml_node root ); 
-bool load_cells_from_pugixml( void ); // load cells based on default config XML root 
+bool load_cells_from_pugixml( void ); // load cells based on default config XML root
 
+void set_parameters_from_distributions( const pugi::xml_node root );
+void set_parameters_from_distributions(void);
+void set_distributed_parameters(pugi::xml_node node, Cell_Definition *pCD);
+void set_distributed_parameter(pugi::xml_node node_dist, Cell_Definition *pCD);
+void set_distributed_parameter(Cell_Definition *pCD, std::string behavior, std::string type, pugi::xml_node node_dist);
+
+void get_log_normal_bounds(pugi::xml_node node_dist, std::string behavior, Cell_Definition *pCD, double &lb, double &ub, double base_value, bool check_base);
+void set_distributed_parameter(Cell* pCell, std::string behavior, double val);
+void print_drawing_expectations(double mu, double sigma, double lb, double ub, int n);
+
+bool is_in(std::string x, std::vector<std::string> A);
+bool strcmpi(std::string x, std::string y);
 
 //	
 // 2D functions 

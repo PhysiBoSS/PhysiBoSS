@@ -41,7 +41,8 @@ BioFVM_OBJECTS := BioFVM_vector.o BioFVM_mesh.o BioFVM_microenvironment.o BioFVM
 BioFVM_utilities.o BioFVM_basic_agent.o BioFVM_MultiCellDS.o BioFVM_agent_container.o 
 
 PhysiCell_core_OBJECTS := PhysiCell_phenotype.o PhysiCell_cell_container.o PhysiCell_standard_models.o \
-PhysiCell_cell.o PhysiCell_custom.o PhysiCell_utilities.o PhysiCell_constants.o PhysiCell_basic_signaling.o
+PhysiCell_cell.o PhysiCell_custom.o PhysiCell_utilities.o PhysiCell_constants.o PhysiCell_basic_signaling.o \
+PhysiCell_signal_behavior.o PhysiCell_rules.o
 
 PhysiCell_module_OBJECTS := PhysiCell_SVG.o PhysiCell_pathology.o PhysiCell_MultiCellDS.o PhysiCell_various_outputs.o \
 PhysiCell_pugixml.o PhysiCell_settings.o PhysiCell_geometry.o
@@ -63,22 +64,30 @@ all:
 	make heterogeneity-sample
 	make 
 
+name:
+	@echo ""
+	@echo "Executable name is" $(PROGRAM_NAME)
+	@echo ""
+
 # sample projects 	
 list-projects:
 	@echo "Sample projects: template biorobots-sample cancer-biorobots-sample cancer-immune-sample"
-	@echo "                 celltypes3-sample heterogeneity-sample heterogeneity-3D pred-prey-farmer virus-macrophage-sample worm-sample"
+	@echo "                 celltypes3-sample heterogeneity-sample pred-prey-farmer virus-macrophage-sample"
+	@echo "                 worm-sample interaction-sample mechano-sample rules-sample physimess-sample custom-division-sample"
+	@echo "                 asymmetric-division-sample immune-function-sample episode-sample"
 	@echo ""
-	@echo "Sample intracellular projects: template_BM ode-energy-sample physiboss-cell-lines-sample physiboss-tnf-model cancer-metabolism-sample"
+	@echo "Sample intracellular projects: template_BM ode-energy-sample physiboss-cell-lines-sample"
+	@echo "                 cancer-metabolism-sample physiboss-tutorial physiboss-tutorial-invasion"
+	@echo "					physiboss-tnf-model prostate"
 	@echo ""
 	
 template:
-	cp ./sample_projects/template/custom_modules/* ./custom_modules/
+	cp -r ./sample_projects/template/custom_modules/* ./custom_modules/
 	touch main.cpp && cp main.cpp main-backup.cpp
 	cp ./sample_projects/template/main.cpp ./main.cpp 
 	cp Makefile Makefile-backup
 	cp ./sample_projects/template/Makefile .
-	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
-	cp ./sample_projects/template/config/* ./config/
+	cp -r ./sample_projects/template/config/* ./config 
 	
 # sample projects 
 
@@ -86,7 +95,7 @@ template:
 biorobots-sample:
 	cp ./sample_projects/biorobots/custom_modules/* ./custom_modules/
 	touch main.cpp && cp main.cpp main-backup.cpp
-	cp ./sample_projects/biorobots/main-biorobots.cpp ./main.cpp 
+	cp ./sample_projects/biorobots/main.cpp ./main.cpp 
 	cp Makefile Makefile-backup
 	cp ./sample_projects/biorobots/Makefile .
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
@@ -95,7 +104,7 @@ biorobots-sample:
 cancer-biorobots-sample:
 	cp ./sample_projects/cancer_biorobots/custom_modules/* ./custom_modules/
 	touch main.cpp && cp main.cpp main-backup.cpp
-	cp ./sample_projects/cancer_biorobots/main-cancer_biorobots.cpp ./main.cpp 
+	cp ./sample_projects/cancer_biorobots/main.cpp ./main.cpp 
 	cp Makefile Makefile-backup
 	cp ./sample_projects/cancer_biorobots/Makefile .
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
@@ -122,20 +131,11 @@ celltypes3-sample:
 heterogeneity-sample:
 	cp ./sample_projects/heterogeneity/custom_modules/* ./custom_modules/
 	touch main.cpp && cp main.cpp main-backup.cpp
-	cp ./sample_projects/heterogeneity/main-heterogeneity.cpp ./main.cpp 
+	cp ./sample_projects/heterogeneity/main.cpp ./main.cpp 
 	cp Makefile Makefile-backup
 	cp ./sample_projects/heterogeneity/Makefile .
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
 	cp ./sample_projects/heterogeneity/config/* ./config/
-	
-heterogeneity-3D:
-	cp ./sample_projects/heterogeneity_3D/custom_modules/* ./custom_modules/
-	touch main.cpp && cp main.cpp main-backup.cpp
-	cp ./sample_projects/heterogeneity_3D/main-heterogeneity.cpp ./main.cpp 
-	cp Makefile Makefile-backup
-	cp ./sample_projects/heterogeneity_3D/Makefile .
-	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
-	cp ./sample_projects/heterogeneity_3D/config/* ./config/
 	
 pred-prey-farmer:
 	cp ./sample_projects/pred_prey_farmer/custom_modules/* ./custom_modules/
@@ -162,7 +162,77 @@ worm-sample:
 	cp Makefile Makefile-backup
 	cp ./sample_projects/worm/Makefile .
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
-	cp ./sample_projects/worm/config/* ./config/	
+	cp ./sample_projects/worm/config/* ./config/
+	
+interaction-sample:
+	cp ./sample_projects/interactions/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects/interactions/main.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects/interactions/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp ./sample_projects/interactions/config/* ./config/
+
+mechano-sample:
+	cp ./sample_projects/mechano/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects/mechano/main.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects/mechano/Makefile .
+	cp ./sample_projects/mechano/config/* ./config/
+
+rules-sample:
+	cp ./sample_projects/rules_sample/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects/rules_sample/main.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects/rules_sample/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp ./sample_projects/rules_sample/config/* ./config/
+
+physimess-sample:
+	cp ./sample_projects/physimess/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects/physimess/main.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects/physimess/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp -r ./sample_projects/physimess/config/* ./config/
+
+custom-division-sample:
+	cp -r ./sample_projects/custom_division/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects/custom_division/main.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects/custom_division/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp -r ./sample_projects/custom_division/config/* ./config/
+
+asymmetric-division-sample:
+	cp -r ./sample_projects/asymmetric_division/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects/asymmetric_division/main.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects/asymmetric_division/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp -r ./sample_projects/asymmetric_division/config/* ./config/
+
+immune-function-sample:
+	cp -r ./sample_projects/immune_function/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects/immune_function/main.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects/immune_function/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp -r ./sample_projects/immune_function/config/* ./config/
+
+episode-sample:
+	cp -r ./sample_projects/episode/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects/episode/main.cpp ./main.cpp
+	cp Makefile Makefile-backup
+	cp ./sample_projects/episode/Makefile .
+	cp -r ./sample_projects/episode/config/* ./config
 
 # ---- intracellular projects 
 ode-energy-sample:
@@ -183,6 +253,24 @@ physiboss-cell-lines-sample:
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
 	cp ./sample_projects_intracellular/boolean/physiboss_cell_lines/config/* ./config/
 
+physiboss-tutorial:
+	cp ./sample_projects_intracellular/boolean/tutorial/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/boolean/tutorial/main.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects_intracellular/boolean/tutorial/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp -r ./sample_projects_intracellular/boolean/tutorial/config/* ./config/
+
+physiboss-tutorial-invasion:
+	cp ./sample_projects_intracellular/boolean/cancer_invasion/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/boolean/cancer_invasion/main.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects_intracellular/boolean/cancer_invasion/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp -r ./sample_projects_intracellular/boolean/cancer_invasion/config/* ./config/
+	
 physiboss-tnf-model:
 	cp ./sample_projects_intracellular/boolean/spheroid_tnf_model/custom_modules/* ./custom_modules/
 	touch main.cpp && cp main.cpp main-backup.cpp
@@ -192,6 +280,16 @@ physiboss-tnf-model:
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
 	cp ./sample_projects_intracellular/boolean/spheroid_tnf_model/config/* ./config/
 	cp -r ./sample_projects_intracellular/boolean/spheroid_tnf_model/scripts ./
+
+prostate:
+	cp ./sample_projects_intracellular/boolean/prostate/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/boolean/prostate/main-prostate.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects_intracellular/boolean/prostate/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp ./sample_projects_intracellular/boolean/prostate/config/* ./config/
+	cp -r ./sample_projects_intracellular/boolean/prostate/scripts ./
 
 ecoli-acetic-switch-sample:
 	cp ./sample_projects_intracellular/fba/ecoli_acetic_switch/custom_modules/* ./custom_modules/
@@ -211,10 +309,10 @@ cancer-metabolism-sample:
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml
 	cp ./sample_projects_intracellular/fba/cancer_metabolism/config/* ./config/
 
-template_BM: 	
+template_BM:
 	cp ./sample_projects_intracellular/boolean/template_BM/custom_modules/* ./custom_modules/
 	touch main.cpp && cp main.cpp main-backup.cpp
-	cp ./sample_projects_intracellular/boolean/template_BM/main-template_BM.cpp ./main.cpp 
+	cp ./sample_projects_intracellular/boolean/template_BM/main.cpp ./main.cpp 
 	cp Makefile Makefile-backup
 	cp ./sample_projects_intracellular/boolean/template_BM/Makefile .
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
@@ -276,6 +374,12 @@ PhysiCell_custom.o: ./core/PhysiCell_custom.cpp
 PhysiCell_constants.o: ./core/PhysiCell_constants.cpp
 	$(COMPILE_COMMAND) -c ./core/PhysiCell_constants.cpp 
 	
+PhysiCell_signal_behavior.o: ./core/PhysiCell_signal_behavior.cpp
+	$(COMPILE_COMMAND) -c ./core/PhysiCell_signal_behavior.cpp 
+
+PhysiCell_rules.o: ./core/PhysiCell_rules.cpp
+	$(COMPILE_COMMAND) -c ./core/PhysiCell_rules.cpp 
+
 # BioFVM core components (needed by PhysiCell)
 	
 BioFVM_vector.o: ./BioFVM/BioFVM_vector.cpp
@@ -341,7 +445,7 @@ PhysiCell_geometry.o: ./modules/PhysiCell_geometry.cpp
 reset:
 	rm -f *.cpp PhysiCell_cell.o
 	cp ./sample_projects/Makefile-default Makefile 
-	rm -f ./custom_modules/*
+	rm -rf ./custom_modules/*
 	touch ./custom_modules/empty.txt 
 	touch ALL_CITATIONS.txt 
 	touch ./core/PhysiCell_cell.cpp
@@ -390,11 +494,11 @@ FRAMERATE := 24
 OUTPUT := output
 
 jpeg: 
-	@magick identify -format "%h" $(OUTPUT)/initial.svg >> __H.txt 
-	@magick identify -format "%w" $(OUTPUT)/initial.svg >> __W.txt 
-	@expr 2 \* \( $$(grep . __H.txt) / 2 \) >> __H1.txt 
-	@expr 2 \* \( $$(grep . __W.txt) / 2 \) >> __W1.txt 
-	@echo "$$(grep . __W1.txt)!x$$(grep . __H1.txt)!" >> __resize.txt 
+	@magick identify -format "%h" $(OUTPUT)/initial.svg > __H.txt 
+	@magick identify -format "%w" $(OUTPUT)/initial.svg > __W.txt 
+	@expr 2 \* \( $$(grep . __H.txt) / 2 \) > __H1.txt 
+	@expr 2 \* \( $$(grep . __W.txt) / 2 \) > __W1.txt 
+	@echo "$$(grep . __W1.txt)!x$$(grep . __H1.txt)!" > __resize.txt 
 	@magick mogrify -format jpg -resize $$(grep . __resize.txt) $(OUTPUT)/s*.svg
 	rm -f __H*.txt __W*.txt __resize.txt 
 	
@@ -408,8 +512,8 @@ movie:
 
 SOURCE := PhysiCell_upgrade.zip 
 get-upgrade: 
-	@echo $$(curl https://raw.githubusercontent.com/MathCancer/PhysiCell/master/VERSION.txt) >> VER.txt 
-	@echo https://github.com/MathCancer/PhysiCell/releases/download/$$(grep . VER.txt)/PhysiCell_V.$$(grep . VER.txt).zip >> DL_FILE.txt 
+	@echo $$(curl https://raw.githubusercontent.com/MathCancer/PhysiCell/master/VERSION.txt) > VER.txt 
+	@echo https://github.com/MathCancer/PhysiCell/releases/download/$$(grep . VER.txt)/PhysiCell_V.$$(grep . VER.txt).zip > DL_FILE.txt 
 	rm -f VER.txt
 	$$(curl -L $$(grep . DL_FILE.txt) --output PhysiCell_upgrade.zip)
 	rm -f DL_FILE.txt 
@@ -432,3 +536,48 @@ upgrade: $(SOURCE)
 	mv -f PhysiCell/documentation/User_Guide.pdf documentation
 	rm -f -r PhysiCell
 	rm -f $(SOURCE) 
+
+# use: make save PROJ=your_project_name
+PROJ := my_project
+
+save: 
+	echo "Saving project as $(PROJ) ... "
+	mkdir -p ./user_projects
+	mkdir -p ./user_projects/$(PROJ)
+	mkdir -p ./user_projects/$(PROJ)/custom_modules
+	mkdir -p ./user_projects/$(PROJ)/config 
+	cp main.cpp ./user_projects/$(PROJ)
+	cp Makefile ./user_projects/$(PROJ)
+	cp VERSION.txt ./user_projects/$(PROJ)
+	cp -r ./config/* ./user_projects/$(PROJ)/config
+	cp -r ./custom_modules/* ./user_projects/$(PROJ)/custom_modules
+
+load: 
+	echo "Loading project from $(PROJ) ... "
+	cp ./user_projects/$(PROJ)/main.cpp .
+	cp ./user_projects/$(PROJ)/Makefile .
+	cp -r ./user_projects/$(PROJ)/config/* ./config/ 
+	cp -r ./user_projects/$(PROJ)/custom_modules/* ./custom_modules/ 
+
+pack:
+	@echo " "
+	@echo "Preparing project $(PROJ) for sharing ... "
+	@echo " " 
+	cd ./user_projects && zip -r $(PROJ).zip $(PROJ)
+	@echo " "
+	@echo "Share ./user_projects/$(PROJ).zip ... "
+	@echo "Other users can unzip $(PROJ).zip in their ./user_projects, compile, and run."
+	@echo " " 
+
+unpack:
+	@echo " "
+	@echo "Preparing shared project $(PROJ).zip for use ... "
+	@echo " " 
+	cd ./user_projects && unzip $(PROJ).zip 
+	@echo " "
+	@echo "Load this project via make load PROJ=$(PROJ) ... "
+	@echo " " 	
+
+list-user-projects:
+	@echo "user projects::"
+	@cd ./user_projects && ls -dt1 * | grep . | sed 's!empty.txt!!'

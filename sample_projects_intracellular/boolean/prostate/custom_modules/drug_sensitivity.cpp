@@ -1,3 +1,4 @@
+
 #include "./drug_sensitivity.h"
 
 /**
@@ -38,7 +39,8 @@ const vector<pair<string, int>> half_lives = {
     { "Trametinib", 5760},
     { "Selumetinib", 822},
     { "Pictilisib", 1062},
-    { "Alpelisib", 822}    
+    { "Alpelisib", 822},
+    
 };
 
 string get_value (const vector<pair<string, string>> dict, string key) {
@@ -50,6 +52,7 @@ int get_value (const vector<pair<string, int>> dict, string key) {
     vector< pair<string, int>>::const_iterator dict_iterator = find_if( dict.begin(), dict.end(),[&key](const pair < string, int>& element){ return element.first  == key;} );
     return (*dict_iterator).second;
 }
+
 
 vector<double> get_drug_sensitivity_values (string drug_name) {
     static double max_conc = parameters.doubles(drug_name+"_maxc");

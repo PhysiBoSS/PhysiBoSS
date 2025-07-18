@@ -33,7 +33,7 @@
 #                                                                             #
 # BSD 3-Clause License (see https://opensource.org/licenses/BSD-3-Clause)     #
 #                                                                             #
-# Copyright (c) 2015-2021, Paul Macklin and the PhysiCell Project             #
+# Copyright (c) 2015-2025, Paul Macklin and the PhysiCell Project             #
 # All rights reserved.                                                        #
 #                                                                             #
 # Redistribution and use in source and binary forms, with or without          #
@@ -67,6 +67,7 @@
 
 #include "PhysiCell_standard_models.h" 
 #include "PhysiCell_cell.h" 
+#include "../modules/PhysiCell_pathology.h"
 
 namespace PhysiCell{
 	
@@ -523,7 +524,7 @@ void standard_volume_update_function( Cell* pCell, Phenotype& phenotype, double 
 	if( phenotype.volume.fluid < 0.0 )
 	{ phenotype.volume.fluid = 0.0; }
 		
-	phenotype.volume.nuclear_fluid = (phenotype.volume.nuclear / phenotype.volume.total) * 
+	phenotype.volume.nuclear_fluid = (phenotype.volume.nuclear / (phenotype.volume.total+1e-16) ) * 
 		( phenotype.volume.fluid );
 	phenotype.volume.cytoplasmic_fluid = phenotype.volume.fluid - phenotype.volume.nuclear_fluid; 
 
@@ -545,12 +546,11 @@ void standard_volume_update_function( Cell* pCell, Phenotype& phenotype, double 
 	phenotype.volume.nuclear = phenotype.volume.nuclear_solid + phenotype.volume.nuclear_fluid; 
 	phenotype.volume.cytoplasmic = phenotype.volume.cytoplasmic_solid + phenotype.volume.cytoplasmic_fluid; 
 	
-	phenotype.volume.calcified_fraction = dt * phenotype.volume.calcification_rate 
+	phenotype.volume.calcified_fraction += dt * phenotype.volume.calcification_rate 
 		* (1- phenotype.volume.calcified_fraction);
    
 	phenotype.volume.total = phenotype.volume.cytoplasmic + phenotype.volume.nuclear; 
-	
-	
+		
 	phenotype.volume.fluid_fraction = phenotype.volume.fluid / 
 		( 1e-16 + phenotype.volume.total ); 
    
@@ -561,8 +561,52 @@ void standard_volume_update_function( Cell* pCell, Phenotype& phenotype, double 
 
 void basic_volume_model( Cell* pCell, Phenotype& phenotype, double dt )
 {
+	// This model does not simulate a nucleus, and sets all nuclear volumes to zero. 
+	// The total volume is most relevant. Use the cytoplasmic volume if you must. 
+	
+	// update fluid volume 
+	phenotype.volume.fluid += dt * phenotype.volume.fluid_change_rate * 
+	( phenotype.volume.target_fluid_fraction * phenotype.volume.total - phenotype.volume.fluid );
+		
+	// if the fluid volume is negative, set to zero
+	if( phenotype.volume.fluid < 0.0 )
+	{ phenotype.volume.fluid = 0.0; }
+
+	// now distribute fluid to cytoplasm and nucleus 
+		
+	phenotype.volume.nuclear_fluid = 0.0; 
+		// (phenotype.volume.nuclear / phenotype.volume.total) * ( phenotype.volume.fluid );
+	phenotype.volume.cytoplasmic_fluid = phenotype.volume.fluid;
+		// - phenotype.volume.nuclear_fluid; 
+
+	// biomass creation 
+
+	phenotype.volume.nuclear_solid = 0; 
+	
+	// don't overwrite target_solid_cytoplasmic. 
+	phenotype.volume.cytoplasmic_solid += dt * phenotype.volume.cytoplasmic_biomass_change_rate * 
+		( phenotype.volume.target_solid_cytoplasmic - phenotype.volume.cytoplasmic_solid );	
+	if( phenotype.volume.cytoplasmic_solid < 0.0 )
+	{ phenotype.volume.cytoplasmic_solid = 0.0; }
+
+	// bookkeeping 
+	
+	// phenotype.volume.solid = phenotype.volume.nuclear_solid + phenotype.volume.cytoplasmic_solid;
+	phenotype.volume.solid = phenotype.volume.cytoplasmic_solid;
+	
+	phenotype.volume.nuclear = 0.0; // phenotype.volume.nuclear_solid + phenotype.volume.nuclear_fluid; 
+	phenotype.volume.cytoplasmic = phenotype.volume.cytoplasmic_solid + phenotype.volume.cytoplasmic_fluid; 
+	
+	phenotype.volume.calcified_fraction = dt * phenotype.volume.calcification_rate 
+		* (1- phenotype.volume.calcified_fraction);
+   
+	phenotype.volume.total = phenotype.volume.cytoplasmic; //  + phenotype.volume.nuclear; 
 	
 	
+	phenotype.volume.fluid_fraction = phenotype.volume.fluid / 
+		( 1e-16 + phenotype.volume.total ); 
+   
+	phenotype.geometry.update( pCell,phenotype,dt );
 	
 	return; 
 }
@@ -681,7 +725,7 @@ void initialize_default_cell_definition( void )
 {
 	// If the standard models have not yet been created, do so now. 
 	create_standard_cycle_and_death_models();
-		
+	
 	// set the microenvironment pointer 
 	cell_defaults.pMicroenvironment = NULL;
 	if( BioFVM::get_default_microenvironment() != NULL )
@@ -715,7 +759,10 @@ void initialize_default_cell_definition( void )
 	cell_defaults.functions.calculate_distance_to_membrane = NULL; 
 	
 	cell_defaults.functions.set_orientation = NULL;
-
+	
+	cell_defaults.functions.plot_agent_SVG = standard_agent_SVG;
+	cell_defaults.functions.plot_agent_legend = standard_agent_legend;
+	
 	// add the standard death models to the default phenotype. 
 	cell_defaults.phenotype.death.add_death_model( 0.00319/60.0 , &apoptosis , apoptosis_parameters );
 		// MCF10A, to get a 2% apoptotic index 
@@ -725,6 +772,16 @@ void initialize_default_cell_definition( void )
 	cell_defaults.phenotype.cycle.sync_to_cycle_model( cell_defaults.functions.cycle_model ); 
 	
 	// set molecular defaults 
+	
+	// new March 2022 : make sure Cell_Interactions and Cell_Transformations 
+	// 					are appropriately sized. Same on motiltiy. 
+	//                  The Cell_Definitions constructor doesn't catch 
+	//					these for the cell_defaults 
+	cell_defaults.phenotype.cell_interactions.sync_to_cell_definitions(); 
+	cell_defaults.phenotype.cell_transformations.sync_to_cell_definitions(); 
+	cell_defaults.phenotype.cycle.asymmetric_division.sync_to_cell_definitions();
+	cell_defaults.phenotype.motility.sync_to_current_microenvironment(); 
+	cell_defaults.phenotype.mechanics.sync_to_cell_definitions(); 
 	
 	return; 	
 }
@@ -867,26 +924,111 @@ void chemotaxis_function( Cell* pCell, Phenotype& phenotype , double dt )
 	return;
 }
 
+void advanced_chemotaxis_function_normalized( Cell* pCell, Phenotype& phenotype , double dt )
+{
+	// We'll work directly on the migration bias direction 
+	std::vector<double>* pVec = &(phenotype.motility.migration_bias_direction);  
+	// reset to zero. use memset to be faster??
+	pVec->assign( 3, 0.0 ); 
+	
+	// a place to put each gradient prior to normalizing it 
+	std::vector<double> temp(3,0.0); 
+
+	// weighted combination of the gradients 
+	for( int i=0; i < phenotype.motility.chemotactic_sensitivities.size(); i++ )
+	{
+		// get and normalize ith gradient 
+		temp = pCell->nearest_gradient(i); 
+		normalize( &temp ); 
+		axpy( pVec , phenotype.motility.chemotactic_sensitivities[i] , temp ); 
+	}
+	// normalize that 
+	normalize( pVec ); 
+	
+	return;
+}
+
+void advanced_chemotaxis_function( Cell* pCell, Phenotype& phenotype , double dt )
+{
+	// We'll work directly on the migration bias direction 
+	std::vector<double>* pVec = &(phenotype.motility.migration_bias_direction);  
+	// reset to zero. use memset to be faster??
+	pVec->assign( 3, 0.0 ); 
+
+	// weighted combination of the gradients 
+	for( int i=0; i < phenotype.motility.chemotactic_sensitivities.size(); i++ )
+	{
+		// get and normalize ith gradient 
+		axpy( pVec , phenotype.motility.chemotactic_sensitivities[i] , pCell->nearest_gradient(i) ); 
+	}
+	// normalize that 
+	normalize( pVec ); 
+
+/*
+ #pragma omp critical
+ {
+	std::cout << "\t\ttype: " << pCell->type_name 
+	<< " bias: " << phenotype.motility.migration_bias 
+	<< " speed: " << phenotype.motility.migration_speed 
+	<< " direction: " << phenotype.motility.migration_bias_direction << std::endl; 
+ }
+ */
+
+	return;
+}
+
 void standard_elastic_contact_function( Cell* pC1, Phenotype& p1, Cell* pC2, Phenotype& p2 , double dt )
 {
 	if( pC1->position.size() != 3 || pC2->position.size() != 3 )
-	{
-		#pragma omp critical
-		{
-			std::cout << "what?! " << std::endl
-			<< pC1 << " : " << pC1->type << " " << pC1->type_name << " " << pC1->position << std::endl 
-			<< pC2 << " : " << pC2->type << " " << pC2->type_name << " " << pC2->position << std::endl ;
-		}
-		return; 
-	}
+	{ return; }
 	
 	std::vector<double> displacement = pC2->position;
 	displacement -= pC1->position; 
-	// std::cout << "vel: " << pC1->velocity << " disp: " << displacement << " e: " << p1.mechanics.attachment_elastic_constant << " vel new: "; 
-	axpy( &(pC1->velocity) , p1.mechanics.attachment_elastic_constant , displacement ); 
-	// std::cout << pC1->velocity << std::endl << std::endl; 
+
+	// update May 2022 - effective adhesion 
+	int ii = find_cell_definition_index( pC1->type ); 
+	int jj = find_cell_definition_index( pC2->type ); 
+
+	double adhesion_ii = pC1->phenotype.mechanics.attachment_elastic_constant * pC1->phenotype.mechanics.cell_adhesion_affinities[jj]; 
+	double adhesion_jj = pC2->phenotype.mechanics.attachment_elastic_constant * pC2->phenotype.mechanics.cell_adhesion_affinities[ii]; 
+
+	double effective_attachment_elastic_constant = sqrt( adhesion_ii*adhesion_jj ); 
+
+	// axpy( &(pC1->velocity) , p1.mechanics.attachment_elastic_constant , displacement ); 
+	axpy( &(pC1->velocity) , effective_attachment_elastic_constant , displacement ); 
 	return; 
 }
+
+void standard_elastic_contact_function_confluent_rest_length( Cell* pC1, Phenotype& p1, Cell* pC2, Phenotype& p2 , double dt )
+{
+	if( pC1->position.size() != 3 || pC2->position.size() != 3 )
+	{ return; }
+	
+	std::vector<double> displacement = pC2->position;
+	displacement -= pC1->position; 
+
+	// update May 2022 - effective adhesion 
+	int ii = find_cell_definition_index( pC1->type ); 
+	int jj = find_cell_definition_index( pC2->type ); 
+
+	double adhesion_ii = pC1->phenotype.mechanics.attachment_elastic_constant * pC1->phenotype.mechanics.cell_adhesion_affinities[jj]; 
+	double adhesion_jj = pC2->phenotype.mechanics.attachment_elastic_constant * pC2->phenotype.mechanics.cell_adhesion_affinities[ii]; 
+
+	double effective_attachment_elastic_constant = sqrt( adhesion_ii*adhesion_jj ); 
+	// axpy( &(pC1->velocity) , effective_attachment_elastic_constant , displacement ); 
+
+	// have the adhesion strength taper away at this rest lenght
+	// set the rest length = confluent cell-cell spacing 
+	// 
+	double rest_length = ( p1.geometry.radius + p2.geometry.radius ) * 0.9523809523809523;  
+
+	double strength = ( norm(displacement) - rest_length )*effective_attachment_elastic_constant;
+	normalize( &displacement );
+	axpy( &(pC1->velocity) , strength , displacement ); 
+
+	return; 
+}
+
 
 void evaluate_interactions( Cell* pCell, Phenotype& phenotype, double dt )
 {
@@ -1041,5 +1183,327 @@ double distance_to_domain_edge(Cell* pCell, Phenotype& phenotype, double dummy)
 	pCell->displacement = {0,0,0};
 	return 9e99; 
 }	
+
+void standard_cell_cell_interactions( Cell* pCell, Phenotype& phenotype, double dt )
+{
+	if( phenotype.death.dead == true )
+	{ return; }
+	
+	Cell* pTarget = NULL; 
+	int type = -1; 
+	std::string type_name = "none";
+	double probability = 0.0; 
+	
+	bool attacked = false; 
+	bool phagocytosed = false; 
+	bool fused = false; 
+	
+	for( int n=0; n < pCell->state.neighbors.size(); n++ )
+	{
+		pTarget = pCell->state.neighbors[n]; 
+		type = pTarget->type; 
+		type_name = pTarget->type_name; 
+		
+		if( pTarget->phenotype.volume.total < 1e-15 )
+		{ break; } 
+		
+		if( pTarget->phenotype.death.dead == true )
+		{
+			// ADD SPECIFIC PHAGOCYTOSIS HERE JUNE 2024 
+
+			bool apoptotic = (bool) get_single_signal( pTarget , "apoptotic" ); 
+			bool necrotic = (bool) get_single_signal( pTarget , "necrotic" ); 
+			bool other = !(apoptotic || necrotic); // neither apoptotic nor necrotic 
+
+			// apoptotic phagocytosis 
+			probability = phenotype.cell_interactions.apoptotic_phagocytosis_rate * dt; 
+			if( UniformRandom() < probability && phagocytosed == false && apoptotic == true ) // add the prior phago check in July 2024  
+			{
+				pCell->ingest_cell(pTarget); 
+				phagocytosed = true; // was missing : bugfix 
+				// std::cout << "chomp apop " << PhysiCell_globals.current_time << " " << probability <<  std::endl;
+			} 
+
+			// necrotic phagocytosis 
+			probability = phenotype.cell_interactions.necrotic_phagocytosis_rate * dt; 
+			if( UniformRandom() < probability && phagocytosed == false && necrotic == true ) // add the prior phago check in July 2024  
+			{
+				pCell->ingest_cell(pTarget); 
+				phagocytosed = true; // was missing : bugfix 
+				// std::cout << "chomp necro " << PhysiCell_globals.current_time << " " << probability <<  std::endl;
+			} 
+
+			// other dead phagocytosis 
+			probability = phenotype.cell_interactions.other_dead_phagocytosis_rate * dt; 
+			if( UniformRandom() < probability && other == true && phagocytosed == false )  
+			{
+				pCell->ingest_cell(pTarget); 
+				phagocytosed = true; // was missing : bugfix 
+				// std::cout << "chomp other " << PhysiCell_globals.current_time << " " << probability <<  std::endl;
+			} 
+		}
+		else
+		{
+			// live phagocytosis
+			// assume you can only phagocytose one at a time for now 
+			probability = phenotype.cell_interactions.live_phagocytosis_rate(type_name) * dt; // s[type] * dt;  
+			if( UniformRandom() < probability && phagocytosed == false ) 
+			{
+				pCell->ingest_cell(pTarget);
+				phagocytosed = true; 
+			} 
+			
+			// attack 
+			// assume you can only attack one cell at a time 
+			// probability = phenotype.cell_interactions.attack_rate(type_name)*dt; // s[type] * dt;  
+
+			double attack_ij = phenotype.cell_interactions.attack_rate(type_name); 
+			double immunogenicity_ji = pTarget->phenotype.cell_interactions.immunogenicity(pCell->type_name); 
+
+			// probability of STARTING an attack 
+			probability = attack_ij * immunogenicity_ji * dt; 
+			if( attacked == false && pCell->phenotype.cell_interactions.pAttackTarget == NULL )
+			{
+				if( UniformRandom() < probability ) 
+				{				
+					pCell->phenotype.cell_interactions.pAttackTarget = pTarget; 
+					attacked = true; 
+					/*					
+					std::cout << "*********   *********  ********  start atack **** " << PhysiCell_globals.current_time << std::endl; 
+					std::cout 
+					<< "attack duration: " << pCell->phenotype.cell_interactions.attack_duration << " "  
+					<< "attack damage rate: " << pCell->phenotype.cell_interactions.attack_damage_rate <<  std::endl; 
+					*/
+					// spring-link these cells 
+					attach_cells_as_spring(pCell,pTarget); 
+				} 
+			}
+
+/*
+			// perform attack. be careful to not overcount it! 
+			// make sure that (1) I have a non-null pAttackTarget, and that (2) we are talking about pTarget 
+			// easiest way to do this is to check if the pAttackTarget = pTarget. IF pAttackTarget = NULL, it 
+			// won't be true. If pAttackTarget is non-null, but we're looking ata different cell, also not true. 
+			// if pAttackTarget = pTarget, then we're "looking" at the right cell, so do the attack. 
+			if( pCell->phenotype.cell_interactions.pAttackTarget == pTarget ) 
+			{
+				pCell->attack_cell(pCell->phenotype.cell_interactions.pAttackTarget,dt); 
+				attacked = true; // attacked at least one cell in this time step 
+
+				// probability of ending attack 
+				// end attack if target is dead 
+				probability = dt / (1e-15 + pCell->phenotype.cell_interactions.attack_duration); 
+
+				if( UniformRandom() < probability || pCell->phenotype.cell_interactions.pAttackTarget->phenotype.death.dead ) 
+				{
+					std::cout << "*********   *********  ********  attack done **** " << probability << " " << 
+					pCell->phenotype.cell_interactions.pAttackTarget->state.total_attack_time << " " 		
+					<< (int) pCell->phenotype.cell_interactions.pAttackTarget->phenotype.death.dead << std::endl; 
+					pCell->phenotype.cell_interactions.pAttackTarget = NULL; 
+				} 
+			} 
+*/
+			
+			// fusion 
+			// assume you can only fuse once cell at a time 
+			probability = phenotype.cell_interactions.fusion_rate(type_name)*dt; // s[type] * dt;  
+			if( UniformRandom() < probability && fused == false  ) 
+			{
+				pCell->fuse_cell(pTarget);
+				fused = true; 
+			} 
+		}
+	}
+
+	// move effector attack here. 
+
+		if( pCell->phenotype.cell_interactions.pAttackTarget != NULL ) 
+		{
+			Cell* pTarget = pCell->phenotype.cell_interactions.pAttackTarget; 
+
+			pCell->attack_cell(pTarget,dt); 
+			attacked = true; // attacked at least one cell in this time step 
+
+			// attack_cell
+
+			// probability of ending attack 
+			// end attack if target is dead 
+			probability = dt / (1e-15 + pCell->phenotype.cell_interactions.attack_duration); 
+
+
+			if( UniformRandom() < probability || pTarget->phenotype.death.dead ) 
+			{
+				/*
+				std::cout << "*********   *********  ********  attack done **** " << PhysiCell_globals.current_time << " " 
+				<< probability << " "
+				<< "attack time: " << pTarget->state.total_attack_time << " " 		
+				<< "damage: " << pTarget->phenotype.cell_integrity.damage <<  " " 		
+				<< "dead? " << (int) pTarget->phenotype.death.dead << " " 
+				<< "damage delivered: " << pCell->phenotype.cell_interactions.total_damage_delivered << std::endl; 
+				*/
+
+				detach_cells_as_spring(pCell,pTarget); 
+
+				pCell->phenotype.cell_interactions.pAttackTarget = NULL; 
+			} 
+		} 
+
+
+	// move decision if to end attack here. 
+
+
+}
+
+void standard_cell_transformations( Cell* pCell, Phenotype& phenotype, double dt )
+{
+	if( phenotype.death.dead == true )
+	{ return; }
+
+	double probability = 0.0; 
+	for( int i=0 ; i < phenotype.cell_transformations.transformation_rates.size() ; i++ )
+	{
+		probability = phenotype.cell_transformations.transformation_rates[i] * dt;  
+		if( UniformRandom() <= probability ) 
+		{
+			// std::cout << "Transforming from " << pCell->type_name << " to " << cell_definitions_by_index[i]->name << std::endl; 
+			pCell->convert_to_cell_definition( *cell_definitions_by_index[i] ); 
+			return; 
+		} 
+	}
+
+}
+
+void standard_asymmetric_division_function( Cell* pCell_parent, Cell* pCell_daughter )
+{
+	Cell_Definition* pCD_parent = cell_definitions_by_name[pCell_parent->type_name];
+	double total = pCell_parent->phenotype.cycle.asymmetric_division.probabilities_total();
+	if (total > 1.0)
+	{
+		double sym_div_prob = pCell_parent->phenotype.cycle.asymmetric_division.asymmetric_division_probabilities[pCell_parent->type] + 1.0 - total;
+		if (sym_div_prob < 0.0)
+		{ 
+			throw std::runtime_error("Error: Asymmetric division probabilities for " + pCD_parent->name + " sum to greater than 1.0 and cannot be normalized.");
+		}
+		pCell_parent->phenotype.cycle.asymmetric_division.asymmetric_division_probabilities[pCell_parent->type] = sym_div_prob;
+		pCell_daughter->phenotype.cycle.asymmetric_division.asymmetric_division_probabilities[pCell_daughter->type] = sym_div_prob;
+	}
+	double r = UniformRandom();
+	for( int i=0; i < pCD_parent->phenotype.cycle.asymmetric_division.asymmetric_division_probabilities.size(); i++ )
+	{
+		if( r <= pCell_parent->phenotype.cycle.asymmetric_division.asymmetric_division_probabilities[i] )
+		{
+			if (i != pCell_daughter->type) // only convert if the daughter is not already the correct type
+			{ pCell_daughter->convert_to_cell_definition( *cell_definitions_by_index[i] ); }
+			return;
+		}
+		r -= pCell_parent->phenotype.cycle.asymmetric_division.asymmetric_division_probabilities[i];
+	}
+	// if we're here, then do not do asym div
+	return;
+}
+
+//  alternative way to select the index from weights that could be faster (is faster as # cell types --> infinity)
+// int select_by_probabilities( const std::vector<double>& probabilities )
+// {
+// 	double r = UniformRandom();
+
+// 	std::vector<double> cumulative_weights(probabilities.size());
+// 	std::partial_sum(probabilities.begin(), probabilities.end(), cumulative_weights.begin());
+
+// 	// Use binary search to find the index
+// 	auto it = std::upper_bound(cumulative_weights.begin(), cumulative_weights.end(), r);
+// 	int index = std::distance(cumulative_weights.begin(), it);
+// 	if (index >= probabilities.size())
+// 	{ return -1; }
+	
+// 	return index;
+// }
+
+void dynamic_attachments( Cell* pCell , Phenotype& phenotype, double dt )
+{
+    // check for detachments 
+    double detachment_probability = phenotype.mechanics.detachment_rate * dt; 
+    for( int j=0; j < pCell->state.attached_cells.size(); j++ )
+    {
+        Cell* pTest = pCell->state.attached_cells[j]; 
+        if( UniformRandom() <= detachment_probability )
+        { detach_cells( pCell , pTest ); }
+    }
+
+    // check if I have max number of attachments 
+    if( pCell->state.attached_cells.size() >= phenotype.mechanics.maximum_number_of_attachments )
+    { return; }
+
+    // check for new attachments; 
+    double attachment_probability = phenotype.mechanics.attachment_rate * dt; 
+    bool done = false; 
+    int j = 0; 
+    while( done == false && j < pCell->state.neighbors.size() )
+    {
+        Cell* pTest = pCell->state.neighbors[j]; 
+		if (phenotype.cell_interactions.pAttackTarget==pTest || pTest->phenotype.cell_interactions.pAttackTarget==pCell) // do not let attackers detach randomly
+		{ continue; }
+        if( pTest->state.number_of_attached_cells() < pTest->phenotype.mechanics.maximum_number_of_attachments )
+        {
+            // std::string search_string = "adhesive affinity to " + pTest->type_name; 
+            // double affinity = get_single_behavior( pCell , search_string );
+			double affinity = phenotype.mechanics.cell_adhesion_affinity(pTest->type_name); 
+
+            double prob = attachment_probability * affinity; 
+            if( UniformRandom() <= prob )
+            {
+                // attempt the attachment. testing for prior connection is already automated 
+                attach_cells( pCell, pTest ); 
+                if( pCell->state.attached_cells.size() >= phenotype.mechanics.maximum_number_of_attachments )
+                { done = true; }
+            }
+        }
+        j++; 
+    }
+    return; 
+}
+
+void dynamic_spring_attachments( Cell* pCell , Phenotype& phenotype, double dt )
+{
+    // check for detachments 
+    double detachment_probability = phenotype.mechanics.detachment_rate * dt; 
+    for( int j=0; j < pCell->state.spring_attachments.size(); j++ )
+    {
+        Cell* pTest = pCell->state.spring_attachments[j]; 
+        if( UniformRandom() <= detachment_probability )
+        { detach_cells_as_spring( pCell , pTest ); }
+    }
+
+    // check if I have max number of attachments 
+    if( pCell->state.spring_attachments.size() >= phenotype.mechanics.maximum_number_of_attachments )
+    { return; }
+
+    // check for new attachments; 
+    double attachment_probability = phenotype.mechanics.attachment_rate * dt; 
+    bool done = false; 
+    int j = 0; 
+    while( done == false && j < pCell->state.neighbors.size() )
+    {
+        Cell* pTest = pCell->state.neighbors[j]; 
+        if( pTest->state.spring_attachments.size() < pTest->phenotype.mechanics.maximum_number_of_attachments )
+        {
+            // std::string search_string = "adhesive affinity to " + pTest->type_name; 
+            // double affinity = get_single_behavior( pCell , search_string );
+			double affinity = phenotype.mechanics.cell_adhesion_affinity(pTest->type_name); 
+
+            double prob = attachment_probability * affinity; 
+            if( UniformRandom() <= prob )
+            {
+                // attempt the attachment. testing for prior connection is already automated 
+                attach_cells_as_spring( pCell, pTest ); 
+                if( pCell->state.spring_attachments.size() >= phenotype.mechanics.maximum_number_of_attachments )
+                { done = true; }
+            }
+        }
+        j++; 
+    }
+    return; 
+}
+
 	
 };

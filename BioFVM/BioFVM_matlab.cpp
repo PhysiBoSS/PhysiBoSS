@@ -13,7 +13,7 @@
 #                                                                           #
 # BSD 3-Clause License (see https://opensource.org/licenses/BSD-3-Clause)   #
 #                                                                           #
-# Copyright (c) 2015-2017, Paul Macklin and the BioFVM Project              #
+# Copyright (c) 2015-2025, Paul Macklin and the BioFVM Project              #
 # All rights reserved.                                                      #
 #                                                                           #
 # Redistribution and use in source and binary forms, with or without        #
@@ -108,7 +108,8 @@ std::vector< std::vector<double> > read_matlab( std::string filename )
      type_data_format > 5 || // unknown format
      type_matrix_type != 0 ) // want full matrices, not sparse 
  {
-  std::cout << "Error reading file " << filename << ": I can't read this format yet!" << std::endl;
+  std::cout << "Error reading file " << filename << ": I can't read this format yet!" << std::endl
+            << "\t Make sure you save the .mat file in '-v4'" << std::endl;
   return output;
  } 
 

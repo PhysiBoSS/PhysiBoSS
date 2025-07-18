@@ -77,9 +77,11 @@ void create_cell_types(void)
 	/*  This parses the cell definitions in the XML config file.  */
 	initialize_cell_definitions_from_pugixml();
 
-	//  This sets the custom phenotype function
-	cell_defaults.functions.update_phenotype = update_phenotype_with_signaling;
-
+	//  This sets the pre and post intracellular update functions
+	cell_defaults.functions.pre_update_intracellular =  update_boolean_model_inputs;
+	cell_defaults.functions.post_update_intracellular = update_behaviors;
+	cell_defaults.functions.update_phenotype = NULL; 
+	
 	//  This initializes the the TNF receptor model
 	tnf_receptor_model_setup();
 	tnf_boolean_model_interface_setup();
@@ -91,6 +93,9 @@ void create_cell_types(void)
 	cell_defaults.custom_data["bound_internal_TNFR"] = 0;
 
 	build_cell_definitions_maps();
+	
+	setup_signal_behavior_dictionaries();
+
 	display_cell_definitions(std::cout);
 
 	return;

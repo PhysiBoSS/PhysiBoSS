@@ -1,7 +1,6 @@
 
 #include "../core/PhysiCell.h"
 #include "../modules/PhysiCell_standard_modules.h" 
-// #include "../addons/PhysiBoSS/src/boolean_network.h"
 #include "drug_sensitivity.h"
 #include "boolean_model_interface.h"
 
@@ -11,9 +10,10 @@
  * 
  *	\details Modules needed for the drug_AGS example. This custom module can be used to study the inhibition of AGS cell lines with AKT, beta-catenin and TAK inhibitors.
  *
- *	\date 19/06/2022
- *	\author Annika Meert and Arnau Montagud, BSC-CNS, with code previously developed by Gerard Pradas and Miguel Ponce de Leon, BSC-CNS
-*/
+ *
+ *	\date 19/10/2020
+ *	\author Arnau Montagud, BSC-CNS, with code previously developed by Gerard Pradas and Miguel Ponce de Leon, BSC-CNS
+ */
 
 using namespace BioFVM; 
 using namespace PhysiCell;
