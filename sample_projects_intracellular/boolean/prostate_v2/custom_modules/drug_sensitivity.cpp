@@ -39,8 +39,7 @@ const vector<pair<string, int>> half_lives = {
     { "Trametinib", 5760},
     { "Selumetinib", 822},
     { "Pictilisib", 1062},
-    { "Alpelisib", 822},
-    
+    { "Alpelisib", 822}    
 };
 
 string get_value (const vector<pair<string, string>> dict, string key) {
