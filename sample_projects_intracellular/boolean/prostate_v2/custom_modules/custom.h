@@ -1,6 +1,7 @@
 
 #include "../core/PhysiCell.h"
 #include "../modules/PhysiCell_standard_modules.h" 
+#include "../addons/PhysiBoSS/src/boolean_network.h"
 #include "drug_sensitivity.h"
 #include "boolean_model_interface.h"
 

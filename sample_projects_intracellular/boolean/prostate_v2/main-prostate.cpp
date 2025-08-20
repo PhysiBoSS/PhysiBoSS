@@ -8,7 +8,6 @@
 #include <fstream>
 #include "./core/PhysiCell.h"
 #include "./modules/PhysiCell_standard_modules.h" 
-#include "./addons/PhysiBoSS/src/maboss_intracellular.h"
 
 /**
  *	\main main-prostate file
@@ -31,22 +30,12 @@ int main( int argc, char* argv[] )
 	// load and parse settings file(s)
 	
 	bool XML_status = false; 
-	char copy_command [1024]; 
 	if( argc > 1 )
-	{
-		XML_status = load_PhysiCell_config_file( argv[1] ); 
-		sprintf( copy_command , "cp %s %s" , argv[1] , PhysiCell_settings.folder.c_str() ); 
-		}
+	{ XML_status = load_PhysiCell_config_file( argv[1] ); }
 	else
-	{
-		XML_status = load_PhysiCell_config_file( "./config/PhysiCell_settings_LNCaP.xml" ); 
-		sprintf( copy_command , "cp ./config/PhysiCell_settings_LNCaP.xml %s" , PhysiCell_settings.folder.c_str() ); 
-}
+	{ XML_status = load_PhysiCell_config_file( "./config/PhysiCell_settings_LNCaP.xml" ); }
 	if( !XML_status )
 	{ exit(-1); }
-		
-	// copy config file to output directry 
-	system( copy_command ); 
 	
 	// OpenMP setup
 	omp_set_num_threads(PhysiCell_settings.omp_num_threads);
@@ -93,14 +82,10 @@ int main( int argc, char* argv[] )
 	set_save_biofvm_cell_data_as_custom_matlab( true );
 	
 	// save a simulation snapshot 
-
+	
 	char filename[1024];
 	sprintf( filename , "%s/initial" , PhysiCell_settings.folder.c_str() ); 
 	save_PhysiCell_to_MultiCellDS_xml_pugi( filename , microenvironment , PhysiCell_globals.current_time ); 
-	
-	sprintf( filename , "%s/states_initial.csv", PhysiCell_settings.folder.c_str());
-	MaBoSSIntracellular::save( filename, *PhysiCell::all_cells);
-	
 	
 	// save a quick SVG cross section through z = 0, after setting its 
 	// length bar to 200 microns 
@@ -113,11 +98,6 @@ int main( int argc, char* argv[] )
 	
 	sprintf( filename , "%s/initial.svg" , PhysiCell_settings.folder.c_str() ); 
 	SVG_plot( filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function );
-	
-	sprintf( filename , "%s/legend.svg" , PhysiCell_settings.folder.c_str() ); 
-	create_plot_legend( filename , cell_coloring_function ); 
-	
-	add_software_citation( "PhysiBoSS" , PhysiBoSS_Version , PhysiBoSS_DOI, PhysiBoSS_URL);  
 	
 	display_citations(); 
 	
@@ -155,11 +135,6 @@ int main( int argc, char* argv[] )
 					sprintf( filename , "%s/output%08u" , PhysiCell_settings.folder.c_str(),  PhysiCell_globals.full_output_index ); 
 					
 					save_PhysiCell_to_MultiCellDS_xml_pugi( filename , microenvironment , PhysiCell_globals.current_time ); 
-					
-					sprintf( filename , "%s/states_%08u.csv", PhysiCell_settings.folder.c_str(), PhysiCell_globals.full_output_index);
-					
-					MaBoSSIntracellular::save( filename, *PhysiCell::all_cells );
-	
 				}
 				
 				PhysiCell_globals.full_output_index++; 
@@ -206,8 +181,6 @@ int main( int argc, char* argv[] )
 	
 	sprintf( filename , "%s/final" , PhysiCell_settings.folder.c_str() ); 
 	save_PhysiCell_to_MultiCellDS_xml_pugi( filename , microenvironment , PhysiCell_globals.current_time ); 
-	sprintf( filename , "%s/states_final.csv", PhysiCell_settings.folder.c_str());
-	MaBoSSIntracellular::save( filename, *PhysiCell::all_cells );
 	
 	sprintf( filename , "%s/final.svg" , PhysiCell_settings.folder.c_str() ); 
 	SVG_plot( filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function );

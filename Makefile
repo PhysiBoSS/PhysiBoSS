@@ -78,7 +78,7 @@ list-projects:
 	@echo ""
 	@echo "Sample intracellular projects: template_BM ode-energy-sample physiboss-cell-lines-sample"
 	@echo "                 cancer-metabolism-sample physiboss-tutorial physiboss-tutorial-invasion"
-	@echo "					physiboss-tnf-model prostate"
+	@echo "					physiboss-tnf-model prostate prostate_v1 prostate_v2"
 	@echo ""
 	
 template:
@@ -280,6 +280,26 @@ physiboss-tnf-model:
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
 	cp ./sample_projects_intracellular/boolean/spheroid_tnf_model/config/* ./config/
 	cp -r ./sample_projects_intracellular/boolean/spheroid_tnf_model/scripts ./
+
+prostate_v1:
+	cp ./sample_projects_intracellular/boolean/prostate_v1/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/boolean/prostate_v1/main-prostate_v1.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects_intracellular/boolean/prostate_v1/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp ./sample_projects_intracellular/boolean/prostate_v1/config/* ./config/
+	cp -r ./sample_projects_intracellular/boolean/prostate_v1/scripts ./
+
+prostate_v2:
+	cp ./sample_projects_intracellular/boolean/prostate_v2/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/boolean/prostate_v2/main-prostate_v2.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects_intracellular/boolean/prostate_v2/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp ./sample_projects_intracellular/boolean/prostate_v2/config/* ./config/
+	cp -r ./sample_projects_intracellular/boolean/prostate_v2/scripts ./
 
 prostate:
 	cp ./sample_projects_intracellular/boolean/prostate/custom_modules/* ./custom_modules/
