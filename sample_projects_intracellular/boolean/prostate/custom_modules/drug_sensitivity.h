@@ -25,11 +25,13 @@ using namespace std;
 using namespace PhysiCell;
 using namespace BioFVM;
 
-extern const vector<pair<string, string>> drug_targets;
-extern const vector<pair<string, int>> half_lives;
+extern vector<pair<string, string>> drug_targets;
+extern vector<pair<string, int>> half_lives;
 
-int get_value (const vector<pair<string, int>> dict, string key);
-string get_value (const vector<pair<string, string>> dict, string key);
+// Function declarations
+string get_value(const vector<pair<string, string>>& dict, const string& key);
+int get_value(const vector<pair<string, int>>& dict, const string& key);
+
 vector<double> get_drug_sensitivity_values (string drug_name);
 double get_drug_concentration_from_level (string cell_line, string drug_name, int conc_level, int num_of_conc_levels, int simulation_mode);
 double get_drug_concentration_from_IC (string cell_line, string drug_name, string IC_value, int simulation_mode);

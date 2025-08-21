@@ -288,7 +288,7 @@ prostate_v1:
 	cp Makefile Makefile-backup
 	cp ./sample_projects_intracellular/boolean/prostate_v1/Makefile .
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
-	cp ./sample_projects_intracellular/boolean/prostate_v1/config/* ./config/
+	cp -r ./sample_projects_intracellular/boolean/prostate_v1/config/* ./config/
 	cp -r ./sample_projects_intracellular/boolean/prostate_v1/scripts ./
 
 prostate_v2:
@@ -298,7 +298,7 @@ prostate_v2:
 	cp Makefile Makefile-backup
 	cp ./sample_projects_intracellular/boolean/prostate_v2/Makefile .
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
-	cp ./sample_projects_intracellular/boolean/prostate_v2/config/* ./config/
+	cp -r ./sample_projects_intracellular/boolean/prostate_v2/config/* ./config/
 	cp -r ./sample_projects_intracellular/boolean/prostate_v2/scripts ./
 
 prostate:
@@ -308,7 +308,7 @@ prostate:
 	cp Makefile Makefile-backup
 	cp ./sample_projects_intracellular/boolean/prostate/Makefile .
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
-	cp ./sample_projects_intracellular/boolean/prostate/config/* ./config/
+	cp -r ./sample_projects_intracellular/boolean/prostate/config/* ./config/
 	cp -r ./sample_projects_intracellular/boolean/prostate/scripts ./
 
 ecoli-acetic-switch-sample:

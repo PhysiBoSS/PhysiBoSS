@@ -1,7 +1,8 @@
+#ifndef __CUSTOM_H__
+#define __CUSTOM_H__
 
 #include "../core/PhysiCell.h"
-#include "../modules/PhysiCell_standard_modules.h" 
-// #include "../addons/PhysiBoSS/src/maboss_network.h"
+#include "../modules/PhysiCell_standard_modules.h"
 #include "drug_sensitivity.h"
 #include "boolean_model_interface.h"
 
@@ -53,3 +54,5 @@ struct init_record
 std::vector<init_record> read_init_file(std::string filename, char delimiter, bool header);
 
 inline float sphere_volume_from_radius(float radius) {return 4/3 * PhysiCell_constants::pi * std::pow(radius, 3);}
+
+#endif

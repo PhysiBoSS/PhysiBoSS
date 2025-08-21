@@ -18,8 +18,9 @@
 // put custom code modules here! 
 
 #include "./addons/PhysiBoSS/src/maboss_intracellular.h"
-#include "./custom_modules/custom.h" 
-// #include "./custom_modules/drug_sensitivity.h"
+#include "./custom_modules/custom.h"
+#include "./custom_modules/drug_sensitivity.h"
+#include "./custom_modules/boolean_model_interface.h"
 
 using namespace BioFVM;
 using namespace PhysiCell;
@@ -72,6 +73,8 @@ int main( int argc, char* argv[] )
 	// 	}
 	// }
 
+	/* Microenvironment setup */ 
+	setup_microenvironment(); // modify this in the custom code 
 
 	
 	/* PhysiCell setup */ 
@@ -102,7 +105,7 @@ int main( int argc, char* argv[] )
 	save_PhysiCell_to_MultiCellDS_v2( filename , microenvironment , PhysiCell_globals.current_time ); 
 	// save_PhysiCell_to_MultiCellDS_xml_pugi( filename , microenvironment , PhysiCell_globals.current_time ); 
 	sprintf( filename , "%s/states_initial.csv", PhysiCell_settings.folder.c_str());
-	MaBoSSIntracellular::save( filename, *PhysiCell::all_cells);
+	MaBoSSIntracellular::save( filename);
 
 	
 	// save a quick SVG cross section through z = 0, after setting its 
@@ -163,7 +166,7 @@ int main( int argc, char* argv[] )
 					
 					save_PhysiCell_to_MultiCellDS_v2( filename , microenvironment , PhysiCell_globals.current_time ); 
 					sprintf( filename , "%s/states_%08u.csv", PhysiCell_settings.folder.c_str(), PhysiCell_globals.full_output_index);
-					MaBoSSIntracellular::save( filename, *PhysiCell::all_cells );
+					MaBoSSIntracellular::save( filename);
 
 				}
 				
@@ -216,7 +219,7 @@ int main( int argc, char* argv[] )
 	sprintf( filename , "%s/final" , PhysiCell_settings.folder.c_str() ); 
 	save_PhysiCell_to_MultiCellDS_v2( filename , microenvironment , PhysiCell_globals.current_time ); 
 	sprintf( filename , "%s/states_final.csv", PhysiCell_settings.folder.c_str());
-	MaBoSSIntracellular::save( filename, *PhysiCell::all_cells );
+	MaBoSSIntracellular::save( filename );
 	
 	sprintf( filename , "%s/final.svg" , PhysiCell_settings.folder.c_str() ); 
 	SVG_plot( filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function );

@@ -13,7 +13,7 @@ endif
 
 # prostate model has more than 64 nodes, so we have 
 # to set up this var to the number of nodes
-MABOSS_MAX_NODES = 150
+MABOSS_MAX_NODES = 256
 
 ### MaBoSS configuration 
 # MaBoSS max nodes
@@ -94,7 +94,7 @@ PhysiCell_pugixml.o PhysiCell_settings.o PhysiCell_geometry.o
 # put your custom objects here (they should be in the custom_modules directory)
 MaBoSS := ./addons/PhysiBoSS/MaBoSS/engine/src/BooleanNetwork.h
 
-PhysiBoSS_OBJECTS := maboss_network.o maboss_intracellular.o drug_sensitivity.o boolean_model_interface.o
+PhysiBoSS_OBJECTS := maboss_network.o maboss_intracellular.o
 
 PhysiCell_custom_module_OBJECTS := custom.o drug_sensitivity.o boolean_model_interface.o
 
@@ -204,7 +204,7 @@ PhysiCell_pugixml.o: ./modules/PhysiCell_pugixml.cpp
 PhysiCell_settings.o: ./modules/PhysiCell_settings.cpp
 	$(COMPILE_COMMAND) -c ./modules/PhysiCell_settings.cpp	
 
-	PhysiCell_basic_signaling.o: ./core/PhysiCell_basic_signaling.cpp
+PhysiCell_basic_signaling.o: ./core/PhysiCell_basic_signaling.cpp
 	$(COMPILE_COMMAND) -c ./core/PhysiCell_basic_signaling.cpp
 	
 PhysiCell_geometry.o: ./modules/PhysiCell_geometry.cpp

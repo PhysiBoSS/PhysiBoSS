@@ -1,3 +1,6 @@
+#ifndef __BOOLEAN_MODEL_INTERFACE_H__
+#define __BOOLEAN_MODEL_INTERFACE_H__
+
 #include "../core/PhysiCell.h"
 #include "../modules/PhysiCell_standard_modules.h" 
 #include "../addons/PhysiBoSS/src/maboss_network.h"
@@ -27,3 +30,5 @@ void boolean_model_interface_main (Cell* pCell, Phenotype& phenotype, double dt)
 
 void pre_update_intracellular(Cell* pCell, Phenotype& phenotype, double dt);
 void post_update_intracellular(Cell* pCell, Phenotype& phenotype, double dt);
+
+#endif
