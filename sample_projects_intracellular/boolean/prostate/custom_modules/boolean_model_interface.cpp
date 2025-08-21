@@ -58,7 +58,7 @@ void set_input_nodes(Cell* pCell) {
 		}
 	}
 	else if (PhysiCell::parameters.ints("simulation_mode") == 1)
-	{	
+	{
 		// double inhibition - two drugs are present - we have 4 cell strains 
 
 		std::string drug1_name = microenvironment.density_names[1];

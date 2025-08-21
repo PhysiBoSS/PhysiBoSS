@@ -151,7 +151,7 @@
 			<phenotype>
 				<cycle code="5" name="live_cells_cycle_model">  
 					<phase_transition_rates units="1/min">
-						<rate start_index="0" end_index="0" fixed_duration="false">0.0005‬51</rate>
+						<rate start_index="0" end_index="0" fixed_duration="false">0.000551</rate>
 					</phase_transition_rates>
 				</cycle>
 				

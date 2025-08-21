@@ -33,7 +33,8 @@ parser.add_argument("--replicates", default=1, type=int, help="Number of replica
 
 # example usage (to obtain the setup for the showcasing project in my master thesis):
 # python3 addons/drugsims/physiboss_drugsim.py -p prostate --cell_line LNCaP -d Ipatasertib,Afatinib,Ulixertinib,Luminespib,Selumetinib,Pictilisib --mode both --drug-concs IC10 IC30 IC50 IC70 IC90 --replicates 10 -cl True
-# python3 ./sample_projects_intracellular/boolean/prostate_v2nova/scripts/physiboss_drugsim.py -p prostate_v2nova --cell_line LNCaP -d Ipatasertib,Afatinib -r 0,0.5,1 --mode both --drug-concs IC50 -cl True
+# python3 ./sample_projects_intracellular/boolean/prostate/scripts/physiboss_drugsim.py -p prostate --cell_line LNCaP -d Ipatasertib,Afatinib -r 0,0.5,1 --mode both --drug-concs IC50 -cl True
+# python3 ./sample_projects_intracellular/boolean/prostate/scripts/physiboss_drugsim.py -p prostate --cell_line LNCaP -d Pictilisib,Luminespib --mode both --drug-concs IC90
 args = parser.parse_args()
 #%% Process Arguments
 
@@ -109,7 +110,7 @@ drugs=args.drugs
 drug_list = str(drugs.replace (" ", "").replace(",", ", ")).split(", ")
 print("Drugs to be administered: "+str(drug_list).replace("[", "").replace("]","").replace("'",""))
 # convert druglist into node-list
-if (project == "prostate_v2nova") :
+if (project == "prostate") :
     node_list = [drug_node_pairs_prostate.get(item,item)  for item in drug_list]
 else :
     node_list = [drug_node_pairs_AGS.get(item,item)  for item in drug_list]
@@ -117,8 +118,9 @@ else :
 
 # specify boolean model path
 #input_cond = args.input_cond
-bool_model_path_dir = "sample_projects_intracellular/boolean/prostate_v2nova/config/boolean_network"
-if (project == "prostate_v2nova") :
+# bool_model_path_dir = "sample_projects_intracellular/boolean/prostate/config/boolean_network"
+bool_model_path_dir = "{}/{}/{}/{}".format("sample_projects_intracellular", project, "config", "boolean_network")
+if (project == "prostate") :
     bool_model_filename = cell_line + "_mut_RNA_00"
 else:
     bool_model_filename = cell_line
@@ -128,9 +130,8 @@ bool_model = "{}/{}".format(bool_model_path_dir, bool_model_filename)
 node_list_1 = [x.split(", ") for x in node_list]
 
 # set drug sensitivity path
-# drug_csv_path =  "{}/{}/{}/{}_{}".format("sample_projects_intracellular/boolean", project, "config", project,"drug_sensitivity.csv")
-drug_csv_path = "sample_projects_intracellular/boolean/prostate_v2nova/config/prostate_drug_sensitivity.csv"
-# drug_csv_path = "../config/prostate_v2nova/prostate_drug_sensitivity.csv"
+drug_csv_path =  "{}/{}/{}/{}_{}".format("sample_projects_intracellular/boolean", project, "config", project,"drug_sensitivity.csv")
+# drug_csv_path = "sample_projects_intracellular/boolean/prostate/config/prostate_drug_sensitivity.csv"
 drug_dataframe = pd.read_csv(drug_csv_path)
 
 # create two list containing the value and the name of the chosen drug resistance levels 
@@ -429,9 +430,11 @@ def add_drug_to_xml(drug, drug_concs, rest, path_to_xml, xml_output_path, model_
     # set the new bnd and cfg files 
     bnd_file = user_parameters.find('bnd_file') 
     # this path is for later when i have in the makefile saved where the files are 
-    bnd_file.text = "{}/{}/{}/{}_{}.{}".format(".", "config", "boolean_network", model_name, "all_nodes", "bnd")
+    # bnd_file.text = "{}/{}/{}/{}_{}.{}".format(".", "config", "boolean_network", model_name, "all_nodes", "bnd")
+    bnd_file.text = "{}/{}/{}/{}_{}.{}".format(".", "config", "boolean_network", "LNCaP_mut_RNA_00_all_nodes", "all_nodes", "bnd")    
     cfg_file = user_parameters.find('cfg_file') 
-    cfg_file.text = "{}/{}/{}/{}_{}.{}".format(".", "config", "boolean_network", model_name, "all_nodes", "cfg")
+    # cfg_file.text = "{}/{}/{}/{}_{}.{}".format(".", "config", "boolean_network", model_name, "all_nodes", "cfg")
+    cfg_file.text = "{}/{}/{}/{}_{}.{}".format(".", "config", "boolean_network", "LNCaP_mut_RNA_00_all_nodes", "all_nodes", "cfg")
 
     # set the chosen simulation mode 
     simulation_mode = user_parameters.find("simulation_mode")
@@ -455,11 +458,11 @@ def add_project_to_makefile(project_name, makefile_path):
         make_string = ""
         line_count = 11
         for line in buf:
-            if  "prostate_v2nova:" in line:
+            if  "prostate:" in line:
                 # save the following lines in a string
                 line_count = 0
             if line_count <= 10:
-                make_string = make_string + line.replace("prostate_v2nova", project_name)
+                make_string = make_string + line.replace("prostate", project_name)
                 line_count += 1
             if "template_BM:" in line:
                 line = make_string  + line 
@@ -498,7 +501,7 @@ def setup_drug_simulations(druglist, nodelist, bool_model_name, bool_model, proj
         # drug_levels = drug_levels_list
         drug_concs = drug_concs_list 
 
-    # create the project folder and copy the prostate_v2nova project files in it
+    # create the project folder and copy the prostate project files in it
     if not os.path.exists(project_path):
         shutil.copytree(prostate_path, project_path)
 
@@ -546,7 +549,7 @@ def setup_drug_simulations(druglist, nodelist, bool_model_name, bool_model, proj
 
     # delete created folders again 
     # shutil.rmtree(project_path)
-    # delete new .cfg and .bnd in the original prostate_v2nova folder 
+    # delete new .cfg and .bnd in the original prostate folder 
     os.remove("{}_{}.cfg".format(bool_model,"all_nodes"))
     os.remove("{}_{}.bnd".format(bool_model,"all_nodes"))
 
@@ -564,7 +567,7 @@ elif (mode == "both"):
     setup_drug_simulations(drug_list, node_list, bool_model_filename, bool_model, project_path, drug_rest_name_list, drug_concs, "single", simulation_list)
     setup_drug_simulations(drug_list, node_list, bool_model_filename, bool_model, project_path, drug_rest_name_list, drug_concs, "double", simulation_list)
 
-# modify the project Makefile - rename all prostate_v2nova to the project name 
+# modify the project Makefile - rename all prostate to the project name 
 project_makefile = project_path + "/Makefile"
 with open(project_makefile, "r") as input_makefile:
     buf = input_makefile.readlines()
@@ -580,8 +583,8 @@ with open(project_makefile, "w") as output_makefile:
 # add_project_to_makefile(project_name, makefile_path)
 
 # rename the main file 
-# original_main_path = "{}/{}-{}.{}".format(project_path, "main", project, "cpp")
-original_main_path = "sample_projects_intracellular/boolean/physiboss_drugsim_prostate_v2nova_LNCaP/main-prostate.cpp"
+original_main_path = "{}/{}-{}.{}".format(project_path, "main", project, "cpp")
+# original_main_path = "sample_projects_intracellular/boolean/physiboss_drugsim_prostate_LNCaP/main-prostate.cpp"
 new_main_path = "{}/{}-{}.{}".format(project_path, "main", project_name, "cpp")
 # os.rename(original_main_path, new_main_path)
 shutil.copy(original_main_path, new_main_path)
