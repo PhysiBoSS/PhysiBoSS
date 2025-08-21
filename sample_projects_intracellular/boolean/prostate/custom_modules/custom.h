@@ -29,8 +29,9 @@ void setup_tissue( void );
 void setup_tissue_resistant( void ); 
 
 void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt );
-void pre_update_intracellular(Cell* pCell, Phenotype& phenotype, double dt);
-void post_update_intracellular(Cell* pCell, Phenotype& phenotype, double dt);
+void custom_function( Cell* pCell, Phenotype& phenotype , double dt );
+void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt ); 
+void treatment_function ();
 
 // custom cell phenotype functions could go here 
 void tumor_cell_phenotype_with_signaling( Cell* pCell, Phenotype& phenotype, double dt );

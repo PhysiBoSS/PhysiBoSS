@@ -13,7 +13,7 @@ void update_custom_variables( Cell* pCell )
 			int index_drug_node = pCell->custom_data.find_variable_index(drug_name + "_node");
 			string drug_target = get_value(drug_targets, drug_name);
 			pCell->custom_data.variables.at(index_drug_conc).value = pCell->nearest_density_vector()[drug_index];
-			pCell->custom_data.variables.at(index_drug_node).value = pCell->boolean_network.get_node_value("anti_" + drug_target);
+			pCell->custom_data.variables.at(index_drug_node).value = pCell->phenotype.intracellular->get_boolean_variable_value("anti_" + drug_target);
 		}	
 	}
 }
@@ -31,12 +31,11 @@ void set_boolean_node (Cell* pCell, std::string drug_name, int drug_index, doubl
 			double random_num = (double) rand()/RAND_MAX;
 			if (random_num <= cell_inhibition) 
 			{
-			
-				pCell->boolean_network.set_node_value(node_name, 1);
+				pCell->phenotype.intracellular->set_boolean_variable_value(node_name, 1);
 			}
 			else 
 			{
-				pCell->boolean_network.set_node_value(node_name, 0);
+				pCell->phenotype.intracellular->set_boolean_variable_value(node_name, 0);
 			}
 			
 		}
@@ -93,8 +92,6 @@ void set_input_nodes(Cell* pCell) {
 
 void from_nodes_to_cell(Cell* pCell, Phenotype& phenotype, double dt)
 {
-	std::vector<bool>* nodes = pCell->boolean_network.get_nodes();
-	int bn_index;
 
 	// Prostate live model
 	// map apoptosis, proliferation and invasion values to agent-based model
@@ -106,7 +103,7 @@ void from_nodes_to_cell(Cell* pCell, Phenotype& phenotype, double dt)
 		int apoptosis_index = phenotype.death.find_death_model_index(PhysiCell_constants::apoptosis_death_model);
 		
 		// Update Apoptosis 
-		if(pCell->boolean_network.get_node_value("Apoptosis"))
+		if(pCell->phenotype.intracellular->get_boolean_variable_value("Apoptosis"))
 		{
 			// simple implementation, just lead immediately to death
 			// pCell->start_death(apoptosis_index);
@@ -116,7 +113,7 @@ void from_nodes_to_cell(Cell* pCell, Phenotype& phenotype, double dt)
 		}
 
 		// Update Adhesion
-		if( pCell->boolean_network.get_node_value("EMT"))
+		if( pCell->phenotype.intracellular->get_boolean_variable_value("EMT"))
 		{
 			// reduce cell-cell adhesion 
 			// pCell->evolve_coef_sigmoid( 
@@ -129,7 +126,7 @@ void from_nodes_to_cell(Cell* pCell, Phenotype& phenotype, double dt)
 
 		// Update pReference_live_phenotype for proliferation node 
 
-		if (pCell->boolean_network.get_node_value("Proliferation")) 
+		if (pCell->phenotype.intracellular->get_boolean_variable_value("Proliferation")) 
 		{
 			// multiplier implementation
 			//pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index) *= 2.5;
@@ -154,7 +151,7 @@ void from_nodes_to_cell(Cell* pCell, Phenotype& phenotype, double dt)
 
 
 		// Update Migration
-		if(pCell->boolean_network.get_node_value("Migration"))
+		if(pCell->phenotype.intracellular->get_boolean_variable_value("Migration"))
 		{ 
 			pCell->phenotype.motility.is_motile = true;
 		 	pCell->phenotype.motility.migration_speed = PhysiCell::parameters.doubles("migration_speed");
@@ -172,7 +169,7 @@ void from_nodes_to_cell(Cell* pCell, Phenotype& phenotype, double dt)
 
 
 		// Update Invasion
-		if(pCell->boolean_network.get_node_value("Invasion"))
+		if(pCell->phenotype.intracellular->get_boolean_variable_value("Invasion"))
 		{
 			// nothing happens for now 
 		}
@@ -184,25 +181,21 @@ void from_nodes_to_cell(Cell* pCell, Phenotype& phenotype, double dt)
 
 
 void boolean_model_interface_main (Cell* pCell, Phenotype& phenotype, double dt){
-    static int index_next_physiboss_run = pCell->custom_data.find_variable_index("next_physiboss_run");
-
+    
 	if( phenotype.death.dead == true )
 	{
 		pCell->functions.update_phenotype = NULL;
 		return;
 	}
+}
 
-	if (PhysiCell_globals.current_time >= pCell->custom_data.variables.at(index_next_physiboss_run).value)
-	{
-		set_input_nodes(pCell);
+void pre_update_intracellular(Cell* pCell, Phenotype& phenotype, double dt)
+{
+	set_input_nodes(pCell);
+}
 
-		pCell->boolean_network.run_maboss();
-		// Get noisy step size
-		double next_run_in = pCell->boolean_network.get_time_to_update();
-		pCell->custom_data.variables.at(index_next_physiboss_run).value = PhysiCell_globals.current_time + next_run_in;
-		
-		update_custom_variables(pCell);
-
-		from_nodes_to_cell(pCell, phenotype, dt);
-	}
+void post_update_intracellular(Cell* pCell, Phenotype& phenotype, double dt)
+{	
+	update_custom_variables(pCell);
+	from_nodes_to_cell(pCell, phenotype, dt);
 }

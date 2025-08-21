@@ -34,9 +34,6 @@ void create_cell_types( void )
 	cell_defaults.functions.volume_update_function = standard_volume_update_function;
 	cell_defaults.functions.update_velocity = standard_update_cell_velocity;
 	
-	cell_defaults.functions.pre_update_intracellular = pre_update_intracellular;
-	cell_defaults.functions.post_update_intracellular = post_update_intracellular;
-	
 	cell_defaults.functions.update_migration_bias = NULL; 
 	cell_defaults.functions.update_phenotype = tumor_cell_phenotype_with_signaling;
 	cell_defaults.functions.custom_cell_rule = NULL; 
@@ -63,19 +60,7 @@ void create_cell_types( void )
 	}
 
 	build_cell_definitions_maps(); 
-	
-	/*
-	   This intializes cell signal and response dictionaries 
-	*/
-
-	setup_signal_behavior_dictionaries();
-
-	/*
-	   This summarizes the setup. 
-	*/
-	
 	display_cell_definitions( std::cout ); 
-
 
 	return; 
 }
@@ -154,7 +139,12 @@ void setup_tissue( void )
 	Cell* pC;
 
 	std::vector<init_record> cells = read_init_file(parameters.strings("init_cells_filename"), ';', true);
-	
+	std::string bnd_file = PhysiCell::parameters.strings("bnd_file");
+	std::string cfg_file = PhysiCell::parameters.strings("cfg_file");
+	BooleanNetwork prostate_network;
+	double maboss_time_step = PhysiCell::parameters.doubles("maboss_time_step");
+	prostate_network.initialize_boolean_network(bnd_file, cfg_file, maboss_time_step);
+
 	for (int i = 0; i < cells.size(); i++)
 	{
 		float x = cells[i].x;
@@ -224,6 +214,10 @@ void setup_tissue( void )
 		// pC->phenotype.cycle.data.current_phase_index = phase;
 		pC->phenotype.cycle.data.elapsed_time_in_phase = elapsed_time;	
 		
+		pC->boolean_network = prostate_network;
+		pC->boolean_network.restart_nodes();
+		static int index_next_physiboss_run = pC->custom_data.find_variable_index("next_physiboss_run");
+		pC->custom_data.variables.at(index_next_physiboss_run).value = pC->boolean_network.get_time_to_update();
 		update_custom_variables(pC);
 	}
 

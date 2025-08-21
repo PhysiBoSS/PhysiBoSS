@@ -209,9 +209,15 @@
 				</secretion>
 
 				<molecular />	
+				<intracellular type="maboss">
+					<bnd_filename>./config/boolean_network/DU145_mut_RNA_00.bnd</bnd_filename>
+					<cfg_filename>./config/boolean_network/DU145_mut_RNA_00.cfg</cfg_filename>
+					<settings>
+						<intracellular_dt>10</intracellular_dt>
+					</settings>
+				</intracellular>
 			</phenotype>
 			<custom_data>
-				<next_physiboss_run units="dimensionless">10.</next_physiboss_run>
 				<motility_state>0</motility_state>
 			</custom_data>
 		</cell_definition>
@@ -233,9 +239,6 @@
 	
 		<cell_line type="string" units="">DU145</cell_line>
 
-		<bnd_file type="string" units="">./config/boolean_network/DU145_mut_RNA_00.bnd</bnd_file>
-		<cfg_file type="string" units="">./config/boolean_network/DU145_mut_RNA_00.cfg</cfg_file>
-		<maboss_time_step type="double" units="dimensionless">10.</maboss_time_step>
 		<init_cells_filename type="string" units="">./config/init.txt</init_cells_filename>
 
 		<simulation_mode type="int">-1</simulation_mode>

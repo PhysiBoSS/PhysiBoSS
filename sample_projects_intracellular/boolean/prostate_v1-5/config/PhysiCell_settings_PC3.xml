@@ -101,7 +101,7 @@
 	</parallel> 
 	
 	<save>
-		<folder>output_VCaP</folder>
+		<folder>output_PC3</folder>
 
 		<full_data>
 			<interval units="min">240</interval>
@@ -151,7 +151,7 @@
 			<phenotype>
 				<cycle code="5" name="live_cells_cycle_model">  
 					<phase_transition_rates units="1/min">
-						<rate start_index="0" end_index="0" fixed_duration="false">0.000235</rate>
+						<rate start_index="0" end_index="0" fixed_duration="false">0.0005269</rate>
 					</phase_transition_rates>
 				</cycle>
 				
@@ -209,15 +209,9 @@
 				</secretion>
 
 				<molecular />	
-				<intracellular type="maboss">
-					<bnd_filename>./config/boolean_network/VCaP_mut_RNA_00.bnd</bnd_filename>
-					<cfg_filename>./config/boolean_network/VCaP_mut_RNA_00.cfg</cfg_filename>
-					<settings>
-						<intracellular_dt>10</intracellular_dt>
-					</settings>
-				</intracellular>
 			</phenotype>
 			<custom_data>
+				<next_physiboss_run units="dimensionless">10.</next_physiboss_run>
 				<motility_state>0</motility_state>
 			</custom_data>
 		</cell_definition>
@@ -232,13 +226,16 @@
 
 		<!-- proliferation switch implementation -->
 		<transition_rate_multiplier type="double" units="">2</transition_rate_multiplier>
-		<base_transition_rate type="double" units="">0.000235</base_transition_rate>
+		<base_transition_rate type="double" units="">0.0005269</base_transition_rate>
 		
 		<!-- Apoptosis rate implementation -->
 		<apoptosis_rate_multiplier type="double" units="">5</apoptosis_rate_multiplier>
 	
-		<cell_line type="string" units="">VCaP</cell_line>
-		
+		<cell_line type="string" units="">PC3</cell_line>
+
+		<bnd_file type="string" units="">./config/boolean_network/PC3_mut_RNA_00.bnd</bnd_file>
+		<cfg_file type="string" units="">./config/boolean_network/PC3_mut_RNA_00.cfg</cfg_file>
+		<maboss_time_step type="double" units="dimensionless">10.</maboss_time_step>
 		<init_cells_filename type="string" units="">./config/init.txt</init_cells_filename>
 
 		<simulation_mode type="int">-1</simulation_mode>

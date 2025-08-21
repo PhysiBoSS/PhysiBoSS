@@ -113,25 +113,14 @@ void from_nodes_to_cell(Cell* pCell, Phenotype& phenotype, double dt)
 		}
 
 		// Update Adhesion
-		if( pCell->phenotype.intracellular->get_boolean_variable_value("EMT"))
-		{
-			// reduce cell-cell adhesion 
-			// pCell->evolve_coef_sigmoid( 
-			// 	pCell->boolean_network.get_node_value("EMT"), phenotype.mechanics.cell_cell_adhesion_strength, dt 
-			// );
-
-			//phenotype.mechanics.cell_cell_adhesion_strength = PhysiCell::parameters.doubles("homotypic_adhesion_max") * theta 
-		}
-
+		// if( pCell->phenotype.intracellular->get_boolean_variable_value("EMT")){ // nothing happens for now }
 
 		// Update pReference_live_phenotype for proliferation node 
-
 		if (pCell->phenotype.intracellular->get_boolean_variable_value("Proliferation")) 
 		{
 			// multiplier implementation
 			//pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index) *= 2.5;
 			//std::cout << "Rate up! " << std::endl;
-
 
 			//switch implementation
 			double high_transition_rate = PhysiCell::parameters.doubles("base_transition_rate") * PhysiCell::parameters.doubles("transition_rate_multiplier");
@@ -143,23 +132,19 @@ void from_nodes_to_cell(Cell* pCell, Phenotype& phenotype, double dt)
 			//pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index) *= 0.4;
 			//std::cout << "Rate down! " << std::endl;
 
-
 			//switch implementation 
 			pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index) = PhysiCell::parameters.doubles("base_transition_rate");
 		}
 
-
-
 		// Update Migration
 		if(pCell->phenotype.intracellular->get_boolean_variable_value("Migration"))
-		{ 
+		{
 			pCell->phenotype.motility.is_motile = true;
 		 	pCell->phenotype.motility.migration_speed = PhysiCell::parameters.doubles("migration_speed");
 			pCell->phenotype.motility.migration_bias = PhysiCell::parameters.doubles("migration_bias");
 			pCell->phenotype.motility.persistence_time = PhysiCell::parameters.doubles("persistence");
 
-			// pCell->evolve_coef(pCell->boolean_network.get_node_value("Migration"),	phenotype.motility.migration_speed, dt 
-			// );
+			// pCell->evolve_coef(pCell->phenotype.intracellular->get_boolean_variable_value("Migration"),	phenotype.motility.migration_speed, dt );
 			// pCell->phenotype.motility.migration_speed = PhysiCell::parameters.doubles("max_motility_speed") * migration_coeff
 		}
 		else 
@@ -167,18 +152,12 @@ void from_nodes_to_cell(Cell* pCell, Phenotype& phenotype, double dt)
 			pCell->phenotype.motility.is_motile = false;
 		}
 
-
 		// Update Invasion
-		if(pCell->phenotype.intracellular->get_boolean_variable_value("Invasion"))
-		{
-			// nothing happens for now 
-		}
-
+		// if(pCell->phenotype.intracellular->get_boolean_variable_value("Invasion")){// nothing happens for now }
 	}
 
 	pCell->set_internal_uptake_constants(dt);
 }
-
 
 void boolean_model_interface_main (Cell* pCell, Phenotype& phenotype, double dt){
     
