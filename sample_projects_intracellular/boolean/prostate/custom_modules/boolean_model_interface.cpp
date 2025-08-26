@@ -6,14 +6,22 @@ void update_custom_variables( Cell* pCell )
 	// first density is oxygen - shouldn't be changed: index from 1
 	for (int i = 0; i < microenvironment.number_of_densities(); i++) 
 	{
-		std::string drug_name = microenvironment.density_names[i];
+		const std::string& drug_name = microenvironment.density_names[i];
 		if (drug_name != "oxygen") {
 			int drug_index = microenvironment.find_density_index(drug_name);
-			int index_drug_conc = pCell->custom_data.find_variable_index(drug_name + "_concentration");
-			int index_drug_node = pCell->custom_data.find_variable_index(drug_name + "_node");
-			string drug_target = get_value(drug_targets, drug_name);
+			
+			// Cache the string operations
+			std::string conc_var_name = drug_name + "_concentration";
+			std::string node_var_name = drug_name + "_node";
+			
+			int index_drug_conc = pCell->custom_data.find_variable_index(conc_var_name);
+			int index_drug_node = pCell->custom_data.find_variable_index(node_var_name);
+			
+			const string& drug_target = get_value(drug_targets, drug_name);
+			std::string anti_target = "anti_" + drug_target;
+			
 			pCell->custom_data.variables.at(index_drug_conc).value = pCell->nearest_density_vector()[drug_index];
-			pCell->custom_data.variables.at(index_drug_node).value = pCell->phenotype.intracellular->get_boolean_variable_value("anti_" + drug_target);
+			pCell->custom_data.variables.at(index_drug_node).value = pCell->phenotype.intracellular->get_boolean_variable_value(anti_target);
 		}	
 	}
 }

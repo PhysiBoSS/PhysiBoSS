@@ -250,8 +250,8 @@
 				</transformation_rates>
 			</cell_transformations>
 			<intracellular type="maboss">
-				<bnd_filename>./config/boolean_network/LNCaP_mut_RNA_00.bnd</bnd_filename>
-				<cfg_filename>./config/boolean_network/LNCaP_mut_RNA_00.cfg</cfg_filename>
+				<bnd_filename>./config/boolean_network/LNCaP_mut_RNA_00_all_nodes.bnd</bnd_filename>
+				<cfg_filename>./config/boolean_network/LNCaP_mut_RNA_00_all_nodes.cfg</cfg_filename>
 				<settings>
 					<intracellular_dt>6.0</intracellular_dt>
 					<time_stochasticity>0.0</time_stochasticity>
@@ -283,7 +283,7 @@
 <initial_conditions>
 	<cell_positions enabled="true" type="csv">
 		<folder>./config</folder>
-		<filename>init.txt</filename>
+		<filename>init2.csv</filename>
 	</cell_positions>
 </initial_conditions>
 
@@ -313,13 +313,13 @@
 	<Pictilisib_xmid units="ln(uM)" type="double">3.85680179514967</Pictilisib_xmid>
 	<Pictilisib_maxc units="uM" type="double">10.0</Pictilisib_maxc>
 	<prop_drug_resistant_Pictilisib type="double" units="dimensionless">0.0</prop_drug_resistant_Pictilisib>
-	<drug_concentration_Pictilisib type="string" units="dimensionless">IC90</drug_concentration_Pictilisib>
+	<drug_concentration_Pictilisib type="string" units="dimensionless">0</drug_concentration_Pictilisib> <!-- IC90 -->
 	<Luminespib_uptake_rate type="double" units="">0.0025</Luminespib_uptake_rate>
 	<Luminespib_secretion_rate type="double" units="fg/cell/min">0.1</Luminespib_secretion_rate>
 	<Luminespib_scal units="dimensionless" type="double">2.30653618101248</Luminespib_scal>
 	<Luminespib_xmid units="ln(uM)" type="double">7.02401783651853</Luminespib_xmid>
 	<Luminespib_maxc units="uM" type="double">0.25</Luminespib_maxc>
 	<prop_drug_resistant_Luminespib type="double" units="dimensionless">0.0</prop_drug_resistant_Luminespib>
-	<drug_concentration_Luminespib type="string" units="dimensionless">IC90</drug_concentration_Luminespib>
+	<drug_concentration_Luminespib type="string" units="dimensionless">0</drug_concentration_Luminespib> <!-- IC90 -->
 </user_parameters>
 </PhysiCell_settings>

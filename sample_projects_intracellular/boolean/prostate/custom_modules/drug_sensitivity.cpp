@@ -79,9 +79,9 @@ int get_value(const vector<pair<string, int>>& dict, const string& key) {
 
 
 vector<double> get_drug_sensitivity_values (string drug_name) {
-    static double max_conc = parameters.doubles(drug_name+"_maxc");
-    static double xmid = parameters.doubles(drug_name+"_xmid");
-    static double scale = parameters.doubles(drug_name+"_scal");
+    double max_conc = parameters.doubles(drug_name+"_maxc");
+    double xmid = parameters.doubles(drug_name+"_xmid");
+    double scale = parameters.doubles(drug_name+"_scal");
 
     return {max_conc, xmid, scale};
 }
