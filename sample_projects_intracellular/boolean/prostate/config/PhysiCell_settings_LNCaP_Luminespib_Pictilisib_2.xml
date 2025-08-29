@@ -22,7 +22,7 @@
 	</overall>
 
 	<parallel>
-		<omp_num_threads>4</omp_num_threads>
+		<omp_num_threads>1</omp_num_threads>
 	</parallel>
 
 	<save>

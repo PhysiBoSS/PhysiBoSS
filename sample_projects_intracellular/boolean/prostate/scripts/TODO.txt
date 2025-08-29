@@ -1,0 +1,5 @@
+- check processors # and race condition (?)
+- check double inhibition values
+- redo setup python script using v.2.2.3 (rules)
+-- where to store cell lines info and drug sensitivity functions (python or Cpp?)
+- check new structure of BooleanModelInterface
