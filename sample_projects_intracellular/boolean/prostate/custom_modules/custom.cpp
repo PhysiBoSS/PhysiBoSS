@@ -1,6 +1,10 @@
 
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+#include <sstream>
 #include "./custom.h"
+#include "../BioFVM/BioFVM.h" 
 
 /**
  *	\main prostate custom
@@ -9,8 +13,8 @@
  *	\details Modules needed for the prostate example. 
  *
  *
- *	\date 14/12/2020
- *	\author Annika Meert, BSC-CNS, with code previously developed by Arnau Montagud, Gerard Pradas and Miguel Ponce de Leon, BSC-CNS
+ *	\date 20/08/2025
+ *	\author Arnau Montagud, Annika Meert, Gerard Pradas and Miguel Ponce de Leon, BSC-CNS
  */
 
 // declare cell definitions here 
@@ -22,7 +26,11 @@ void create_cell_types( void )
 	// that future division and other events are still not identical 
 	// for all runs 
 	
-	SeedRandom( parameters.ints("random_seed") ); // or specify a seed here 
+	// set the random seed 
+	if (parameters.ints.find_index("random_seed") != -1)
+	{
+		SeedRandom(parameters.ints("random_seed"));
+	}
 	
 	/* 
 	   Put any modifications to default cell definition here if you 
@@ -31,39 +39,46 @@ void create_cell_types( void )
 	   This is a good place to set default functions. 
 	*/ 
 
+	initialize_default_cell_definition(); 
+	cell_defaults.phenotype.secretion.sync_to_microenvironment( &microenvironment ); 
+
 	cell_defaults.functions.volume_update_function = standard_volume_update_function;
 	cell_defaults.functions.update_velocity = standard_update_cell_velocity;
-	
-	cell_defaults.functions.pre_update_intracellular = pre_update_intracellular;
-	cell_defaults.functions.post_update_intracellular = post_update_intracellular;
-	
+
+	// cell_defaults.functions.pre_update_intracellular = pre_update_intracellular;
+	// cell_defaults.functions.post_update_intracellular = post_update_intracellular;
+
 	cell_defaults.functions.update_migration_bias = NULL; 
-	cell_defaults.functions.update_phenotype = tumor_cell_phenotype_with_signaling;
+	cell_defaults.functions.update_phenotype = NULL; // tumor_cell_phenotype_with_signaling;
 	cell_defaults.functions.custom_cell_rule = NULL; 
+	cell_defaults.functions.contact_function = NULL; 
 	
 	cell_defaults.functions.add_cell_basement_membrane_interactions = NULL; 
 	cell_defaults.functions.calculate_distance_to_membrane = NULL; 
 	
-	cell_defaults.functions.set_orientation = NULL;
+	// cell_defaults.functions.set_orientation = NULL;
 
 	/*
 	   This parses the cell definitions in the XML config file. 
 	*/
+
 	initialize_cell_definitions_from_pugixml();
 
-	cell_defaults.phenotype.secretion.sync_to_microenvironment( &microenvironment );
+	/*
+	   This builds the map of cell definitions and summarizes the setup. 
+	*/
 
 	// set molecular properties for each drug defined in PhysiCell_settings.xml
 	// starts with the second density because the first density is oxygen
-	for (int i = 0; i < microenvironment.number_of_densities(); i++) 
-	{
-		if (microenvironment.density_names[i] != "oxygen") {
-			cell_defaults.phenotype.molecular.fraction_released_at_death[i] = 0.0;
-		}
-	}
+	// for (int i = 0; i < microenvironment.number_of_densities(); i++) 
+	// {
+	// 	if (microenvironment.density_names[i] != "oxygen") {
+	// 		cell_defaults.phenotype.molecular.fraction_released_at_death[i] = 0.0;
+	// 	}
+	// }
 
 	build_cell_definitions_maps(); 
-	
+
 	/*
 	   This intializes cell signal and response dictionaries 
 	*/
@@ -71,11 +86,38 @@ void create_cell_types( void )
 	setup_signal_behavior_dictionaries();
 
 	/*
-	   This summarizes the setup. 
+       Cell rule definitions 
 	*/
-	
-	display_cell_definitions( std::cout ); 
 
+	setup_cell_rules(); 
+
+	/* 
+	   Put any modifications to individual cell definitions here. 
+	   
+	   This is a good place to set custom functions. 
+	*/ 
+
+	cell_defaults.functions.pre_update_intracellular = pre_update_intracellular;
+	cell_defaults.functions.post_update_intracellular = post_update_intracellular;
+	
+	cell_defaults.functions.update_phenotype = phenotype_function; 
+	cell_defaults.functions.custom_cell_rule = custom_function; 
+	cell_defaults.functions.contact_function = contact_function; 
+
+	Cell_Definition* pCD = find_cell_definition( "default");
+
+	pCD->functions.pre_update_intracellular = pre_update_intracellular;
+	pCD->functions.post_update_intracellular = post_update_intracellular;
+	pCD->functions.custom_cell_rule = custom_function; 
+	pCD->functions.contact_function = contact_function; 
+	pCD->functions.update_velocity = standard_update_cell_velocity; 
+
+	
+	/*
+	   This builds the map of cell definitions and summarizes the setup. 
+	*/
+
+	display_cell_definitions( std::cout ); 
 
 	return; 
 }
@@ -88,57 +130,55 @@ double get_decay_rate(double half_life){
 
 void setup_microenvironment( void )
 {
-	// make sure to override and go back to 2D 
-	if( default_microenvironment_options.simulate_2D == true )
-	{
-		std::cout << "Warning: overriding XML config option and setting to 3D!" << std::endl; 
-		default_microenvironment_options.simulate_2D = false; 
-	}	
+	// // make sure to override and go back to 2D 
+	// if( default_microenvironment_options.simulate_2D == true )
+	// {
+	// 	std::cout << "Warning: overriding XML config option and setting to 3D!" << std::endl; 
+	// 	default_microenvironment_options.simulate_2D = false; 
+	// }	
 
 	// set intial conditions and dirichlet boundary conditions for the drugs; vector already contains the condition for oxygen
-	double oxygen_condition = 160.0;
-	vector<double> condition_vector = {oxygen_condition};
-	vector<bool> activation_vector {1};
-	vector<double> decay_vector {0.1};
-	for (int i = 0; i < microenvironment.number_of_densities(); i++)
-	{
-		std::string drug_name = microenvironment.density_names[i];
-		if (drug_name != "oxygen") {
-			// int current_drug_level= parameters.ints("current_concentration_level_" + drug_name);
-			// int total_drug_levels = parameters.ints("total_concentration_levels");
-			string cell_line = parameters.strings("cell_line");
-			int simulation_mode = parameters.ints("simulation_mode");
+	// double oxygen_condition = 160.0;
+	// vector<double> condition_vector = {oxygen_condition};
+	// vector<bool> activation_vector {1};
+	// vector<double> decay_vector {0.1};
+	// for (int i = 0; i < microenvironment.number_of_densities(); i++)
+	// {
+	// 	std::string drug_name = microenvironment.density_names[i];
+	// 	if (drug_name != "oxygen") {
+	// 		// int current_drug_level= parameters.ints("current_concentration_level_" + drug_name);
+	// 		// int total_drug_levels = parameters.ints("total_concentration_levels");
+	// 		string cell_line = parameters.strings("cell_line");
+	// 		int simulation_mode = parameters.ints("simulation_mode");
 
-			//drug_conc can either be an IC value or an actual drug concentration
-			string drug_conc = parameters.strings("drug_concentration_" + drug_name);
-			double drug_concentration;
-			// check if drug_conc contains the string "IC"
-			if(drug_conc.find("IC") != string::npos) {
-				drug_concentration = get_drug_concentration_from_IC(cell_line, drug_name, drug_conc, simulation_mode);
-			
-			}
-			else {
-				drug_concentration = stod(drug_conc);
-				}
-			
-			// double drug_concentration = get_drug_concentration_from_level(cell_line, drug_name, current_drug_level, total_drug_levels, simulation_mode);
-			condition_vector.push_back(drug_concentration);
-			activation_vector.push_back(1);
+	// 		//drug_conc can either be an IC value or an actual drug concentration
+	// 		string drug_conc = parameters.strings("drug_concentration_" + drug_name);
+	// 		double drug_concentration;
+	// 		// check if drug_conc contains the string "IC"
+	// 		if(drug_conc.find("IC") != string::npos) {
+	// 			drug_concentration = get_drug_concentration_from_IC(cell_line, drug_name, drug_conc, simulation_mode);
+	// 		}
+	// 		else {
+	// 				drug_concentration = stod(drug_conc);
+	// 			}
+	// 		// double drug_concentration = get_drug_concentration_from_level(cell_line, drug_name, current_drug_level, total_drug_levels, simulation_mode);
+	// 		condition_vector.push_back(drug_concentration);
+	// 		activation_vector.push_back(1);
 
-			// double half_life = get_value(half_lives, drug_name);
-			// double decay_rate = get_decay_rate(half_life);
-			// decay_vector.push_back(decay_rate);
+	// 		// double half_life = get_value(half_lives, drug_name);
+	// 		// double decay_rate = get_decay_rate(half_life);
+	// 		// decay_vector.push_back(decay_rate);
 
-		}
-	}
-	default_microenvironment_options.Dirichlet_activation_vector = activation_vector;
-	default_microenvironment_options.Dirichlet_condition_vector = condition_vector;
-	default_microenvironment_options.Dirichlet_zmax_values = condition_vector;
-	default_microenvironment_options.Dirichlet_zmin_values = condition_vector;
-	default_microenvironment_options.Dirichlet_ymax_values = condition_vector;
-	default_microenvironment_options.Dirichlet_ymin_values = condition_vector;
-	default_microenvironment_options.Dirichlet_xmax_values = condition_vector;
-	default_microenvironment_options.Dirichlet_xmin_values = condition_vector;
+	// 	}
+	// }
+	// default_microenvironment_options.Dirichlet_activation_vector = activation_vector;
+	// default_microenvironment_options.Dirichlet_condition_vector = condition_vector;
+	// default_microenvironment_options.Dirichlet_zmax_values = condition_vector;
+	// default_microenvironment_options.Dirichlet_zmin_values = condition_vector;
+	// default_microenvironment_options.Dirichlet_ymax_values = condition_vector;
+	// default_microenvironment_options.Dirichlet_ymin_values = condition_vector;
+	// default_microenvironment_options.Dirichlet_xmax_values = condition_vector;
+	// default_microenvironment_options.Dirichlet_xmin_values = condition_vector;
 
 
 	// initialize BioFVM 
@@ -151,10 +191,18 @@ void setup_microenvironment( void )
 
 void setup_tissue( void )
 {
+	// place a cluster of tumor cells at the center 
+	load_cells_from_pugixml();
+
+}
+
+//  old setup_tissue function, needs to be updated to new structure
+void setup_tissue_resistant( void )
+{
 	Cell* pC;
 
 	std::vector<init_record> cells = read_init_file(parameters.strings("init_cells_filename"), ';', true);
-	
+
 	for (int i = 0; i < cells.size(); i++)
 	{
 		float x = cells[i].x;
@@ -219,9 +267,7 @@ void setup_tissue( void )
 		}
  
 		pC->assign_position( x, y, z );
-		// pC->set_total_volume(sphere_volume_from_radius(radius));
 		
-		// pC->phenotype.cycle.data.current_phase_index = phase;
 		pC->phenotype.cycle.data.elapsed_time_in_phase = elapsed_time;	
 		
 		update_custom_variables(pC);
@@ -230,7 +276,18 @@ void setup_tissue( void )
 	return; 
 }
 
-// custom cell phenotype function to run PhysiBoSS when is needed
+void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
+{ return; }
+
+void custom_function( Cell* pCell, Phenotype& phenotype , double dt )
+{ return; } 
+
+void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt )
+{ return; } 
+
+void treatment_function () 
+{ return; }
+
 void tumor_cell_phenotype_with_signaling( Cell* pCell, Phenotype& phenotype, double dt)
 {
 	update_cell_and_death_parameters_O2_based(pCell, phenotype, dt);
@@ -242,74 +299,76 @@ void tumor_cell_phenotype_with_signaling( Cell* pCell, Phenotype& phenotype, dou
 	boolean_model_interface_main (pCell, phenotype, dt);
 }
 
-std::vector<std::string> prolif_apoptosis_coloring( Cell* pCell )
-{
-	std::vector<std::string> output;
-	if (pCell->phenotype.cycle.current_phase().code == PhysiCell_constants::apoptosis_death_model)
-	{
-		//apoptotic cells are colored red
-		output = {"crimson", "black","darkred", "darkred"};
-	}
+// coloring function, not used
 
-	else if (pCell->phenotype.cycle.current_phase().code == PhysiCell_constants::necrosis_death_model)
-	{
-		//necrotic cells are colored brown
-		output = {"peru", "black","saddlebrown", "saddlebrown"};
-	}
+// std::vector<std::string> prolif_apoptosis_coloring( Cell* pCell )
+// {
+// 	std::vector<std::string> output;
+// 	if (pCell->phenotype.cycle.current_phase().code == PhysiCell_constants::apoptosis_death_model)
+// 	{
+// 		//apoptotic cells are colored red
+// 		output = {"crimson", "black","darkred", "darkred"};
+// 	}
 
-	else if (PhysiCell::parameters.ints("simulation_mode") == 0) 
-	{
-		std::string drug_name = microenvironment.density_names[1];
-		if (pCell->type_name == drug_name + "_sensitive")
-		{
-			//drug sensitive living cells are colored blue
-			output = {"deepskyblue", "black", "darkblue", "darkblue"};
-		} 
-		else 
-		{
-			//drug resistant living cells are colored green
-			output = {"limegreen", "black", "darkgreen", "darkgreen"};
-		}
-	}
-	else if (PhysiCell::parameters.ints("simulation_mode") == 1) 
-	{
-		// // color living cells just in one color 
-		// output = {"limegreen", "black", "darkgreen", "darkgreen"};
+// 	else if (pCell->phenotype.cycle.current_phase().code == PhysiCell_constants::necrosis_death_model)
+// 	{
+// 		//necrotic cells are colored brown
+// 		output = {"peru", "black","saddlebrown", "saddlebrown"};
+// 	}
 
-		// In case we want to color all 4 strains differently:
-		// double inhibitions --> 4 cell strains 
-		std::string drug1_name = microenvironment.density_names[1];
-		std::string drug2_name = microenvironment.density_names[2]; 
-		if (pCell->type_name == drug1_name + "_sensitive")
-		{
-			//cells that are sensitive to both drugs are colored blue
-			output = {"deepskyblue", "black", "darkblue", "darkblue"};
-		}
-		else if (pCell->type_name == drug2_name + "_resistant")
-		{
-			// cells that are just sensitive to the first drug 
-			output = {"limegreen", "black", "darkgreen", "darkgreen"};
+// 	else if (PhysiCell::parameters.ints("simulation_mode") == 0) 
+// 	{
+// 		std::string drug_name = microenvironment.density_names[1];
+// 		if (pCell->type_name == drug_name + "_sensitive")
+// 		{
+// 			//drug sensitive living cells are colored blue
+// 			output = {"deepskyblue", "black", "darkblue", "darkblue"};
+// 		} 
+// 		else 
+// 		{
+// 			//drug resistant living cells are colored green
+// 			output = {"limegreen", "black", "darkgreen", "darkgreen"};
+// 		}
+// 	}
+// 	else if (PhysiCell::parameters.ints("simulation_mode") == 1) 
+// 	{
+// 		// // color living cells just in one color 
+// 		// output = {"limegreen", "black", "darkgreen", "darkgreen"};
 
-		}
-		else if (pCell->type_name == drug2_name + "_sensitive")
-		{
-			// cells are just sensitive to the second drug
-			output = {"gold", "black", "orange", "orange"};
-		}
-		else 
-		{
-			// cells aren't sensitive to any drug
-			output = {"mediumorchid", "black", "mediumpurple", "mediumpurple"};
-		}
-	}
-	else 
-	{
-		// no drug simulation - living cells are colored green
-		output = {"limegreen", "black", "darkgreen", "darkgreen"};
-	}
-	return output;
+// 		// In case we want to color all 4 strains differently:
+// 		// double inhibitions --> 4 cell strains 
+// 		std::string drug1_name = microenvironment.density_names[1];
+// 		std::string drug2_name = microenvironment.density_names[2]; 
+// 		if (pCell->type_name == drug1_name + "_sensitive")
+// 		{
+// 			//cells that are sensitive to both drugs are colored blue
+// 			output = {"deepskyblue", "black", "darkblue", "darkblue"};
+// 		}
+// 		else if (pCell->type_name == drug2_name + "_resistant")
+// 		{
+// 			// cells that are just sensitive to the first drug 
+// 			output = {"limegreen", "black", "darkgreen", "darkgreen"};
 
-}
+// 		}
+// 		else if (pCell->type_name == drug2_name + "_sensitive")
+// 		{
+// 			// cells are just sensitive to the second drug
+// 			output = {"gold", "black", "orange", "orange"};
+// 		}
+// 		else 
+// 		{
+// 			// cells aren't sensitive to any drug
+// 			output = {"mediumorchid", "black", "mediumpurple", "mediumpurple"};
+// 		}
+// 	}
+// 	else 
+// 	{
+// 		// no drug simulation - living cells are colored green
+// 		output = {"limegreen", "black", "darkgreen", "darkgreen"};
+// 	}
+// 	return output;
+
+// }
 
 // ***********************************************************
 // * NOTE: Funtion to read init files created with PhysiBoSS *

@@ -6,20 +6,29 @@ void update_custom_variables( Cell* pCell )
 	// first density is oxygen - shouldn't be changed: index from 1
 	for (int i = 0; i < microenvironment.number_of_densities(); i++) 
 	{
-		std::string drug_name = microenvironment.density_names[i];
+		const std::string& drug_name = microenvironment.density_names[i];
 		if (drug_name != "oxygen") {
 			int drug_index = microenvironment.find_density_index(drug_name);
-			int index_drug_conc = pCell->custom_data.find_variable_index(drug_name + "_concentration");
-			int index_drug_node = pCell->custom_data.find_variable_index(drug_name + "_node");
-			string drug_target = get_value(drug_targets, drug_name);
+			
+			// Cache the string operations
+			std::string conc_var_name = drug_name + "_concentration";
+			std::string node_var_name = drug_name + "_node";
+			
+			int index_drug_conc = pCell->custom_data.find_variable_index(conc_var_name);
+			int index_drug_node = pCell->custom_data.find_variable_index(node_var_name);
+			
+			const string& drug_target = get_value(drug_targets, drug_name);
+			std::string anti_target = "anti_" + drug_target;
+			
 			pCell->custom_data.variables.at(index_drug_conc).value = pCell->nearest_density_vector()[drug_index];
-			pCell->custom_data.variables.at(index_drug_node).value = pCell->phenotype.intracellular->get_boolean_variable_value("anti_" + drug_target);
+			pCell->custom_data.variables.at(index_drug_node).value = pCell->phenotype.intracellular->get_boolean_variable_value(anti_target);
 		}	
 	}
 }
 
 
-void set_boolean_node (Cell* pCell, std::string drug_name, int drug_index, double threshold) {
+// void set_boolean_node (Cell* pCell, std::string drug_name, int drug_index, double threshold) {
+void set_boolean_node (Cell* pCell, std::string drug_name, int drug_index) {
 	if (drug_index != -1)
 		{
 			string drug_target = get_value(drug_targets, drug_name);
@@ -49,42 +58,47 @@ void set_input_nodes(Cell* pCell) {
 
 		std::string drug_name = microenvironment.density_names[1];
 		int drug_index = microenvironment.find_density_index(drug_name);
-		int drug_threshold = PhysiCell::parameters.doubles( "threshold_" + drug_name);
+		// int drug_threshold = PhysiCell::parameters.doubles( "threshold_" + drug_name);
 
 		if (pCell->type_name == drug_name + "_sensitive")
 		{
 			// cell is sensitive to the drug -> set boolean node
-			set_boolean_node(pCell, drug_name, drug_index, drug_threshold);
+			// set_boolean_node(pCell, drug_name, drug_index, drug_threshold);
+			set_boolean_node(pCell, drug_name, drug_index);
 		}
 	}
 	else if (PhysiCell::parameters.ints("simulation_mode") == 1)
-	{	
+	{
 		// double inhibition - two drugs are present - we have 4 cell strains 
 
 		std::string drug1_name = microenvironment.density_names[1];
 		int drug1_index = microenvironment.find_density_index(drug1_name);
-		int drug1_threshold = PhysiCell::parameters.doubles( "threshold_" + drug1_name);
+		// int drug1_threshold = PhysiCell::parameters.doubles( "threshold_" + drug1_name);
 
 		std::string drug2_name = microenvironment.density_names[2];
 		int drug2_index = microenvironment.find_density_index(drug2_name);
-		int drug2_threshold = PhysiCell::parameters.doubles( "threshold_" + drug2_name);
+		// int drug2_threshold = PhysiCell::parameters.doubles( "threshold_" + drug2_name);
 	
-		if (pCell->type_name == drug1_name + "_sensitive")
-		{	
+		// if (pCell->type_name == drug1_name + "_sensitive")
+		// {	
 			// cell is sensitive to both drugs
-			set_boolean_node(pCell, drug1_name, drug1_index, drug1_threshold);
-			set_boolean_node(pCell, drug2_name, drug2_index, drug2_threshold);
-		}
-		else if (pCell->type_name == drug2_name + "_resistant")
-		{
+			// set_boolean_node(pCell, drug1_name, drug1_index, drug1_threshold);
+			// set_boolean_node(pCell, drug2_name, drug2_index, drug2_threshold);
+			set_boolean_node(pCell, drug1_name, drug1_index);
+			set_boolean_node(pCell, drug2_name, drug2_index);
+		// }
+		// else if (pCell->type_name == drug2_name + "_resistant")
+		// {
 			// cell is only sensitive to the first drug
-			set_boolean_node(pCell, drug1_name, drug1_index, drug1_threshold);
-		}
-		else if (pCell->type_name == drug2_name +  "_sensitive")
-		{
+			// set_boolean_node(pCell, drug1_name, drug1_index, drug1_threshold);
+			// set_boolean_node(pCell, drug1_name, drug1_index);
+		// }
+		// else if (pCell->type_name == drug2_name +  "_sensitive")
+		// {
 			// cell is only sensitive to the second drug
-			set_boolean_node(pCell, drug2_name, drug2_index, drug2_threshold);
-		}
+			// set_boolean_node(pCell, drug2_name, drug2_index, drug2_threshold);
+		// 	set_boolean_node(pCell, drug2_name, drug2_index);
+		// }
 
 		// else: cell is sensitive to no drug --> no boolean node is set
 	}
@@ -113,29 +127,20 @@ void from_nodes_to_cell(Cell* pCell, Phenotype& phenotype, double dt)
 		}
 
 		// Update Adhesion
-		if( pCell->phenotype.intracellular->get_boolean_variable_value("EMT"))
-		{
-			// reduce cell-cell adhesion 
-			// pCell->evolve_coef_sigmoid( 
-			// 	pCell->boolean_network.get_node_value("EMT"), phenotype.mechanics.cell_cell_adhesion_strength, dt 
-			// );
-
-			//phenotype.mechanics.cell_cell_adhesion_strength = PhysiCell::parameters.doubles("homotypic_adhesion_max") * theta 
-		}
-
+		// if( pCell->phenotype.intracellular->get_boolean_variable_value("EMT")){ // nothing happens for now }
 
 		// Update pReference_live_phenotype for proliferation node 
-
 		if (pCell->phenotype.intracellular->get_boolean_variable_value("Proliferation")) 
 		{
 			// multiplier implementation
 			//pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index) *= 2.5;
 			//std::cout << "Rate up! " << std::endl;
 
-
 			//switch implementation
 			double high_transition_rate = PhysiCell::parameters.doubles("base_transition_rate") * PhysiCell::parameters.doubles("transition_rate_multiplier");
 			pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index) = high_transition_rate;
+
+			// pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index) = PhysiCell::parameters.doubles("base_transition_rate");
 		}
 		else 
 		{
@@ -143,23 +148,19 @@ void from_nodes_to_cell(Cell* pCell, Phenotype& phenotype, double dt)
 			//pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index) *= 0.4;
 			//std::cout << "Rate down! " << std::endl;
 
-
 			//switch implementation 
 			pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index) = PhysiCell::parameters.doubles("base_transition_rate");
 		}
 
-
-
 		// Update Migration
 		if(pCell->phenotype.intracellular->get_boolean_variable_value("Migration"))
-		{ 
+		{
 			pCell->phenotype.motility.is_motile = true;
 		 	pCell->phenotype.motility.migration_speed = PhysiCell::parameters.doubles("migration_speed");
 			pCell->phenotype.motility.migration_bias = PhysiCell::parameters.doubles("migration_bias");
 			pCell->phenotype.motility.persistence_time = PhysiCell::parameters.doubles("persistence");
 
-			// pCell->evolve_coef(pCell->boolean_network.get_node_value("Migration"),	phenotype.motility.migration_speed, dt 
-			// );
+			// pCell->evolve_coef(pCell->phenotype.intracellular->get_boolean_variable_value("Migration"),	phenotype.motility.migration_speed, dt );
 			// pCell->phenotype.motility.migration_speed = PhysiCell::parameters.doubles("max_motility_speed") * migration_coeff
 		}
 		else 
@@ -167,18 +168,12 @@ void from_nodes_to_cell(Cell* pCell, Phenotype& phenotype, double dt)
 			pCell->phenotype.motility.is_motile = false;
 		}
 
-
 		// Update Invasion
-		if(pCell->phenotype.intracellular->get_boolean_variable_value("Invasion"))
-		{
-			// nothing happens for now 
-		}
-
+		// if(pCell->phenotype.intracellular->get_boolean_variable_value("Invasion")){// nothing happens for now }
 	}
 
 	pCell->set_internal_uptake_constants(dt);
 }
-
 
 void boolean_model_interface_main (Cell* pCell, Phenotype& phenotype, double dt){
     

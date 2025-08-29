@@ -14,8 +14,7 @@
 
 using namespace std;
 
-
-const vector<pair<string, string>> drug_targets = {
+vector<pair<string, string>> drug_targets = {
     { "Ipatasertib", "AKT"},
     { "Afuresertib", "AKT"},
     { "Afatinib", "EGFR"},
@@ -29,7 +28,7 @@ const vector<pair<string, string>> drug_targets = {
     { "BIBR1532", "TERT"}
 };
 
-const vector<pair<string, int>> half_lives = {
+vector<pair<string, int>> half_lives = {
     { "Ipatasertib", 2748},
     { "Afuresertib", 2448},
     { "Afatinib", 2220},
@@ -43,21 +42,46 @@ const vector<pair<string, int>> half_lives = {
     
 };
 
-string get_value (const vector<pair<string, string>> dict, string key) {
-    vector< pair<string, string>>::const_iterator dict_iterator = find_if( dict.begin(), dict.end(),[&key](const pair < string, string>& element){ return element.first  == key;} );
-    return (*dict_iterator).second;
+// Update function definitions to match declarations
+string get_value(const vector<pair<string, string>>& dict, const string& key) {
+    vector<pair<string, string>>::const_iterator dict_iterator = 
+        find_if(dict.begin(), dict.end(),
+            [&key](const pair<string, string>& element) -> bool { 
+                return element.first == key; 
+            });
+    if (dict_iterator != dict.end()) {
+        return dict_iterator->second;
+    }
+    return "";  // or throw an exception
 }
 
-int get_value (const vector<pair<string, int>> dict, string key) {
-    vector< pair<string, int>>::const_iterator dict_iterator = find_if( dict.begin(), dict.end(),[&key](const pair < string, int>& element){ return element.first  == key;} );
-    return (*dict_iterator).second;
+int get_value(const vector<pair<string, int>>& dict, const string& key) {
+    vector<pair<string, int>>::const_iterator dict_iterator = 
+        find_if(dict.begin(), dict.end(),
+            [&key](const pair<string, int>& element) -> bool { 
+                return element.first == key; 
+            });
+    if (dict_iterator != dict.end()) {
+        return dict_iterator->second;
+    }
+    return -1;  // or throw an exception
 }
+
+// string get_value (const vector<pair<string, string>> dict, string key) {
+    // vector< pair<string, string>>::const_iterator dict_iterator = find_if( dict.begin(), dict.end(),[&key](const pair < string, string>& element){ return element.first  == key;} );
+    // return (*dict_iterator).second;
+// }
+
+// int get_value (const vector<pair<string, int>> dict, string key) {
+//     vector< pair<string, int>>::const_iterator dict_iterator = find_if( dict.begin(), dict.end(),[&key](const pair < string, int>& element){ return element.first  == key;} );
+//     return (*dict_iterator).second;
+// }
 
 
 vector<double> get_drug_sensitivity_values (string drug_name) {
-    static double max_conc = parameters.doubles(drug_name+"_maxc");
-    static double xmid = parameters.doubles(drug_name+"_xmid");
-    static double scale = parameters.doubles(drug_name+"_scal");
+    double max_conc = parameters.doubles(drug_name+"_maxc");
+    double xmid = parameters.doubles(drug_name+"_xmid");
+    double scale = parameters.doubles(drug_name+"_scal");
 
     return {max_conc, xmid, scale};
 }
