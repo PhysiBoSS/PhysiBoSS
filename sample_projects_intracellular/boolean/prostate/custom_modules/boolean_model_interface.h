@@ -23,7 +23,8 @@ using namespace PhysiCell;
 
 void update_custom_variables( Cell* pCell );
 
-void set_boolean_node (Cell* pCell, std::string drug_name, int index, double threshold);
+// void set_boolean_node (Cell* pCell, std::string drug_name, int index, double threshold);
+void set_boolean_node (Cell* pCell, std::string drug_name, int drug_index);
 void set_input_nodes(Cell* pCell); 
 void from_nodes_to_cell(Cell* pCell, Phenotype& phenotype, double dt);
 void boolean_model_interface_main (Cell* pCell, Phenotype& phenotype, double dt);

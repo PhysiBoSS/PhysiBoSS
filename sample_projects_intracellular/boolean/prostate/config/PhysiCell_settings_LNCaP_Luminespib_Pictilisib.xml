@@ -26,7 +26,7 @@
 	</parallel>
 
 	<save>
-		<folder>output_nodrug_new_dt6</folder>
+		<folder>output_lumi_picti</folder>
 		<full_data>
 			<interval units="min">240</interval>
 			<enable>true</enable>
@@ -305,7 +305,7 @@
 		<cfg_file type="string" units="">./config/boolean_network/LNCaP_mut_RNA_00.cfg</cfg_file> -->
 	<!-- <maboss_time_step type="double" units="dimensionless">10.</maboss_time_step> -->
 	<!-- <init_cells_filename type="string" units="">./config/init.txt</init_cells_filename> -->
-	<simulation_mode type="int">-1</simulation_mode>
+	<simulation_mode type="int">1</simulation_mode>
 	<!-- <membrane_length type="int" units=""> 470 </membrane_length> -->
 	<Pictilisib_uptake_rate type="double" units="">0.0025</Pictilisib_uptake_rate>
 	<Pictilisib_secretion_rate type="double" units="fg/cell/min">0.1</Pictilisib_secretion_rate>
@@ -313,13 +313,13 @@
 	<Pictilisib_xmid units="ln(uM)" type="double">3.85680179514967</Pictilisib_xmid>
 	<Pictilisib_maxc units="uM" type="double">10.0</Pictilisib_maxc>
 	<prop_drug_resistant_Pictilisib type="double" units="dimensionless">0.0</prop_drug_resistant_Pictilisib>
-	<drug_concentration_Pictilisib type="string" units="dimensionless">0</drug_concentration_Pictilisib> <!-- IC90 -->
+	<drug_concentration_Pictilisib type="string" units="dimensionless">IC90</drug_concentration_Pictilisib> <!-- IC90 -->
 	<Luminespib_uptake_rate type="double" units="">0.0025</Luminespib_uptake_rate>
 	<Luminespib_secretion_rate type="double" units="fg/cell/min">0.1</Luminespib_secretion_rate>
 	<Luminespib_scal units="dimensionless" type="double">2.30653618101248</Luminespib_scal>
 	<Luminespib_xmid units="ln(uM)" type="double">7.02401783651853</Luminespib_xmid>
 	<Luminespib_maxc units="uM" type="double">0.25</Luminespib_maxc>
 	<prop_drug_resistant_Luminespib type="double" units="dimensionless">0.0</prop_drug_resistant_Luminespib>
-	<drug_concentration_Luminespib type="string" units="dimensionless">0</drug_concentration_Luminespib> <!-- IC90 -->
+	<drug_concentration_Luminespib type="string" units="dimensionless">IC90</drug_concentration_Luminespib> <!-- IC90 -->
 </user_parameters>
 </PhysiCell_settings>

@@ -138,47 +138,47 @@ void setup_microenvironment( void )
 	// }	
 
 	// set intial conditions and dirichlet boundary conditions for the drugs; vector already contains the condition for oxygen
-	double oxygen_condition = 160.0;
-	vector<double> condition_vector = {oxygen_condition};
-	vector<bool> activation_vector {1};
-	vector<double> decay_vector {0.1};
-	for (int i = 0; i < microenvironment.number_of_densities(); i++)
-	{
-		std::string drug_name = microenvironment.density_names[i];
-		if (drug_name != "oxygen") {
-			// int current_drug_level= parameters.ints("current_concentration_level_" + drug_name);
-			// int total_drug_levels = parameters.ints("total_concentration_levels");
-			string cell_line = parameters.strings("cell_line");
-			int simulation_mode = parameters.ints("simulation_mode");
+	// double oxygen_condition = 160.0;
+	// vector<double> condition_vector = {oxygen_condition};
+	// vector<bool> activation_vector {1};
+	// vector<double> decay_vector {0.1};
+	// for (int i = 0; i < microenvironment.number_of_densities(); i++)
+	// {
+	// 	std::string drug_name = microenvironment.density_names[i];
+	// 	if (drug_name != "oxygen") {
+	// 		// int current_drug_level= parameters.ints("current_concentration_level_" + drug_name);
+	// 		// int total_drug_levels = parameters.ints("total_concentration_levels");
+	// 		string cell_line = parameters.strings("cell_line");
+	// 		int simulation_mode = parameters.ints("simulation_mode");
 
-			//drug_conc can either be an IC value or an actual drug concentration
-			string drug_conc = parameters.strings("drug_concentration_" + drug_name);
-			double drug_concentration;
-			// check if drug_conc contains the string "IC"
-			if(drug_conc.find("IC") != string::npos) {
-				drug_concentration = get_drug_concentration_from_IC(cell_line, drug_name, drug_conc, simulation_mode);
-			}
-			else {
-					drug_concentration = stod(drug_conc);
-				}
-			// double drug_concentration = get_drug_concentration_from_level(cell_line, drug_name, current_drug_level, total_drug_levels, simulation_mode);
-			condition_vector.push_back(drug_concentration);
-			activation_vector.push_back(1);
+	// 		//drug_conc can either be an IC value or an actual drug concentration
+	// 		string drug_conc = parameters.strings("drug_concentration_" + drug_name);
+	// 		double drug_concentration;
+	// 		// check if drug_conc contains the string "IC"
+	// 		if(drug_conc.find("IC") != string::npos) {
+	// 			drug_concentration = get_drug_concentration_from_IC(cell_line, drug_name, drug_conc, simulation_mode);
+	// 		}
+	// 		else {
+	// 				drug_concentration = stod(drug_conc);
+	// 			}
+	// 		// double drug_concentration = get_drug_concentration_from_level(cell_line, drug_name, current_drug_level, total_drug_levels, simulation_mode);
+	// 		condition_vector.push_back(drug_concentration);
+	// 		activation_vector.push_back(1);
 
-			// double half_life = get_value(half_lives, drug_name);
-			// double decay_rate = get_decay_rate(half_life);
-			// decay_vector.push_back(decay_rate);
+	// 		// double half_life = get_value(half_lives, drug_name);
+	// 		// double decay_rate = get_decay_rate(half_life);
+	// 		// decay_vector.push_back(decay_rate);
 
-		}
-	}
-	default_microenvironment_options.Dirichlet_activation_vector = activation_vector;
-	default_microenvironment_options.Dirichlet_condition_vector = condition_vector;
-	default_microenvironment_options.Dirichlet_zmax_values = condition_vector;
-	default_microenvironment_options.Dirichlet_zmin_values = condition_vector;
-	default_microenvironment_options.Dirichlet_ymax_values = condition_vector;
-	default_microenvironment_options.Dirichlet_ymin_values = condition_vector;
-	default_microenvironment_options.Dirichlet_xmax_values = condition_vector;
-	default_microenvironment_options.Dirichlet_xmin_values = condition_vector;
+	// 	}
+	// }
+	// default_microenvironment_options.Dirichlet_activation_vector = activation_vector;
+	// default_microenvironment_options.Dirichlet_condition_vector = condition_vector;
+	// default_microenvironment_options.Dirichlet_zmax_values = condition_vector;
+	// default_microenvironment_options.Dirichlet_zmin_values = condition_vector;
+	// default_microenvironment_options.Dirichlet_ymax_values = condition_vector;
+	// default_microenvironment_options.Dirichlet_ymin_values = condition_vector;
+	// default_microenvironment_options.Dirichlet_xmax_values = condition_vector;
+	// default_microenvironment_options.Dirichlet_xmin_values = condition_vector;
 
 
 	// initialize BioFVM 
