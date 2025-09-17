@@ -1,0 +1,728 @@
+
+-------------------------------------------------- Run --------------------------------------------------
+MaBoSS version: 2.3.4 [networks up to 128 nodes]
+
+Run start time: Mon Mar  8 12:57:27 2021
+Run end time: Mon Mar  8 12:57:51 2021
+
+Core user runtime: 20.5 secs using 1 thread
+Core elapsed runtime: 23.581 secs using 1 thread
+
+Epilogue user runtime: 0.06 secs using 1 thread
+Epilogue elapsed runtime: 0.083 secs using 1 thread
+
+StatDist user runtime: 0 secs using 1 thread
+StatDist elapsed runtime: 0 secs using 1 thread
+
+Time Tick: 0.5
+Max Time: 1000
+Sample Count: 10000
+StatDist Trajectory Count: 0
+StatDist Similarity Cache Maximum Size: 20000
+Discrete Time: FALSE
+Random Generator: physical
+Generated Number Count: 1607444
+
+---------------------------------------------------------------------------------------------------------
+
+------------------------------------------------ Network ------------------------------------------------
+node GF {
+  logic = (NOT GF AND GF_High) OR (GF);
+  rate_up = @logic ? $u_GF : 0;
+  rate_down = @logic ? 0 : $d_GF;
+}
+
+node GF_High {
+  logic = (GF_High);
+  rate_up = @logic ? $u_GF_High : 0;
+  rate_down = @logic ? 0 : $d_GF_High;
+}
+
+node CAD {
+  logic = (Casp9 AND Casp3);
+  rate_up = @logic ? $u_CAD : 0;
+  rate_down = @logic ? 0 : $d_CAD;
+}
+
+node RTK {
+  logic = (NOT GF AND NOT CAD AND GF_High) OR (GF AND NOT CAD);
+  rate_up = @logic ? $u_RTK : 0;
+  rate_down = @logic ? 0 : $d_RTK;
+}
+
+node Grb2 {
+  logic = (RTK AND GF_High);
+  rate_up = @logic ? $u_Grb2 : 0;
+  rate_down = @logic ? 0 : $d_Grb2;
+}
+
+node SOS {
+  logic = (Grb2);
+  rate_up = @logic ? $u_SOS : 0;
+  rate_down = @logic ? 0 : $d_SOS;
+}
+
+node Ras {
+  logic = (Grb2 AND SOS);
+  rate_up = @logic ? $u_Ras : 0;
+  rate_down = @logic ? 0 : $d_Ras;
+}
+
+node Casp3 {
+  logic = (NOT Casp8 AND NOT IAPs AND NOT Casp9 AND Casp3) OR (NOT Casp8 AND NOT IAPs AND Casp9) OR (NOT Casp8 AND IAPs AND Casp9 AND Casp3) OR (Casp8 AND NOT IAPs) OR (Casp8 AND IAPs AND NOT Casp9 AND Casp3) OR (Casp8 AND IAPs AND Casp9);
+  rate_up = @logic ? $u_Casp3 : 0;
+  rate_down = @logic ? 0 : $d_Casp3;
+}
+
+node RAF {
+  logic = (Ras AND NOT Casp3);
+  rate_up = @logic ? $u_RAF : 0;
+  rate_down = @logic ? 0 : $d_RAF;
+}
+
+node PIP3 {
+  logic = (NOT PI3K AND PI3K_H) OR (PI3K);
+  rate_up = @logic ? $u_PIP3 : 0;
+  rate_down = @logic ? 0 : $d_PIP3;
+}
+
+node S6K {
+  logic = (mTORC1 AND NOT Casp3);
+  rate_up = @logic ? $u_S6K : 0;
+  rate_down = @logic ? 0 : $d_S6K;
+}
+
+node mTORC2 {
+  logic = (NOT PIP3 AND NOT S6K) OR (PIP3);
+  rate_up = @logic ? $u_mTORC2 : 0;
+  rate_down = @logic ? 0 : $d_mTORC2;
+}
+
+node PI3K {
+  logic = (NOT RTK AND Ras) OR (RTK);
+  rate_up = @logic ? $u_PI3K : 0;
+  rate_down = @logic ? 0 : $d_PI3K;
+}
+
+node PI3K_H {
+  logic = (RTK AND Ras AND PI3K AND p110_H);
+  rate_up = @logic ? $u_PI3K_H : 0;
+  rate_down = @logic ? 0 : $d_PI3K_H;
+}
+
+node PDK1 {
+  logic = (PI3K AND PIP3);
+  rate_up = @logic ? $u_PDK1 : 0;
+  rate_down = @logic ? 0 : $d_PDK1;
+}
+
+node AKT_B {
+  logic = (NOT mTORC2 AND PIP3 AND PDK1 AND NOT Casp3) OR (mTORC2 AND PIP3 AND NOT Casp3);
+  rate_up = @logic ? $u_AKT_B : 0;
+  rate_down = @logic ? 0 : $d_AKT_B;
+}
+
+node p110_H {
+  logic = (NOT p110_H AND FoxO3 AND NOT NeddL4) OR (p110_H AND NOT FoxO3 AND NOT NeddL4) OR (p110_H AND FoxO3);
+  rate_up = @logic ? $u_p110_H : 0;
+  rate_down = @logic ? 0 : $d_p110_H;
+}
+
+node FoxO3 {
+  logic = (NOT AKT_B AND NOT AKT_H AND NOT Plk1) OR (NOT AKT_B AND NOT AKT_H AND Plk1 AND NOT Plk1_H) OR (NOT AKT_B AND NOT AKT_H AND Plk1 AND Plk1_H AND NOT ERK) OR (NOT AKT_B AND AKT_H AND NOT Plk1 AND NOT Plk1_H AND NOT ERK) OR (AKT_B AND NOT AKT_H AND NOT Plk1) OR (AKT_B AND NOT AKT_H AND Plk1 AND NOT Plk1_H) OR (AKT_B AND NOT AKT_H AND Plk1 AND Plk1_H AND NOT ERK);
+  rate_up = @logic ? $u_FoxO3 : 0;
+  rate_down = @logic ? 0 : $d_FoxO3;
+}
+
+node NeddL4 {
+  logic = (Ca2 AND IP3);
+  rate_up = @logic ? $u_NeddL4 : 0;
+  rate_down = @logic ? 0 : $d_NeddL4;
+}
+
+node AKT_H {
+  logic = (Ras AND mTORC2 AND PIP3 AND PDK1 AND AKT_B AND p110_H AND PI3K_H);
+  rate_up = @logic ? $u_AKT_H : 0;
+  rate_down = @logic ? 0 : $d_AKT_H;
+}
+
+node Plk1 {
+  logic = (NOT FoxM1 AND NOT Cdc25A AND CyclinB AND Cdk1 AND NOT Cdh1 AND Plk1_H) OR (NOT FoxM1 AND Cdc25A AND NOT CyclinA AND CyclinB AND Cdk1 AND NOT Cdh1 AND Plk1_H) OR (NOT FoxM1 AND Cdc25A AND CyclinA AND NOT Wee1 AND NOT Cdh1 AND Plk1_H) OR (NOT FoxM1 AND Cdc25A AND CyclinA AND Wee1 AND CyclinB AND Cdk1 AND NOT Cdh1 AND Plk1_H) OR (FoxM1 AND NOT Cdc25A AND CyclinB AND Cdk1 AND NOT Cdh1) OR (FoxM1 AND Cdc25A AND NOT CyclinA AND CyclinB AND Cdk1 AND NOT Cdh1) OR (FoxM1 AND Cdc25A AND CyclinA AND NOT Wee1 AND NOT Cdh1) OR (FoxM1 AND Cdc25A AND CyclinA AND Wee1 AND CyclinB AND Cdk1 AND NOT Cdh1);
+  rate_up = @logic ? $u_Plk1 : 0;
+  rate_down = @logic ? 0 : $d_Plk1;
+}
+
+node Plk1_H {
+  logic = (NOT FoxO3 AND NOT FoxO1 AND FoxM1 AND Plk1 AND Plk1_H) OR (NOT FoxO3 AND FoxO1 AND FoxM1 AND Plk1) OR (FoxO3 AND FoxM1 AND Plk1);
+  rate_up = @logic ? $u_Plk1_H : 0;
+  rate_down = @logic ? 0 : $d_Plk1_H;
+}
+
+node ERK {
+  logic = (NOT BIK AND MEK);
+  rate_up = @logic ? $u_ERK : 0;
+  rate_down = @logic ? 0 : $d_ERK;
+}
+
+node PLCgamma {
+  logic = (RTK AND Grb2 AND PIP3 AND p110_H AND PI3K_H);
+  rate_up = @logic ? $u_PLCgamma : 0;
+  rate_down = @logic ? 0 : $d_PLCgamma;
+}
+
+node Ca2 {
+  logic = (IP3);
+  rate_up = @logic ? $u_Ca2 : 0;
+  rate_down = @logic ? 0 : $d_Ca2;
+}
+
+node IP3 {
+  logic = (PLCgamma);
+  rate_up = @logic ? $u_IP3 : 0;
+  rate_down = @logic ? 0 : $d_IP3;
+}
+
+node FoxO1 {
+  logic = (NOT AKT_H AND NOT Plk1);
+  rate_up = @logic ? $u_FoxO1 : 0;
+  rate_down = @logic ? 0 : $d_FoxO1;
+}
+
+node Myc {
+  logic = (NOT eIF4E AND NOT GSK3 AND NOT pRB AND NOT E2F1 AND ERK) OR (NOT eIF4E AND NOT GSK3 AND NOT pRB AND E2F1) OR (NOT eIF4E AND NOT GSK3 AND pRB AND ERK) OR (NOT eIF4E AND GSK3 AND NOT pRB AND E2F1 AND ERK) OR (eIF4E AND NOT pRB AND NOT E2F1 AND ERK) OR (eIF4E AND NOT pRB AND E2F1) OR (eIF4E AND pRB AND ERK);
+  rate_up = @logic ? $u_Myc : 0;
+  rate_down = @logic ? 0 : $d_Myc;
+}
+
+node p21_mRNA {
+  logic = (NOT FoxO3 AND FoxO1 AND NOT Myc) OR (FoxO3 AND NOT FoxO1 AND NOT Myc) OR (FoxO3 AND FoxO1);
+  rate_up = @logic ? $u_p21_mRNA : 0;
+  rate_down = @logic ? 0 : $d_p21_mRNA;
+}
+
+node TSC2 {
+  logic = (NOT AKT_B AND NOT AKT_H) OR (NOT AKT_B AND AKT_H AND NOT ERK) OR (AKT_B AND NOT AKT_H);
+  rate_up = @logic ? $u_TSC2 : 0;
+  rate_down = @logic ? 0 : $d_TSC2;
+}
+
+node mTORC1 {
+  logic = (NOT PRAS40 AND NOT Rheb AND NOT GSK3 AND E2F1 AND NOT Casp3) OR (NOT PRAS40 AND NOT Rheb AND GSK3 AND NOT E2F1 AND CyclinB AND Cdk1 AND NOT Casp3) OR (NOT PRAS40 AND NOT Rheb AND GSK3 AND E2F1 AND NOT Casp3) OR (NOT PRAS40 AND Rheb AND NOT Casp3) OR (PRAS40 AND NOT GSK3 AND E2F1 AND NOT Casp3) OR (PRAS40 AND GSK3 AND NOT E2F1 AND CyclinB AND Cdk1 AND NOT Casp3) OR (PRAS40 AND GSK3 AND E2F1 AND NOT Casp3);
+  rate_up = @logic ? $u_mTORC1 : 0;
+  rate_down = @logic ? 0 : $d_mTORC1;
+}
+
+node PRAS40 {
+  logic = (NOT AKT_B AND NOT AKT_H) OR (AKT_B AND NOT AKT_H AND NOT mTORC1);
+  rate_up = @logic ? $u_PRAS40 : 0;
+  rate_down = @logic ? 0 : $d_PRAS40;
+}
+
+node DAG {
+  logic = (PLCgamma);
+  rate_up = @logic ? $u_DAG : 0;
+  rate_down = @logic ? 0 : $d_DAG;
+}
+
+node Rheb {
+  logic = (NOT TSC2 AND DAG);
+  rate_up = @logic ? $u_Rheb : 0;
+  rate_down = @logic ? 0 : $d_Rheb;
+}
+
+node GSK3 {
+  logic = (NOT AKT_H AND NOT S6K) OR (NOT AKT_H AND S6K AND NOT ERK);
+  rate_up = @logic ? $u_GSK3 : 0;
+  rate_down = @logic ? 0 : $d_GSK3;
+}
+
+node E2F1 {
+  logic = (NOT pRB AND NOT Myc AND E2F1 AND NOT CyclinA AND NOT CAD) OR (NOT pRB AND Myc AND NOT CyclinA AND NOT CAD);
+  rate_up = @logic ? $u_E2F1 : 0;
+  rate_down = @logic ? 0 : $d_E2F1;
+}
+
+node CyclinB {
+  logic = (NOT FoxO3 AND FoxM1 AND NOT pAPC AND NOT Cdh1) OR (NOT FoxO3 AND FoxM1 AND pAPC AND NOT Cdc20 AND NOT Cdh1) OR (FoxO3 AND NOT FoxM1 AND CyclinB AND NOT pAPC AND NOT Cdh1) OR (FoxO3 AND NOT FoxM1 AND CyclinB AND pAPC AND NOT Cdc20 AND NOT Cdh1) OR (FoxO3 AND FoxM1 AND NOT pAPC AND NOT Cdh1) OR (FoxO3 AND FoxM1 AND pAPC AND NOT Cdc20 AND NOT Cdh1);
+  rate_up = @logic ? $u_CyclinB : 0;
+  rate_down = @logic ? 0 : $d_CyclinB;
+}
+
+node Cdk1 {
+  logic = (NOT Wee1 AND CyclinB AND Cdc25C AND NOT Cdk1 AND NOT CHK1) OR (NOT Wee1 AND CyclinB AND Cdc25C AND Cdk1) OR (Wee1 AND CyclinB AND Cdc25C AND NOT CHK1);
+  rate_up = @logic ? $u_Cdk1 : 0;
+  rate_down = @logic ? 0 : $d_Cdk1;
+}
+
+node eIF4E {
+  logic = (mTORC1 AND NOT Casp3);
+  rate_up = @logic ? $u_eIF4E : 0;
+  rate_down = @logic ? 0 : $d_eIF4E;
+}
+
+node CyclinE {
+  logic = (NOT pRB AND NOT p27Kip1 AND E2F1 AND Cdc6 AND Pre_RC AND NOT Casp3 AND NOT CHK1);
+  rate_up = @logic ? $u_CyclinE : 0;
+  rate_down = @logic ? 0 : $d_CyclinE;
+}
+
+node p21 {
+  logic = (p21_mRNA AND NOT CyclinE AND NOT Casp3);
+  rate_up = @logic ? $u_p21 : 0;
+  rate_down = @logic ? 0 : $d_p21;
+}
+
+node p27Kip1 {
+  logic = (NOT FoxO3 AND NOT FoxO1 AND NOT CyclinD1 AND NOT CyclinE AND NOT CyclinA AND NOT CyclinB AND NOT Casp3) OR (NOT FoxO3 AND NOT FoxO1 AND NOT CyclinD1 AND NOT CyclinE AND NOT CyclinA AND CyclinB AND NOT Cdk1 AND NOT Casp3) OR (NOT FoxO3 AND FoxO1 AND NOT CyclinD1 AND NOT CyclinA AND NOT CyclinB AND NOT Casp3) OR (NOT FoxO3 AND FoxO1 AND NOT CyclinD1 AND NOT CyclinA AND CyclinB AND NOT Cdk1 AND NOT Casp3) OR (FoxO3 AND NOT FoxO1 AND NOT CyclinD1 AND NOT CyclinA AND NOT CyclinB AND NOT Casp3) OR (FoxO3 AND NOT FoxO1 AND NOT CyclinD1 AND NOT CyclinA AND CyclinB AND NOT Cdk1 AND NOT Casp3) OR (FoxO3 AND FoxO1 AND NOT CyclinD1 AND NOT CyclinE AND NOT CyclinB AND NOT Casp3) OR (FoxO3 AND FoxO1 AND NOT CyclinD1 AND NOT CyclinE AND CyclinB AND NOT Cdk1 AND NOT Casp3) OR (FoxO3 AND FoxO1 AND NOT CyclinD1 AND CyclinE AND NOT CyclinA AND NOT CyclinB AND NOT Casp3) OR (FoxO3 AND FoxO1 AND NOT CyclinD1 AND CyclinE AND NOT CyclinA AND CyclinB AND NOT Cdk1 AND NOT Casp3);
+  rate_up = @logic ? $u_p27Kip1 : 0;
+  rate_down = @logic ? 0 : $d_p27Kip1;
+}
+
+node CyclinD1 {
+  logic = (NOT GSK3 AND NOT p21 AND NOT Myc AND E2F1 AND NOT CHK1) OR (NOT GSK3 AND NOT p21 AND Myc AND NOT CHK1) OR (NOT GSK3 AND p21 AND NOT pRB AND NOT Myc AND CyclinD1 AND E2F1 AND NOT CHK1) OR (NOT GSK3 AND p21 AND NOT pRB AND Myc AND E2F1 AND NOT CHK1) OR (GSK3 AND NOT p21 AND NOT Myc AND CyclinD1 AND E2F1 AND NOT CHK1) OR (GSK3 AND NOT p21 AND Myc AND NOT CyclinD1 AND E2F1 AND NOT CHK1) OR (GSK3 AND NOT p21 AND Myc AND CyclinD1 AND NOT CHK1) OR (GSK3 AND p21 AND NOT pRB AND Myc AND CyclinD1 AND E2F1 AND NOT CHK1);
+  rate_up = @logic ? $u_CyclinD1 : 0;
+  rate_down = @logic ? 0 : $d_CyclinD1;
+}
+
+node CyclinA {
+  logic = (CyclinA_mRNA AND NOT Emi1 AND NOT Cdc25A AND CyclinA AND NOT UbcH10 AND NOT pAPC AND NOT Cdh1) OR (CyclinA_mRNA AND NOT Emi1 AND Cdc25A AND NOT pAPC AND NOT Cdh1) OR (CyclinA_mRNA AND Emi1 AND NOT Cdc25A AND CyclinA AND NOT UbcH10 AND NOT pAPC) OR (CyclinA_mRNA AND Emi1 AND NOT Cdc25A AND CyclinA AND UbcH10 AND NOT pAPC AND NOT Cdh1) OR (CyclinA_mRNA AND Emi1 AND Cdc25A AND NOT pAPC);
+  rate_up = @logic ? $u_CyclinA : 0;
+  rate_down = @logic ? 0 : $d_CyclinA;
+}
+
+node pRB {
+  logic = (NOT p27Kip1 AND NOT CyclinD1 AND NOT CyclinE AND NOT CyclinA AND NOT Casp3) OR (p27Kip1 AND NOT CyclinD1 AND NOT CyclinA AND NOT Casp3);
+  rate_up = @logic ? $u_pRB : 0;
+  rate_down = @logic ? 0 : $d_pRB;
+}
+
+node CHK1 {
+  logic = (ATR);
+  rate_up = @logic ? $u_CHK1 : 0;
+  rate_down = @logic ? 0 : $d_CHK1;
+}
+
+node Cdc6 {
+  logic = (NOT E2F1 AND ORC AND Cdc6 AND Cdt1 AND Pre_RC AND NOT CyclinA AND NOT Casp3) OR (NOT E2F1 AND ORC AND Cdc6 AND Cdt1 AND Pre_RC AND CyclinA AND NOT f4N_DNA AND NOT Casp3) OR (E2F1 AND ORC AND NOT Cdc6 AND NOT CyclinA AND NOT Plk1 AND NOT Casp3) OR (E2F1 AND ORC AND NOT Cdc6 AND CyclinA AND NOT Plk1 AND NOT f4N_DNA AND NOT Casp3) OR (E2F1 AND ORC AND Cdc6 AND NOT Cdt1 AND NOT CyclinA AND NOT Plk1 AND NOT Casp3) OR (E2F1 AND ORC AND Cdc6 AND NOT Cdt1 AND CyclinA AND NOT Plk1 AND NOT f4N_DNA AND NOT Casp3) OR (E2F1 AND ORC AND Cdc6 AND Cdt1 AND NOT Pre_RC AND NOT CyclinA AND NOT Plk1 AND NOT Casp3) OR (E2F1 AND ORC AND Cdc6 AND Cdt1 AND NOT Pre_RC AND CyclinA AND NOT Plk1 AND NOT f4N_DNA AND NOT Casp3) OR (E2F1 AND ORC AND Cdc6 AND Cdt1 AND Pre_RC AND NOT CyclinA AND NOT Casp3) OR (E2F1 AND ORC AND Cdc6 AND Cdt1 AND Pre_RC AND CyclinA AND NOT f4N_DNA AND NOT Casp3);
+  rate_up = @logic ? $u_Cdc6 : 0;
+  rate_down = @logic ? 0 : $d_Cdc6;
+}
+
+node Pre_RC {
+  logic = (ORC AND Cdc6 AND Cdt1 AND NOT Replication) OR (ORC AND Cdc6 AND Cdt1 AND Replication AND NOT f4N_DNA);
+  rate_up = @logic ? $u_Pre_RC : 0;
+  rate_down = @logic ? 0 : $d_Pre_RC;
+}
+
+node Cdt1 {
+  logic = (NOT pRB AND NOT Myc AND E2F1 AND NOT CyclinE AND ORC AND Cdc6 AND NOT geminin) OR (NOT pRB AND NOT Myc AND E2F1 AND CyclinE AND ORC AND Cdc6 AND NOT geminin AND NOT Cdc25A) OR (NOT pRB AND NOT Myc AND E2F1 AND CyclinE AND ORC AND Cdc6 AND NOT geminin AND Cdc25A AND NOT CyclinA) OR (NOT pRB AND Myc AND NOT E2F1 AND NOT CyclinE AND ORC AND Cdc6 AND Pre_RC AND NOT geminin) OR (NOT pRB AND Myc AND NOT E2F1 AND CyclinE AND ORC AND Cdc6 AND Pre_RC AND NOT geminin AND NOT Cdc25A) OR (NOT pRB AND Myc AND NOT E2F1 AND CyclinE AND ORC AND Cdc6 AND Pre_RC AND NOT geminin AND Cdc25A AND NOT CyclinA) OR (NOT pRB AND Myc AND E2F1 AND NOT CyclinE AND ORC AND Cdc6 AND NOT geminin) OR (NOT pRB AND Myc AND E2F1 AND CyclinE AND ORC AND Cdc6 AND NOT geminin AND NOT Cdc25A) OR (NOT pRB AND Myc AND E2F1 AND CyclinE AND ORC AND Cdc6 AND NOT geminin AND Cdc25A AND NOT CyclinA) OR (pRB AND NOT Myc AND E2F1 AND NOT CyclinE AND ORC AND Cdc6 AND Pre_RC AND NOT geminin) OR (pRB AND NOT Myc AND E2F1 AND CyclinE AND ORC AND Cdc6 AND Pre_RC AND NOT geminin AND NOT Cdc25A) OR (pRB AND NOT Myc AND E2F1 AND CyclinE AND ORC AND Cdc6 AND Pre_RC AND NOT geminin AND Cdc25A AND NOT CyclinA) OR (pRB AND Myc AND NOT E2F1 AND NOT CyclinE AND ORC AND Cdc6 AND Pre_RC AND NOT geminin) OR (pRB AND Myc AND NOT E2F1 AND CyclinE AND ORC AND Cdc6 AND Pre_RC AND NOT geminin AND NOT Cdc25A) OR (pRB AND Myc AND NOT E2F1 AND CyclinE AND ORC AND Cdc6 AND Pre_RC AND NOT geminin AND Cdc25A AND NOT CyclinA) OR (pRB AND Myc AND E2F1 AND NOT CyclinE AND ORC AND Cdc6 AND NOT geminin) OR (pRB AND Myc AND E2F1 AND CyclinE AND ORC AND Cdc6 AND NOT geminin AND NOT Cdc25A) OR (pRB AND Myc AND E2F1 AND CyclinE AND ORC AND Cdc6 AND NOT geminin AND Cdc25A AND NOT CyclinA);
+  rate_up = @logic ? $u_Cdt1 : 0;
+  rate_down = @logic ? 0 : $d_Cdt1;
+}
+
+node ORC {
+  logic = (NOT E2F1 AND Cdc6 AND Cdt1 AND Pre_RC) OR (E2F1);
+  rate_up = @logic ? $u_ORC : 0;
+  rate_down = @logic ? 0 : $d_ORC;
+}
+
+node f4N_DNA {
+  logic = (NOT Pre_RC AND NOT Replication AND f4N_DNA AND NOT Ect2 AND NOT CAD) OR (NOT Pre_RC AND Replication AND f4N_DNA AND NOT CAD) OR (Pre_RC AND NOT CyclinA AND NOT Replication AND f4N_DNA AND NOT Ect2 AND NOT CAD) OR (Pre_RC AND NOT CyclinA AND Replication AND f4N_DNA AND NOT CAD) OR (Pre_RC AND CyclinA AND NOT Replication AND f4N_DNA AND NOT Ect2 AND NOT CAD) OR (Pre_RC AND CyclinA AND Replication AND NOT CAD);
+  rate_up = @logic ? $u_f4N_DNA : 0;
+  rate_down = @logic ? 0 : $d_f4N_DNA;
+}
+
+node geminin {
+  logic = (E2F1 AND NOT pAPC AND NOT Cdh1) OR (E2F1 AND pAPC AND NOT Cdc20 AND NOT Cdh1);
+  rate_up = @logic ? $u_geminin : 0;
+  rate_down = @logic ? 0 : $d_geminin;
+}
+
+node Cdc25A {
+  logic = (NOT GSK3 AND NOT pRB AND NOT E2F1 AND NOT CyclinE AND FoxM1 AND NOT CyclinA AND NOT CyclinB AND NOT Cdh1 AND NOT CHK1) OR (NOT GSK3 AND NOT pRB AND NOT E2F1 AND NOT CyclinE AND FoxM1 AND NOT CyclinA AND CyclinB AND NOT Cdk1 AND NOT Cdh1 AND NOT CHK1) OR (NOT GSK3 AND NOT pRB AND NOT E2F1 AND NOT CyclinE AND FoxM1 AND NOT CyclinA AND CyclinB AND Cdk1 AND NOT Cdh1) OR (NOT GSK3 AND NOT pRB AND NOT E2F1 AND NOT CyclinE AND FoxM1 AND CyclinA AND NOT Cdh1) OR (NOT GSK3 AND NOT pRB AND NOT E2F1 AND CyclinE AND FoxM1 AND NOT Cdh1) OR (NOT GSK3 AND NOT pRB AND E2F1 AND NOT CyclinE AND NOT FoxM1 AND NOT CyclinA AND NOT CyclinB AND NOT Cdh1 AND NOT CHK1) OR (NOT GSK3 AND NOT pRB AND E2F1 AND NOT CyclinE AND NOT FoxM1 AND NOT CyclinA AND CyclinB AND NOT Cdk1 AND NOT Cdh1 AND NOT CHK1) OR (NOT GSK3 AND NOT pRB AND E2F1 AND NOT CyclinE AND NOT FoxM1 AND NOT CyclinA AND CyclinB AND Cdk1 AND NOT Cdh1) OR (NOT GSK3 AND NOT pRB AND E2F1 AND NOT CyclinE AND NOT FoxM1 AND CyclinA AND NOT Cdh1) OR (NOT GSK3 AND NOT pRB AND E2F1 AND NOT CyclinE AND FoxM1 AND NOT CyclinA AND NOT CyclinB AND NOT CHK1) OR (NOT GSK3 AND NOT pRB AND E2F1 AND NOT CyclinE AND FoxM1 AND NOT CyclinA AND CyclinB AND NOT Cdk1 AND NOT CHK1) OR (NOT GSK3 AND NOT pRB AND E2F1 AND NOT CyclinE AND FoxM1 AND NOT CyclinA AND CyclinB AND Cdk1) OR (NOT GSK3 AND NOT pRB AND E2F1 AND NOT CyclinE AND FoxM1 AND CyclinA) OR (NOT GSK3 AND NOT pRB AND E2F1 AND CyclinE AND NOT FoxM1 AND NOT Cdh1) OR (NOT GSK3 AND NOT pRB AND E2F1 AND CyclinE AND FoxM1) OR (NOT GSK3 AND pRB AND NOT CyclinE AND FoxM1 AND NOT CyclinA AND NOT CyclinB AND NOT Cdh1 AND NOT CHK1) OR (NOT GSK3 AND pRB AND NOT CyclinE AND FoxM1 AND NOT CyclinA AND CyclinB AND NOT Cdk1 AND NOT Cdh1 AND NOT CHK1) OR (NOT GSK3 AND pRB AND NOT CyclinE AND FoxM1 AND NOT CyclinA AND CyclinB AND Cdk1 AND NOT Cdh1) OR (NOT GSK3 AND pRB AND NOT CyclinE AND FoxM1 AND CyclinA AND NOT Cdh1) OR (NOT GSK3 AND pRB AND CyclinE AND FoxM1 AND NOT Cdh1) OR (GSK3 AND NOT pRB AND NOT E2F1 AND NOT CyclinE AND FoxM1 AND NOT CyclinA AND CyclinB AND Cdk1 AND NOT Cdh1) OR (GSK3 AND NOT pRB AND NOT E2F1 AND NOT CyclinE AND FoxM1 AND CyclinA AND NOT Cdh1) OR (GSK3 AND NOT pRB AND NOT E2F1 AND CyclinE AND FoxM1 AND NOT Cdh1) OR (GSK3 AND NOT pRB AND E2F1 AND NOT CyclinE AND NOT FoxM1 AND NOT CyclinA AND CyclinB AND Cdk1 AND NOT Cdh1) OR (GSK3 AND NOT pRB AND E2F1 AND NOT CyclinE AND NOT FoxM1 AND CyclinA AND NOT Cdh1) OR (GSK3 AND NOT pRB AND E2F1 AND NOT CyclinE AND FoxM1 AND NOT CyclinA AND CyclinB AND Cdk1) OR (GSK3 AND NOT pRB AND E2F1 AND NOT CyclinE AND FoxM1 AND CyclinA) OR (GSK3 AND NOT pRB AND E2F1 AND CyclinE AND NOT FoxM1 AND NOT Cdh1) OR (GSK3 AND NOT pRB AND E2F1 AND CyclinE AND FoxM1) OR (GSK3 AND pRB AND NOT CyclinE AND FoxM1 AND NOT CyclinA AND CyclinB AND Cdk1 AND NOT Cdh1) OR (GSK3 AND pRB AND NOT CyclinE AND FoxM1 AND CyclinA AND NOT Cdh1) OR (GSK3 AND pRB AND CyclinE AND FoxM1 AND NOT Cdh1);
+  rate_up = @logic ? $u_Cdc25A : 0;
+  rate_down = @logic ? 0 : $d_Cdc25A;
+}
+
+node Replication {
+  logic = (NOT E2F1 AND Pre_RC AND Cdc25A AND CyclinA AND Replication AND NOT f4N_DNA AND NOT CAD) OR (E2F1 AND NOT CyclinE AND Pre_RC AND Cdc25A AND CyclinA AND Replication AND NOT CAD) OR (E2F1 AND CyclinE AND Pre_RC AND Cdc25A AND NOT CAD);
+  rate_up = @logic ? $u_Replication : 0;
+  rate_down = @logic ? 0 : $d_Replication;
+}
+
+node pAPC {
+  logic = (NOT CyclinB AND pAPC AND Cdc20) OR (CyclinB AND NOT Plk1 AND NOT Cdk1 AND pAPC AND Cdc20) OR (CyclinB AND NOT Plk1 AND Cdk1 AND pAPC) OR (CyclinB AND Plk1 AND NOT Cdk1 AND pAPC AND Cdc20) OR (CyclinB AND Plk1 AND Cdk1);
+  rate_up = @logic ? $u_pAPC : 0;
+  rate_down = @logic ? 0 : $d_pAPC;
+}
+
+node Cdh1 {
+  logic = (NOT Emi1 AND NOT Cdc25A AND NOT CyclinB) OR (NOT Emi1 AND NOT Cdc25A AND CyclinB AND NOT Cdk1) OR (NOT Emi1 AND Cdc25A AND NOT CyclinA AND NOT CyclinB) OR (NOT Emi1 AND Cdc25A AND NOT CyclinA AND CyclinB AND NOT Cdk1) OR (Emi1 AND NOT CyclinA AND NOT CyclinB) OR (Emi1 AND NOT CyclinA AND CyclinB AND NOT Cdk1);
+  rate_up = @logic ? $u_Cdh1 : 0;
+  rate_down = @logic ? 0 : $d_Cdh1;
+}
+
+node Cdc20 {
+  logic = (NOT Emi1 AND NOT CyclinA AND NOT CyclinB AND pAPC AND NOT Cdh1) OR (NOT Emi1 AND NOT CyclinA AND CyclinB AND NOT Cdk1 AND pAPC AND NOT Cdh1) OR (NOT Emi1 AND NOT CyclinA AND CyclinB AND Cdk1 AND pAPC AND NOT Cdh1 AND NOT Mad2) OR (NOT Emi1 AND CyclinA AND pAPC AND NOT Cdh1 AND NOT Mad2);
+  rate_up = @logic ? $u_Cdc20 : 0;
+  rate_down = @logic ? 0 : $d_Cdc20;
+}
+
+node FoxM1 {
+  logic = (NOT Myc AND NOT Cdc25A AND CyclinB AND Plk1 AND Cdk1) OR (NOT Myc AND Cdc25A AND NOT CyclinA AND CyclinB AND Plk1 AND Cdk1) OR (NOT Myc AND Cdc25A AND CyclinA AND NOT CyclinB AND Cdc25B) OR (NOT Myc AND Cdc25A AND CyclinA AND CyclinB AND NOT Cdc25B AND Plk1 AND Cdk1) OR (NOT Myc AND Cdc25A AND CyclinA AND CyclinB AND Cdc25B) OR (Myc AND NOT CyclinE AND NOT Cdc25A AND CyclinB AND Plk1 AND Cdk1) OR (Myc AND NOT CyclinE AND Cdc25A AND NOT CyclinA AND CyclinB AND Plk1 AND Cdk1) OR (Myc AND NOT CyclinE AND Cdc25A AND CyclinA AND NOT CyclinB AND Cdc25B) OR (Myc AND NOT CyclinE AND Cdc25A AND CyclinA AND CyclinB AND NOT Cdc25B AND Plk1 AND Cdk1) OR (Myc AND NOT CyclinE AND Cdc25A AND CyclinA AND CyclinB AND Cdc25B) OR (Myc AND CyclinE);
+  rate_up = @logic ? $u_FoxM1 : 0;
+  rate_down = @logic ? 0 : $d_FoxM1;
+}
+
+node CyclinA_mRNA {
+  logic = (NOT pRB AND NOT E2F1 AND FoxM1 AND NOT CAD) OR (NOT pRB AND E2F1 AND NOT CAD) OR (pRB AND FoxM1 AND NOT CAD);
+  rate_up = @logic ? $u_CyclinA_mRNA : 0;
+  rate_down = @logic ? 0 : $d_CyclinA_mRNA;
+}
+
+node U_Kinetochores {
+  logic = (NOT CyclinB AND NOT Cdh1 AND f4N_DNA AND U_Kinetochores AND NOT A_Kinetochores) OR (CyclinB AND NOT Cdk1 AND NOT Cdh1 AND f4N_DNA AND U_Kinetochores AND NOT A_Kinetochores) OR (CyclinB AND Cdk1 AND NOT Cdh1 AND f4N_DNA AND NOT A_Kinetochores);
+  rate_up = @logic ? $u_U_Kinetochores : 0;
+  rate_down = @logic ? 0 : $d_U_Kinetochores;
+}
+
+node A_Kinetochores {
+  logic = (NOT CyclinB AND NOT pAPC AND NOT Cdh1 AND f4N_DNA AND A_Kinetochores) OR (NOT CyclinB AND pAPC AND NOT Cdc20 AND NOT Cdh1 AND f4N_DNA AND A_Kinetochores) OR (CyclinB AND NOT Plk1 AND NOT pAPC AND NOT Cdh1 AND f4N_DNA AND A_Kinetochores) OR (CyclinB AND NOT Plk1 AND pAPC AND NOT Cdc20 AND NOT Cdh1 AND f4N_DNA AND A_Kinetochores) OR (CyclinB AND Plk1 AND NOT Cdk1 AND NOT pAPC AND NOT Cdh1 AND f4N_DNA AND A_Kinetochores) OR (CyclinB AND Plk1 AND NOT Cdk1 AND pAPC AND NOT Cdc20 AND NOT Cdh1 AND f4N_DNA AND A_Kinetochores) OR (CyclinB AND Plk1 AND Cdk1 AND NOT pAPC AND NOT Cdh1 AND f4N_DNA AND NOT U_Kinetochores AND A_Kinetochores) OR (CyclinB AND Plk1 AND Cdk1 AND NOT pAPC AND NOT Cdh1 AND f4N_DNA AND U_Kinetochores) OR (CyclinB AND Plk1 AND Cdk1 AND pAPC AND NOT Cdc20 AND NOT Cdh1 AND f4N_DNA AND NOT U_Kinetochores AND A_Kinetochores) OR (CyclinB AND Plk1 AND Cdk1 AND pAPC AND NOT Cdc20 AND NOT Cdh1 AND f4N_DNA AND U_Kinetochores);
+  rate_up = @logic ? $u_A_Kinetochores : 0;
+  rate_down = @logic ? 0 : $d_A_Kinetochores;
+}
+
+node Emi1 {
+  logic = (NOT p21 AND NOT CyclinB) OR (NOT p21 AND CyclinB AND NOT Plk1) OR (NOT p21 AND CyclinB AND Plk1 AND NOT Cdk1) OR (NOT p21 AND CyclinB AND Plk1 AND Cdk1 AND NOT U_Kinetochores AND NOT A_Kinetochores) OR (p21 AND NOT pRB AND NOT CyclinB) OR (p21 AND NOT pRB AND CyclinB AND NOT Plk1) OR (p21 AND NOT pRB AND CyclinB AND Plk1 AND NOT Cdk1) OR (p21 AND NOT pRB AND CyclinB AND Plk1 AND Cdk1 AND NOT U_Kinetochores AND NOT A_Kinetochores) OR (p21 AND pRB AND E2F1 AND NOT CyclinB) OR (p21 AND pRB AND E2F1 AND CyclinB AND NOT Plk1) OR (p21 AND pRB AND E2F1 AND CyclinB AND Plk1 AND NOT Cdk1) OR (p21 AND pRB AND E2F1 AND CyclinB AND Plk1 AND Cdk1 AND NOT U_Kinetochores AND NOT A_Kinetochores);
+  rate_up = @logic ? $u_Emi1 : 0;
+  rate_down = @logic ? 0 : $d_Emi1;
+}
+
+node Cdc25B {
+  logic = (FoxM1 AND f4N_DNA);
+  rate_up = @logic ? $u_Cdc25B : 0;
+  rate_down = @logic ? 0 : $d_Cdc25B;
+}
+
+node UbcH10 {
+  logic = (NOT CyclinA AND NOT UbcH10 AND NOT Cdh1) OR (NOT CyclinA AND UbcH10 AND NOT CyclinB AND NOT Cdc20 AND NOT Cdh1) OR (NOT CyclinA AND UbcH10 AND NOT CyclinB AND Cdc20) OR (NOT CyclinA AND UbcH10 AND CyclinB) OR (CyclinA AND NOT UbcH10 AND NOT Cdh1) OR (CyclinA AND UbcH10);
+  rate_up = @logic ? $u_UbcH10 : 0;
+  rate_down = @logic ? 0 : $d_UbcH10;
+}
+
+node Wee1 {
+  logic = (NOT CyclinA AND NOT CyclinB AND NOT Replication AND NOT Casp3 AND CHK1) OR (NOT CyclinA AND NOT CyclinB AND Replication AND NOT Casp3) OR (NOT CyclinA AND CyclinB AND NOT Cdk1 AND NOT Replication AND NOT Casp3 AND CHK1) OR (NOT CyclinA AND CyclinB AND NOT Cdk1 AND Replication AND NOT Casp3) OR (CyclinA AND NOT CyclinB AND NOT Plk1 AND NOT Replication AND NOT Casp3 AND CHK1) OR (CyclinA AND NOT CyclinB AND NOT Plk1 AND Replication AND NOT Casp3) OR (CyclinA AND NOT CyclinB AND Plk1 AND NOT Cdk1 AND NOT Replication AND NOT Casp3 AND CHK1) OR (CyclinA AND NOT CyclinB AND Plk1 AND NOT Cdk1 AND Replication AND NOT Casp3) OR (CyclinA AND NOT CyclinB AND Plk1 AND Cdk1 AND NOT Casp3 AND CHK1) OR (CyclinA AND CyclinB AND NOT Cdk1 AND NOT Replication AND NOT Casp3 AND CHK1) OR (CyclinA AND CyclinB AND NOT Cdk1 AND Replication AND NOT Casp3);
+  rate_up = @logic ? $u_Wee1 : 0;
+  rate_down = @logic ? 0 : $d_Wee1;
+}
+
+node Cdc25C {
+  logic = (NOT CyclinB AND Cdc25B AND Plk1 AND f4N_DNA AND NOT CHK1) OR (CyclinB AND NOT Cdc25B AND Plk1 AND Cdk1 AND f4N_DNA) OR (CyclinB AND Cdc25B AND Plk1 AND NOT Cdk1 AND f4N_DNA AND NOT CHK1) OR (CyclinB AND Cdc25B AND Plk1 AND Cdk1 AND f4N_DNA);
+  rate_up = @logic ? $u_Cdc25C : 0;
+  rate_down = @logic ? 0 : $d_Cdc25C;
+}
+
+node Mad2 {
+  logic = (U_Kinetochores AND NOT A_Kinetochores);
+  rate_up = @logic ? $u_Mad2 : 0;
+  rate_down = @logic ? 0 : $d_Mad2;
+}
+
+node Ect2 {
+  logic = (Cdh1 AND f4N_DNA AND NOT U_Kinetochores AND NOT A_Kinetochores AND Plk1_H);
+  rate_up = @logic ? $u_Ect2 : 0;
+  rate_down = @logic ? 0 : $d_Ect2;
+}
+
+node DR4_5 {
+  logic = (Trail);
+  rate_up = @logic ? $u_DR4_5 : 0;
+  rate_down = @logic ? 0 : $d_DR4_5;
+}
+
+node Casp8 {
+  logic = (NOT Casp3 AND DR4_5) OR (Casp3);
+  rate_up = @logic ? $u_Casp8 : 0;
+  rate_down = @logic ? 0 : $d_Casp8;
+}
+
+node Casp2 {
+  logic = (NOT CyclinB AND NOT U_Kinetochores AND Casp3) OR (NOT CyclinB AND U_Kinetochores AND NOT Mad2 AND Casp3) OR (NOT CyclinB AND U_Kinetochores AND Mad2) OR (CyclinB AND NOT Cdk1 AND NOT U_Kinetochores AND Casp3) OR (CyclinB AND NOT Cdk1 AND U_Kinetochores AND NOT Mad2 AND Casp3) OR (CyclinB AND NOT Cdk1 AND U_Kinetochores AND Mad2) OR (CyclinB AND Cdk1 AND Casp3);
+  rate_up = @logic ? $u_Casp2 : 0;
+  rate_down = @logic ? 0 : $d_Casp2;
+}
+
+node MCL_1 {
+  logic = (NOT AKT_B AND NOT GSK3 AND NOT CyclinB AND NOT Casp2 AND NOT Casp3) OR (NOT AKT_B AND NOT GSK3 AND CyclinB AND NOT Cdk1 AND NOT Casp2 AND NOT Casp3) OR (NOT AKT_B AND NOT GSK3 AND CyclinB AND Cdk1 AND NOT U_Kinetochores AND NOT Casp2 AND NOT Casp3) OR (AKT_B AND NOT GSK3 AND NOT CyclinB AND NOT Casp2 AND NOT Casp3) OR (AKT_B AND NOT GSK3 AND CyclinB AND NOT Cdk1 AND NOT Casp2 AND NOT Casp3) OR (AKT_B AND NOT GSK3 AND CyclinB AND Cdk1 AND NOT U_Kinetochores AND NOT Casp2 AND NOT Casp3) OR (AKT_B AND GSK3 AND NOT E2F1 AND NOT CyclinB AND NOT Casp2 AND NOT Casp3) OR (AKT_B AND GSK3 AND NOT E2F1 AND CyclinB AND NOT Cdk1 AND NOT Casp2 AND NOT Casp3) OR (AKT_B AND GSK3 AND NOT E2F1 AND CyclinB AND Cdk1 AND NOT U_Kinetochores AND NOT Casp2 AND NOT Casp3) OR (AKT_B AND GSK3 AND E2F1 AND NOT CyclinB AND NOT Casp2 AND NOT Casp3 AND ERK) OR (AKT_B AND GSK3 AND E2F1 AND CyclinB AND NOT Cdk1 AND NOT Casp2 AND NOT Casp3 AND ERK) OR (AKT_B AND GSK3 AND E2F1 AND CyclinB AND Cdk1 AND NOT U_Kinetochores AND NOT Casp2 AND NOT Casp3 AND ERK);
+  rate_up = @logic ? $u_MCL_1 : 0;
+  rate_down = @logic ? 0 : $d_MCL_1;
+}
+
+node BCL2 {
+  logic = (NOT CyclinB AND NOT Plk1 AND NOT U_Kinetochores AND NOT BAD AND NOT BIK AND NOT BIM AND NOT Casp3) OR (NOT CyclinB AND NOT Plk1 AND U_Kinetochores AND MCL_1 AND BCLXL AND NOT BAD AND NOT BIK AND NOT BIM AND NOT Casp3) OR (NOT CyclinB AND Plk1 AND NOT BAD AND NOT BIK AND NOT BIM AND NOT Casp3) OR (CyclinB AND NOT Plk1 AND NOT U_Kinetochores AND NOT BAD AND NOT BIK AND NOT BIM AND NOT Casp3) OR (CyclinB AND NOT Plk1 AND U_Kinetochores AND MCL_1 AND BCLXL AND NOT BAD AND NOT BIK AND NOT BIM AND NOT Casp3) OR (CyclinB AND Plk1 AND NOT Cdk1 AND NOT BAD AND NOT BIK AND NOT BIM AND NOT Casp3) OR (CyclinB AND Plk1 AND Cdk1 AND NOT U_Kinetochores AND NOT BAD AND NOT BIK AND NOT BIM AND NOT Casp3) OR (CyclinB AND Plk1 AND Cdk1 AND U_Kinetochores AND NOT MCL_1 AND BCLXL AND NOT BAD AND NOT BIK AND NOT BIM AND NOT Casp3) OR (CyclinB AND Plk1 AND Cdk1 AND U_Kinetochores AND MCL_1 AND NOT BAD AND NOT BIK AND NOT BIM AND NOT Casp3);
+  rate_up = @logic ? $u_BCL2 : 0;
+  rate_down = @logic ? 0 : $d_BCL2;
+}
+
+node BAD {
+  logic = (NOT AKT_B AND NOT AKT_H AND NOT S6K AND NOT Casp8 AND NOT Casp3 AND NOT ERK) OR (NOT AKT_B AND NOT AKT_H AND NOT S6K AND NOT Casp8 AND Casp3) OR (NOT AKT_B AND NOT AKT_H AND NOT S6K AND Casp8) OR (NOT AKT_B AND NOT AKT_H AND S6K AND NOT Casp8 AND Casp3) OR (NOT AKT_B AND NOT AKT_H AND S6K AND Casp8) OR (NOT AKT_B AND AKT_H AND NOT Casp8 AND Casp3) OR (NOT AKT_B AND AKT_H AND Casp8 AND NOT Casp3 AND NOT ERK) OR (NOT AKT_B AND AKT_H AND Casp8 AND Casp3) OR (AKT_B AND NOT AKT_H AND NOT S6K AND NOT Casp8 AND Casp3) OR (AKT_B AND NOT AKT_H AND NOT S6K AND Casp8) OR (AKT_B AND NOT AKT_H AND S6K AND NOT Casp8 AND Casp3) OR (AKT_B AND NOT AKT_H AND S6K AND Casp8 AND NOT Casp3 AND NOT ERK) OR (AKT_B AND NOT AKT_H AND S6K AND Casp8 AND Casp3) OR (AKT_B AND AKT_H AND Casp3);
+  rate_up = @logic ? $u_BAD : 0;
+  rate_down = @logic ? 0 : $d_BAD;
+}
+
+node BCLXL {
+  logic = (NOT CyclinB AND NOT Plk1 AND NOT U_Kinetochores AND NOT BCL2 AND NOT BAD AND NOT Casp3) OR (NOT CyclinB AND NOT Plk1 AND NOT U_Kinetochores AND BCL2 AND NOT Casp3) OR (NOT CyclinB AND NOT Plk1 AND U_Kinetochores AND MCL_1 AND BCL2 AND NOT Casp3) OR (NOT CyclinB AND Plk1 AND NOT BCL2 AND NOT BAD AND NOT Casp3) OR (NOT CyclinB AND Plk1 AND BCL2 AND NOT Casp3) OR (CyclinB AND NOT Plk1 AND NOT Cdk1 AND NOT U_Kinetochores AND NOT BCL2 AND NOT BAD AND NOT Casp3) OR (CyclinB AND NOT Plk1 AND NOT Cdk1 AND NOT U_Kinetochores AND BCL2 AND NOT Casp3) OR (CyclinB AND NOT Plk1 AND NOT Cdk1 AND U_Kinetochores AND MCL_1 AND BCL2 AND NOT Casp3) OR (CyclinB AND NOT Plk1 AND Cdk1 AND NOT U_Kinetochores AND NOT BCL2 AND NOT BAD AND NOT Casp3) OR (CyclinB AND NOT Plk1 AND Cdk1 AND NOT U_Kinetochores AND BCL2 AND NOT Casp3) OR (CyclinB AND Plk1 AND NOT Cdk1 AND NOT BCL2 AND NOT BAD AND NOT Casp3) OR (CyclinB AND Plk1 AND NOT Cdk1 AND BCL2 AND NOT Casp3) OR (CyclinB AND Plk1 AND Cdk1 AND NOT U_Kinetochores AND NOT BCL2 AND NOT BAD AND NOT Casp3) OR (CyclinB AND Plk1 AND Cdk1 AND NOT U_Kinetochores AND BCL2 AND NOT Casp3) OR (CyclinB AND Plk1 AND Cdk1 AND U_Kinetochores AND MCL_1 AND BCL2 AND NOT Casp3);
+  rate_up = @logic ? $u_BCLXL : 0;
+  rate_down = @logic ? 0 : $d_BCLXL;
+}
+
+node BIK {
+  logic = (NOT MCL_1 AND NOT BCLXL AND NOT BCL2);
+  rate_up = @logic ? $u_BIK : 0;
+  rate_down = @logic ? 0 : $d_BIK;
+}
+
+node BIM {
+  logic = (FoxO3 AND GSK3 AND NOT MCL_1 AND NOT BCLXL AND NOT BCL2 AND NOT ERK);
+  rate_up = @logic ? $u_BIM : 0;
+  rate_down = @logic ? 0 : $d_BIM;
+}
+
+node BID {
+  logic = (NOT Casp8 AND Casp2 AND NOT MCL_1 AND NOT BCLXL AND NOT BCL2) OR (Casp8);
+  rate_up = @logic ? $u_BID : 0;
+  rate_down = @logic ? 0 : $d_BID;
+}
+
+node BAK {
+  logic = (NOT MCL_1 AND NOT BCLXL AND NOT BIK AND NOT BIM AND BID) OR (NOT MCL_1 AND NOT BCLXL AND NOT BIK AND BIM) OR (NOT MCL_1 AND NOT BCLXL AND BIK) OR (NOT MCL_1 AND BCLXL AND BID) OR (MCL_1 AND NOT BCLXL AND BID) OR (MCL_1 AND BCLXL AND NOT BCL2 AND BID) OR (MCL_1 AND BCLXL AND BCL2 AND NOT BIK AND BIM AND BID) OR (MCL_1 AND BCLXL AND BCL2 AND BIK AND BID);
+  rate_up = @logic ? $u_BAK : 0;
+  rate_down = @logic ? 0 : $d_BAK;
+}
+
+node BAX {
+  logic = (NOT MCL_1 AND NOT BCLXL AND NOT BCL2 AND NOT BIK AND NOT BIM AND BID) OR (NOT MCL_1 AND NOT BCLXL AND NOT BCL2 AND NOT BIK AND BIM) OR (NOT MCL_1 AND NOT BCLXL AND NOT BCL2 AND BIK) OR (NOT MCL_1 AND NOT BCLXL AND BCL2 AND BIM) OR (NOT MCL_1 AND BCLXL AND BIM) OR (MCL_1 AND NOT BCLXL AND NOT BCL2 AND NOT BIK AND NOT BIM AND BID) OR (MCL_1 AND NOT BCLXL AND NOT BCL2 AND NOT BIK AND BIM) OR (MCL_1 AND NOT BCLXL AND NOT BCL2 AND BIK) OR (MCL_1 AND NOT BCLXL AND BCL2 AND BIM) OR (MCL_1 AND BCLXL AND NOT BCL2 AND BIM) OR (MCL_1 AND BCLXL AND BCL2 AND NOT BIK AND BIM AND BID) OR (MCL_1 AND BCLXL AND BCL2 AND BIK AND BIM);
+  rate_up = @logic ? $u_BAX : 0;
+  rate_down = @logic ? 0 : $d_BAX;
+}
+
+node Cyto_C {
+  logic = (NOT BAK AND BAX) OR (BAK);
+  rate_up = @logic ? $u_Cyto_C : 0;
+  rate_down = @logic ? 0 : $d_Cyto_C;
+}
+
+node SMAC {
+  logic = (NOT BAK AND BAX) OR (BAK);
+  rate_up = @logic ? $u_SMAC : 0;
+  rate_down = @logic ? 0 : $d_SMAC;
+}
+
+node IAPs {
+  logic = (NOT AKT_H AND NOT SMAC) OR (AKT_H);
+  rate_up = @logic ? $u_IAPs : 0;
+  rate_down = @logic ? 0 : $d_IAPs;
+}
+
+node Casp9 {
+  logic = (NOT Cyto_C AND Casp3) OR (Cyto_C AND NOT IAPs) OR (Cyto_C AND IAPs AND Casp3);
+  rate_up = @logic ? $u_Casp9 : 0;
+  rate_down = @logic ? 0 : $d_Casp9;
+}
+
+node ATR {
+  logic = (Replication);
+  rate_up = @logic ? $u_ATR : 0;
+  rate_down = @logic ? 0 : $d_ATR;
+}
+
+node Trail {
+  logic = (Trail);
+  rate_up = @logic ? $u_Trail : 0;
+  rate_down = @logic ? 0 : $d_Trail;
+}
+
+node MEK {
+  logic = (RAF);
+  rate_up = @logic ? $u_MEK : 0;
+  rate_down = @logic ? 0 : $d_MEK;
+}
+---------------------------------------------------------------------------------------------------------
+
+----------------------------------------------- Variables -----------------------------------------------
+$d_AKT_B = 1;
+$d_AKT_H = 1;
+$d_ATR = 1;
+$d_A_Kinetochores = 1;
+$d_BAD = 1;
+$d_BAK = 1;
+$d_BAX = 1;
+$d_BCL2 = 1;
+$d_BCLXL = 1;
+$d_BID = 1;
+$d_BIK = 1;
+$d_BIM = 1;
+$d_CAD = 1;
+$d_CHK1 = 1;
+$d_Ca2 = 1;
+$d_Casp2 = 1;
+$d_Casp3 = 1;
+$d_Casp8 = 1;
+$d_Casp9 = 1;
+$d_Cdc20 = 1;
+$d_Cdc25A = 1;
+$d_Cdc25B = 1;
+$d_Cdc25C = 1;
+$d_Cdc6 = 1;
+$d_Cdh1 = 1;
+$d_Cdk1 = 1;
+$d_Cdt1 = 1;
+$d_CyclinA = 1;
+$d_CyclinA_mRNA = 1;
+$d_CyclinB = 1;
+$d_CyclinD1 = 1;
+$d_CyclinE = 1;
+$d_Cyto_C = 1;
+$d_DAG = 1;
+$d_DR4_5 = 1;
+$d_E2F1 = 1;
+$d_ERK = 1;
+$d_Ect2 = 1;
+$d_Emi1 = 1;
+$d_FoxM1 = 1;
+$d_FoxO1 = 1;
+$d_FoxO3 = 1;
+$d_GF = 1;
+$d_GF_High = 1;
+$d_GSK3 = 1;
+$d_Grb2 = 1;
+$d_IAPs = 1;
+$d_IP3 = 1;
+$d_MCL_1 = 1;
+$d_MEK = 1;
+$d_Mad2 = 1;
+$d_Myc = 1;
+$d_NeddL4 = 1;
+$d_ORC = 1;
+$d_PDK1 = 1;
+$d_PI3K = 1;
+$d_PI3K_H = 1;
+$d_PIP3 = 1;
+$d_PLCgamma = 1;
+$d_PRAS40 = 1;
+$d_Plk1 = 1;
+$d_Plk1_H = 1;
+$d_Pre_RC = 1;
+$d_RAF = 1;
+$d_RTK = 1;
+$d_Ras = 1;
+$d_Replication = 1;
+$d_Rheb = 1;
+$d_S6K = 1;
+$d_SMAC = 1;
+$d_SOS = 1;
+$d_TSC2 = 1;
+$d_Trail = 1;
+$d_U_Kinetochores = 1;
+$d_UbcH10 = 1;
+$d_Wee1 = 1;
+$d_eIF4E = 1;
+$d_f4N_DNA = 1;
+$d_geminin = 1;
+$d_mTORC1 = 1;
+$d_mTORC2 = 1;
+$d_p110_H = 1;
+$d_p21 = 1;
+$d_p21_mRNA = 1;
+$d_p27Kip1 = 1;
+$d_pAPC = 1;
+$d_pRB = 1;
+$u_AKT_B = 1;
+$u_AKT_H = 1;
+$u_ATR = 1;
+$u_A_Kinetochores = 1;
+$u_BAD = 1;
+$u_BAK = 1;
+$u_BAX = 1;
+$u_BCL2 = 1;
+$u_BCLXL = 1;
+$u_BID = 1;
+$u_BIK = 1;
+$u_BIM = 1;
+$u_CAD = 1;
+$u_CHK1 = 1;
+$u_Ca2 = 1;
+$u_Casp2 = 1;
+$u_Casp3 = 1;
+$u_Casp8 = 1;
+$u_Casp9 = 1;
+$u_Cdc20 = 1;
+$u_Cdc25A = 1;
+$u_Cdc25B = 1;
+$u_Cdc25C = 1;
+$u_Cdc6 = 1;
+$u_Cdh1 = 1;
+$u_Cdk1 = 1;
+$u_Cdt1 = 1;
+$u_CyclinA = 1;
+$u_CyclinA_mRNA = 1;
+$u_CyclinB = 1;
+$u_CyclinD1 = 1;
+$u_CyclinE = 1;
+$u_Cyto_C = 1;
+$u_DAG = 1;
+$u_DR4_5 = 1;
+$u_E2F1 = 1;
+$u_ERK = 1;
+$u_Ect2 = 1;
+$u_Emi1 = 1;
+$u_FoxM1 = 1;
+$u_FoxO1 = 1;
+$u_FoxO3 = 1;
+$u_GF = 1;
+$u_GF_High = 1;
+$u_GSK3 = 1;
+$u_Grb2 = 1;
+$u_IAPs = 1;
+$u_IP3 = 1;
+$u_MCL_1 = 1;
+$u_MEK = 1;
+$u_Mad2 = 1;
+$u_Myc = 1;
+$u_NeddL4 = 1;
+$u_ORC = 1;
+$u_PDK1 = 1;
+$u_PI3K = 1;
+$u_PI3K_H = 1;
+$u_PIP3 = 1;
+$u_PLCgamma = 1;
+$u_PRAS40 = 1;
+$u_Plk1 = 1;
+$u_Plk1_H = 1;
+$u_Pre_RC = 1;
+$u_RAF = 1;
+$u_RTK = 1;
+$u_Ras = 1;
+$u_Replication = 1;
+$u_Rheb = 1;
+$u_S6K = 1;
+$u_SMAC = 1;
+$u_SOS = 1;
+$u_TSC2 = 1;
+$u_Trail = 1;
+$u_U_Kinetochores = 1;
+$u_UbcH10 = 1;
+$u_Wee1 = 1;
+$u_eIF4E = 1;
+$u_f4N_DNA = 1;
+$u_geminin = 1;
+$u_mTORC1 = 1;
+$u_mTORC2 = 1;
+$u_p110_H = 1;
+$u_p21 = 1;
+$u_p21_mRNA = 1;
+$u_p27Kip1 = 1;
+$u_pAPC = 1;
+$u_pRB = 1;
+---------------------------------------------------------------------------------------------------------
+
