@@ -67,6 +67,7 @@
 
 #include "custom.h"
 #include "../BioFVM/BioFVM.h"  
+#include "../addons/PhysiBoSS/src/maboss_intracellular.h"
 using namespace BioFVM;
 
 // declare cell definitions here 
@@ -115,6 +116,28 @@ void create_cell_types( void )
 	   
 	   This is a good place to set custom functions. 
 	*/ 
+
+	get_cell_definition("default").functions.update_phenotype = wt_phenotype; 
+
+	// Apply the exit function to specific cell types
+    std::vector<std::string> cell_types_with_mutation = {"default"};
+    
+    for (const auto& cell_type : cell_types_with_mutation)
+    {
+        Cell_Definition* pCD = find_cell_definition(cell_type);
+        if(pCD)
+        {
+            Cycle_Model* cycle_model = &(pCD->phenotype.cycle.model());
+            int live_phase_index = cycle_model->find_phase_index(PhysiCell_constants::live);
+            cycle_model->phase_link(live_phase_index, live_phase_index).exit_function = phase_exit_mutation_function;
+            
+            std::cout << "Applied mutation exit function to " << cell_type << " cells." << std::endl;
+        }
+        else
+        {
+            std::cout << "Warning: Cell type " << cell_type << " not found." << std::endl;
+        }
+    }
 	
 	/*
 	   This builds the map of cell definitions and summarizes the setup. 
@@ -168,9 +191,49 @@ void pre_update_intracellular( Cell* pCell, Phenotype& phenotype, double dt )
 
 }
 
+
+
 void post_update_intracellular( Cell* pCell, Phenotype& phenotype, double dt )
 {
 	color_node(pCell);
+
+	// std::cout << "Cell " << pCell->ID << " generation " << pCell->generation << " parent " << pCell->parent_ID << std::endl;
+
+	// ADD NODE C RESISTANCE
+	update_cell_from_boolean_model(pCell, phenotype, dt);
+	
+}
+
+void update_cell_from_boolean_model(Cell* pCell, Phenotype& phenotype, double dt)
+{
+	static int death_decay_idx = pCell->custom_data.find_variable_index( "death_commitment_decay" );
+	static int apoptosis_index = phenotype.death.find_death_model_index( PhysiCell_constants::apoptosis_death_model );
+	static float apoptosis_rate = pCell->custom_data["apoptosis_rate"];
+	static float death_commitment_decay = pCell->custom_data["death_decay_idx"];
+	bool C_node = pCell->phenotype.intracellular->get_boolean_variable_value( "C" );
+
+	static int density_idx = microenvironment.find_density_index("drug");
+	double drug_density_ext = pCell->nearest_density_vector()[density_idx]; // A density (mM)
+	double density_int = pCell->phenotype.molecular.internalized_total_substrates[density_idx];
+	// density_int /= cell_volume; // divide int tot substrate to get concentration
+
+
+	float basal_apoptosis = 1e-06;
+	float final_apoptosis_rate = basal_apoptosis + apoptosis_rate*drug_density_ext;
+
+
+
+	if ( C_node )
+	{
+		pCell-> phenotype.death.rates[apoptosis_index] = basal_apoptosis;
+
+	} else {
+
+		pCell-> phenotype.death.rates[apoptosis_index] = final_apoptosis_rate;
+	}
+
+
+	return;
 }
 
 std::vector<std::string> my_coloring_function( Cell* pCell )
@@ -194,4 +257,101 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 void color_node(Cell* pCell){
 	std::string node_name = parameters.strings("node_to_visualize");
 	pCell->custom_data[node_name] = pCell->phenotype.intracellular->get_boolean_variable_value(node_name);
+}
+
+void wt_phenotype( Cell* pCell, Phenotype& phenotype, double dt )
+{ 
+	// Default phenotype, doesn't do anything special
+
+	if( phenotype.death.dead == true )
+	{
+		pCell->functions.update_phenotype = NULL; 
+		return; 
+	}
+
+	// Add info on parent cell ID and generation
+	// change_custom_data_var(pCell, "parent_ID", pCell->parent_ID);
+	// change_custom_data_var(pCell, "generation", pCell->generation);
+
+	// First check O2 availability
+	// update_cell_and_death_parameters_O2_based(pCell, phenotype, dt);
+
+	return; 
+}
+
+void add_custom_cycle_function()
+{
+
+	for( int i=0; i < all_cells->size() ; i++ )
+	{
+		// to call each cell, the pointer is *all_cells)[i] instead of pCell
+		(*all_cells)[i]->phenotype.cycle.model().phases[0].entry_function = phase_exit_mutation_function;
+	}
+	
+	return;
+}
+
+
+void phase_exit_mutation_function( Cell* pCell, Phenotype& phenotype, double dt )
+{
+
+	// Choose a random node
+	static std::default_random_engine generator;
+    
+	
+	// Only proceed if the cell has a MaBoSS model
+    if (pCell->phenotype.intracellular &&
+        pCell->phenotype.intracellular->intracellular_type == "maboss")
+    {
+        MaBoSSIntracellular* maboss_model = static_cast<MaBoSSIntracellular*>(pCell->phenotype.intracellular);
+        std::vector<std::string> node_names = maboss_model->maboss.get_all_node_names();
+
+        if (!node_names.empty())
+        {			
+			if (uniform_random() < parameters.doubles("mutation_rate_threshold")){
+
+				std::uniform_int_distribution<size_t> node_dist(0, node_names.size() - 1);
+				size_t node_idx = node_dist(generator);
+				std::string node_name = node_names[node_idx];
+
+				if (node_name == "A" || node_name == "B"){
+
+					// Flip its value
+					bool current_value = maboss_model->maboss.get_node_value(node_name);
+					bool new_value = !current_value;
+					maboss_model->maboss.set_node_value(node_name, new_value);
+
+					// Record the mutation in the cell's mutations vector
+					std::string mutation_record = node_name + "_" + std::to_string(new_value);
+					pCell->custom_data.mutations.push_back(mutation_record);
+
+					// std::cout << "Cell " << pCell->ID << ": flipped node " << node_name
+					//           << " from " << current_value << " to " << new_value << std::endl;
+
+				}
+			}
+
+        }
+        else
+        {
+            std::cout << "Cell " << pCell->ID << " has no nodes in its MaBoSS model!" << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "Cell " << pCell->ID << " does not have a MaBoSS model!" << std::endl;
+    }
+}
+
+
+double get_custom_data_variable(Cell* pCell, std::string variable_name){
+	int tmp_variable_idx = pCell->custom_data.find_variable_index(variable_name);
+	double tmp_variable_value = pCell->custom_data[tmp_variable_idx];
+	return tmp_variable_value;
+}
+
+void change_custom_data_var(Cell* pCell, std::string variable_name, double variable_new_value){
+	int tmp_variable_idx = pCell->custom_data.find_variable_index(variable_name);
+	pCell->custom_data[tmp_variable_idx] = variable_new_value;
+	return;
 }

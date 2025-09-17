@@ -114,6 +114,8 @@ class Custom_Cell_Data
  public:
 	std::vector<Variable> variables; 
 	std::vector<Vector_Variable> vector_variables; 
+	std::vector<std::string> mutations; //
+	
 	
 	int add_variable( Variable& v ); // done 
 	int add_variable( std::string name , std::string units , double value ); // done 

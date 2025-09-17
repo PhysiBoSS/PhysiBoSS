@@ -88,4 +88,11 @@ void pre_update_intracellular( Cell* pCell, Phenotype& phenotype, double dt );
 void post_update_intracellular( Cell* pCell, Phenotype& phenotype, double dt );
 void color_node(Cell* pCell);
 
+void wt_phenotype( Cell* pCell, Phenotype& phenotype, double dt );
+void add_custom_cycle_function();
+void phase_exit_mutation_function( Cell* pCell, Phenotype& phenotype, double dt );
+void change_custom_data_var(Cell* pCell, std::string variable_name, double variable_new_value);
+double get_custom_data_variable(Cell* pCell, std::string variable_name);
+void update_cell_from_boolean_model(Cell* pCell, Phenotype& phenotype, double dt);
+
 #endif

@@ -174,6 +174,8 @@ class MaBoSSNetwork
 			// Finally we set the state
 			set_state(new_state);
 		}
+
+		std::vector<std::string> get_all_node_names();
 };
 
 #endif

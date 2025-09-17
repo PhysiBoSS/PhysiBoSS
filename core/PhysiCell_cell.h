@@ -251,6 +251,9 @@ class Cell : public Basic_Agent
 	std::vector<Cell*> nearby_interacting_cells( void ); // new in 1.8.0 
 	
 	void convert_to_cell_definition( Cell_Definition& cd ); 
+
+	int generation = 0;   // Track cell generation (0 for initial cells)
+	int parent_ID = -1;   // Track parent cell ID (-1 for initial cells)
 };
 
 Cell* create_cell( Cell* (*custom_instantiate)() = NULL );  
