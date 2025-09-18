@@ -1,0 +1,1 @@
+java -jar bioLQM-0.6.1.jar -if booleannet Sizek_model.txt -of bnd Sizek_model.bnd

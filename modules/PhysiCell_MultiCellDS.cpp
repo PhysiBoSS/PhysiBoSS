@@ -443,7 +443,7 @@ void add_PhysiCell_cells_to_open_xml_pugi_v2( pugi::xml_document& xml_dom, std::
 		add_variable_to_labels( data_names,data_units,data_start_indices,data_sizes, 
 			"detachment_rate" , "1/min" , 1 ); 
 
-	 // Motility
+ // Motility
 		// is_motile // 1
 		add_variable_to_labels( data_names,data_units,data_start_indices,data_sizes, 
 			"is_motile" , "none" , 1 ); 
@@ -604,6 +604,15 @@ void add_PhysiCell_cells_to_open_xml_pugi_v2( pugi::xml_document& xml_dom, std::
 			add_variable_to_labels( data_names,data_units,data_start_indices,data_sizes, 
 				name,units,size ); 
 		}
+
+		//Jose: add mutations
+
+		std::string mutation_name;
+		std::cout << "MUTATION NAME " << mutation_name << std::endl;
+		add_variable_to_labels( data_names,data_units,data_start_indices,data_sizes, 
+			"mutations","node_state",1 ); 
+
+		// custom vector variables 
 
 		cell_data_size = total_data_size( data_sizes ); 
 		legend_done = true; 
@@ -768,6 +777,13 @@ void add_PhysiCell_cells_to_open_xml_pugi_v2( pugi::xml_document& xml_dom, std::
 		<< "you fix your directory. Sorry!" << std::endl << std::endl; 
 		exit(-1); 
 	} 
+
+	// For mutations
+	// next, filename 
+	char filename_mut [1024]; 
+	sprintf( filename_mut , "%s_mut.csv" , filename_base.c_str() ); 
+	std::ofstream file_mut(filename_mut);
+	file_mut << "time,ID,type,parent_ID,generation,mutations" << std::endl;
 
 	Cell* pCell; 
 	
@@ -1004,9 +1020,24 @@ void add_PhysiCell_cells_to_open_xml_pugi_v2( pugi::xml_document& xml_dom, std::
 			int size_temp = pCell->custom_data.vector_variables[j].value.size(); 
 			std::fwrite( pCell->custom_data.vector_variables[j].value.data() , sizeof(double) , size_temp , fp );
 		}
+	
+	
+	// mutations
+		// custom vector variables - time, ID, celltype, parent_ID, generation
+		file_mut << PhysiCell_globals.current_time << "," << pCell->ID << "," << pCell->type << "," << pCell->parent_ID << "," << pCell->generation << ",";
+		std::string buffer = "";
+		for( int j=0 ; j < pCell->custom_data.mutations.size(); j++ )
+		{
+			buffer += pCell->custom_data.mutations[j]; 
+			buffer += "."; 
+		}
+
+		file_mut << buffer << std::endl;
+		
 	}
 
 	fclose( fp ); 
+	file_mut.close();
 
 #ifdef ADDON_PHYSIBOSS
 

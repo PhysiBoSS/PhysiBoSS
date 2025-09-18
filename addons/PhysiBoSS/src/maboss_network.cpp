@@ -165,3 +165,11 @@ void MaBoSSNetwork::print_nodes()
 	}
 	std::cout << std::endl;
 }
+
+std::vector<std::string> MaBoSSNetwork::get_all_node_names() {
+    std::vector<std::string> node_names;
+    for (const auto& pair : nodesByName) {
+        node_names.push_back(pair.first);
+    }
+    return node_names;
+}

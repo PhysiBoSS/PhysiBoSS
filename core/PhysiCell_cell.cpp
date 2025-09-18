@@ -428,6 +428,11 @@ Cell::Cell()
 	container = NULL;
 	
 	set_total_volume( phenotype.volume.total ); 
+
+	// @oth: add parent_ID and generation
+
+	generation = 0;
+	parent_ID = -1;
 	
 	return; 
 }
@@ -660,6 +665,9 @@ Cell* Cell::divide( )
 
 	if( this->functions.cell_division_function )
 	{ this->functions.cell_division_function( this, child); }
+
+	child->generation = this->generation + 1;
+	child->parent_ID = this->ID;
 
 	return child;
 }

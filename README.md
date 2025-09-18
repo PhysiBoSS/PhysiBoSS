@@ -1,100 +1,225 @@
-<img align="right" height="200" src="https://github.com/sysbio-curie/MaBoSS/assets/22156824/b1b9a843-a203-42e6-8f8f-1acd2e2f5285">
+# PhysiBoSS 2 - Mutation Tracking and Analysis Branch
 
-# PhysiBoSS 2: a sustainable integration of stochastic Boolean and agent-based modelling frameworks
-**Version:** 2.2.3
+**Branch:** `development_mut_oth`  
+**Based on:** [PhysiBoSS](https://github.com/PhysiBoSS/PhysiBoSS) v2.2.3  
+**PhysiCell base version:** 1.14.2  
+**Author:** Othmane Hayou-Mya, Alejandro Madrid (Barcelona Supercomputing Center, BSC-CNS)  
+**Purpose:** Extended PhysiBoSS with mutation tracking and lineage analysis
 
-**Release date:** 13 December 2024
+---
 
-**PhysiCell base version:** 1.14.2
+## Overview
 
-## Overview: 
-PhysiBoSS 2.0 is a redesign and reimplementation of PhysiBoSS ([doi:10.1093/bioinformatics/bty766](https://doi.org/10.1093/bioinformatics/bty766)). It has been conceived as an add-on that expands the PhysiCell ([doi:10.1371/journal.pcbi.1005991](https://dx.doi.org/10.1371/journal.pcbi.1005991)) agent-based functionalities with intracellular cell signalling using MaBoSS having a decoupled, maintainable and model-agnostic design. PhysiBoSS 2.0 reproduces simulations reported in the original PhysiBoSS publications and can be used with other Boolean models, for instance to predict drug synergy in a gastric adenocarcinoma cell line.
+This repository contains a specialized fork of PhysiBoSS that extends the original framework with comprehensive mutation tracking, lineage analysis, and cellular evolution capabilities. The modifications enable detailed study of cell population dynamics, mutation accumulation, and evolutionary trajectories in agent-based multicellular simulations.
 
-**Reference paper:** [PhysiBoSS 2.0: a sustainable integration of stochastic Boolean and agent-based modelling frameworks](https://www.nature.com/articles/s41540-023-00314-4)
+## Key Features Added
 
-**Reference paper doi:** [10.1038/s41540-023-00314-4](https://doi.org/10.1038/s41540-023-00314-4)
+### 1. **Mutation Tracking System**
+- **Random Node Mutations**: Cells can randomly mutate Boolean network nodes during their lifecycle
+- **Mutation Logging**: All mutations are tracked with detailed metadata (time, cell ID, generation, etc.)
+- **Lineage Tracing**: Complete parent-child relationships are maintained across cell divisions
+- **Export Capabilities**: Comprehensive mutation data export in CSV format for downstream analysis
 
-A tutorial, explaining the new functionalities of PhysiBoSS, including the automated input/output mapping, and more, is available as a preprint. Check it out !
+### 2. **Enhanced Data Output**
+- **Mutation CSV Files** (`.mut.csv`): Detailed mutation logs with timestamps and lineage information
+- **Boolean Network State Tracking**: Real-time monitoring of intracellular Boolean network states
+- **Plotting Scripts**: Custom Python scripts for mutation analysis and visualization
+- **Extended MultiCellDS Output**: Enhanced data structure for comprehensive cell state storage
 
-**Tutorial paper**: [https://arxiv.org/abs/2406.18371](https://arxiv.org/abs/2406.18371)
+### 3. **Custom Analysis Tools**
+- **Plotting Scripts**: Ready-to-use Python scripts for mutation pattern analysis
+- **Statistical Analysis**: Tools for studying mutation rates, lineage trees, and population dynamics
+- **Visualization**: Automated generation of mutation plots and evolutionary trees
 
-**Tutorial project folder**: [here](https://github.com/PhysiBoSS/PhysiBoSS/tree/master/sample_projects_intracellular/boolean/tutorial)
+---
 
-### How to run a PhysiBoSS sample_project inside PhysiCell:
-~~~bash
-git clone https://github.com/PhysiBoSS/PhysiBoSS.git
-cd PhysiBoSS
-make physiboss-tnf-model
-make
-./spheroid_TNF_model
-~~~
+## Repository Structure
 
-### PhysiBoSS documentation:
+### Core Modifications
 
-The documentation of PhysiBoSS is available in the [PhysiBoSS User Guide](https://raw.githubusercontent.com/PhysiBoSS/PhysiBoSS/development/documentation/PhysiBoSS_User_Guide.pdf).
+#### **Core PhysiCell Extensions**
+```
+core/
+├── PhysiCell_cell.h          # Extended Cell class with generation/parent tracking
+├── PhysiCell_cell.cpp        # Modified cell division and initialization logic
+└── PhysiCell_custom.h        # Custom cell behaviors and phenotypes
+```
+
+<!-- #### **MaBoSS Integration Enhancements**
+```
+addons/PhysiBoSS/
+├── src/maboss_network.h      # Enhanced MaBoSS network interface
+├── src/maboss_network.cpp    # Extended with mutation capabilities
+└── MaBoSS/                   # Complete MaBoSS library with compiled binaries
+```
+
+#### **Custom Modules**
+```
+custom_modules/
+├── custom.h                  # Mutation function declarations
+└── custom.cpp               # Core mutation logic and phase exit functions
+```
+
+#### **Configuration Files**
+```
+config/
+├── PhysiCell_settings.xml           # Main simulation configuration
+├── cells.csv                        # Cell type definitions
+├── model.cfg                        # MaBoSS model configuration
+├── model_0.bnd, model_1.bnd        # Boolean network models
+├── posiciones.csv                   # Initial cell positions
+└── equally_distributed_*.csv       # Parameter distribution files
+``` -->
+
+### Analysis and Visualization
+
+#### **Plotting Scripts**
+```
+plotting_scripts/
+├── plot_mutations.py                # Individual mutation analysis
+├── plot_mutations_aggregated.py     # Population-level mutation patterns
+├── mutations.pdf/.png              # Generated mutation plots
+├── mutations_aggregated*.pdf/.png   # Aggregated analysis plots
+└── mutations_legend.pdf/.png       # Plot legends and annotations
+```
+
+#### **Simulation Output**
+```
+output/
+├── output*.xml                      # Simulation state snapshots
+├── output*_mut.csv                  # Mutation tracking data
+├── output*_boolean_intracellular.csv # Boolean network states
+├── snapshot*.svg                    # Visual cell snapshots
+└── *.mat files                     # MATLAB-compatible data export
+```
+
+### Sample Projects
+Extended the "physiboss_cell_lines" sample project with mutation tracking capabilities as 
+a first toy model:
 
 
-### Key makefile rules, from [PhysiCell repository](https://github.com/MathCancer/PhysiCell):
+```
+sample_projects_intracellular/boolean/physiboss_cell_lines/
+├── config/                          # Project-specific configurations
+├── custom_modules/                  # Project-specific mutation logic
+└── Makefile                        # Build configuration
+```
 
-**`make`**: compiles the current project. If no 
-                     project has been defined, it first 
-                     populates the cancer heterogeneity 2D 
-                     sample project and compiles it 
-   
-**`make project-name`**: populates the indicated sample project. 
-                     Use "make" to compile it. 
+---
 
+## Installation and Usage
 
-   * **PhysiBoSS \[`project-name`\]** choices:
-      * physiboss-cell-lines-sample
-      * physiboss-tutorial
-      * physiboss-tutorial-invasion
-      * physiboss-tnf-model
+### Prerequisites
+- GCC compiler (C++11 or later)
+- Make build system
+- Python 3.x (for analysis scripts)
+- Required Python packages: numpy, matplotlib, pandas
 
-   * **PhysiCell \[`project-name`\]** choices:
-      * template 
-      * biorobots-sample 
-      * cancer-biorobots-sample 
-      * cancer-immune-sample
-      * celltypes3-sample 
-      * heterogeneity-sample 
-      * pred-prey-farmer 
-      * virus-macrophage-sample 
-      * worm-sample
-      * ode-energy-sample 
-      * cancer-metabolism-sample
-      * interaction-sample
-      * mechano-sample
-      * rules-sample
-      * physimess-sample
-      * custom-division-sample
-      * asymmetric-division-sample
-      * immune-function-sample episode-sample
+### Building the Project
+```bash
+# Clone this repository
+git clone <your-fork-url>
+cd mutPhysiBoSS
 
-**`make list-projects`** : list all available sample projects 
+# Switch to development branch
+git checkout development_mut_oth
 
-**`make clean`**         : removes all .o files and the executable, so that the next "make" recompiles the entire project 
+# Build the project
+make clean
+make PhysiBoSS-cell-lines; make
 
-**`make data-cleanup`**  : clears out all simulation data 
+# Run a simulation
+./project
+```
 
-**`make reset`**         : de-populates the sample project and returns to the original PhysiCell state. Use this when switching to a new PhysiCell sample project. 
+### Configuration
+1. **Edit `config/PhysiCell_settings.xml`** for simulation parameters
+2. **Modify `config/model.cfg`** for Boolean network settings
+3. **Adjust `config/cells.csv`** for cell type definitions
+4. **Update `custom_modules/custom.cpp`** for custom mutation logic
 
-**`make save PROJ=name`**: save the current project (including the `Makefile`, `main.cpp`, and everything in `./config` and `./custom_modules/`) in `./user_projects/name`, where `name` is your choice for the project. If the project already exists, overwrite it. 
+---
 
-**`make load PROJ=name`**: load the user project `name` from `./user_projects/name` (including the `Makefile`, `main.cpp`, and everything in `./config` and `./custom_modules/`).  
+## Data Analysis
 
-**`make list-user-projects`**: list all user projects in `./user_projects/`. (Use these names without the trailing `/` in `make load PROJ=name`.)
+### Mutation Data Format
+The mutation tracking system exports data in CSV format with the following structure:
 
-**`make jpeg`**          : uses ImageMagick to convert the SVG files in the output directory to JPG (with appropriate sizing to make movies). Supply `OUTPUT=foldername` to select a different folder. 
+```csv
+time,ID,type,parent_ID,generation,mutations
+120.0,42,1,17,2,NodeA_1.NodeB_0.NodeC_1
+240.0,43,1,42,3,NodeA_1.NodeB_0.NodeC_1.NodeD_0
+```
 
-**`make movie`**         : uses ffmpeg to convert the JPG files in the output directory an mp4 movie. Supply `OUTPUT=foldername` to select a different folder, or `FRAMERATE=framerate` to override the frame rate.
+**Fields:**
+- `time`: Simulation time when data was recorded
+- `ID`: Unique cell identifier
+- `type`: Cell type index
+- `parent_ID`: ID of parent cell (-1 for initial cells)
+- `generation`: Cell generation (0 for initial cells)
+- `mutations`: Dot-separated list of mutations (format: `NodeName_NewValue`)
 
-## Legacy version
+### Visualization Scripts
+```bash
+# Individual cell mutation analysis
+python plotting_scripts/plot_mutations.py
 
-PhysiBoSS 1.0, as described in [PhysiBoSS: a multi-scale agent-based modelling framework integrating physical dimension and cell signalling](https://doi.org/10.1093/bioinformatics/bty766), is accessible at [https://github.com/PhysiBoSS/PhysiBoSSv1](https://github.com/PhysiBoSS/PhysiBoSSv1).
+# Population-level mutation patterns
+python plotting_scripts/plot_mutations_aggregated.py
+```
 
-## Acknowledgements
+---
 
-This work has received funding from the Horizon 2020 projects INFORE (ID: 825070) and PerMedCoE (ID: 951773) and from the Horizon Europe project CREXDATA (ID: 101092749). This work was funded in part by the French government under the management of Agence Nationale de la Recherche as part of the “Investissements d’avenir” programme, reference ANR-19-P3IA-0001 (PRAIRIE 3IA Institute).
+---
 
-We thank Anne L'Hévéder for the PhysiBoSS logo.
+## Core Modifications Summary
+
+### Cell Class Extensions
+```cpp
+class Cell {
+    // Added members:
+    int generation = 0;        // Cell generation counter
+    int parent_ID = -1;        // Parent cell ID for lineage tracking
+    std::vector<std::string> mutations;  // Mutation history
+    
+    // Enhanced division method with lineage tracking
+    Cell* divide();
+};
+```
+
+### Mutation Function
+```cpp
+void phase_exit_mutation_function(Cell* pCell, Phenotype& phenotype, double dt) {
+    // Randomly select and mutate Boolean network nodes
+    // Log mutations with metadata
+    // Update cell state accordingly
+}
+```
+
+### Enhanced Data Output
+```cpp
+// Extended CSV output with lineage and mutation data
+void write_mutation_data(std::ostream& os, Cell* pCell, double current_time) {
+    os << current_time << "," << pCell->ID << "," << pCell->type 
+       << "," << pCell->parent_ID << "," << pCell->generation << ",";
+    // Output mutations in dot-separated format
+}
+```
+
+---
+
+## Documentation
+
+### Core Changes Documentation
+See [`core_changes.md`](core_changes.md) for detailed technical documentation of all modifications made to the PhysiCell and PhysiBoSS codebase.
+
+### Original PhysiBoSS Documentation
+- [PhysiBoSS User Guide](https://raw.githubusercontent.com/PhysiBoSS/PhysiBoSS/development/documentation/PhysiBoSS_User_Guide.pdf)
+- [Tutorial Paper](https://arxiv.org/abs/2406.18371)
+- [Reference Paper](https://doi.org/10.1038/s41540-023-00314-4)
+
+---
+
+---
+
+**Note**: This is a development branch with active modifications. For stable production use, consider using tagged releases.
