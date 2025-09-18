@@ -93,7 +93,7 @@ class MaBoSSIntracellular : public PhysiCell::Intracellular {
 		return this->maboss.has_node(name);
 	}
 	
-	bool get_boolean_variable_value(std::string name) {
+	bool ed in(std::string name) {
 		return this->maboss.get_node_value(name);
 	}
 	

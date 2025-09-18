@@ -1,5 +1,5 @@
 VERSION := $(shell grep . VERSION.txt | cut -f1 -d:)
-PROGRAM_NAME := PhysiBoSS_Cell_Lines
+PROGRAM_NAME := mutations_cell_cycle
 
 CC := g++
 # CC := g++-mp-7 # typical macports compiler name
@@ -310,7 +310,7 @@ upgrade: $(SOURCE)
 	rm -f $(SOURCE) 
 	
 # use: make save PROJ=your_project_name
-PROJ := my_project
+PROJ := my_mutations_cell_cycle_project
 
 save: 
 	echo "Saving project as $(PROJ) ... "

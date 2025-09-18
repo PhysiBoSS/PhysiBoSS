@@ -310,7 +310,7 @@ upgrade: $(SOURCE)
 	rm -f $(SOURCE) 
 	
 # use: make save PROJ=your_project_name
-PROJ := my_project
+PROJ := my_mutations_cell_cycle_project
 
 save: 
 	echo "Saving project as $(PROJ) ... "
