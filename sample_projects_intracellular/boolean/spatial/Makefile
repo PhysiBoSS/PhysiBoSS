@@ -239,7 +239,8 @@ reset:
 	# touch ./core/PhysiCell_cell.cpp
 	rm ALL_CITATIONS.txt 
 	rm -rf ./config/*
-	# cp ./config/PhysiCell_settings-backup.xml ./config/PhysiCell_settings.xml 
+	touch ./config/PhysiCell_settings-backup.xml
+	cp ./config/PhysiCell_settings-backup.xml ./config/PhysiCell_settings.xml 
 	rm -rf ./scripts/*
 
 MaBoSS-clean:
