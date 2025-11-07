@@ -123,6 +123,7 @@ class MaBoSSIntracellular : public PhysiCell::Intracellular {
 	static void save(std::string filename);
 	static void load_states( std::string input_filename );
 	static void load_cfgs( std::string input_filename );
+	static void load_bndcfgs( std::string input_filename );
 
     // unneeded for this type
     int update_phenotype_parameters(PhysiCell::Phenotype& phenotype) {return 0;}

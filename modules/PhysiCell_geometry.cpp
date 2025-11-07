@@ -393,6 +393,11 @@ bool load_cells_from_pugixml( pugi::xml_node root )
 					MaBoSSIntracellular::load_states( input_filename );
 				} else if (value_type == "cfg") {
 					MaBoSSIntracellular::load_cfgs( input_filename );
+				} else if (value_type == "bndcfg") {
+					MaBoSSIntracellular::load_bndcfgs( input_filename );
+				} else {
+					std::cout << "Error: Unknown maboss intracellular_states values type " << value_type << " in XML. Try state, cfg or bndcfg." << std::endl; 
+					exit(-1);
 				}
 			}
 		#endif
