@@ -288,7 +288,7 @@ prostate:
 	cp Makefile Makefile-backup
 	cp ./sample_projects_intracellular/boolean/prostate/Makefile .
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
-	cp ./sample_projects_intracellular/boolean/prostate/config/* ./config/
+	cp -r ./sample_projects_intracellular/boolean/prostate/config/* ./config/
 	cp -r ./sample_projects_intracellular/boolean/prostate/scripts ./
 
 ecoli-acetic-switch-sample:
