@@ -26,7 +26,7 @@
 	</parallel>
 
 	<save>
-		<folder>output_nodrug_new_dt6</folder>
+		<folder>output_nodrug</folder>
 		<full_data>
 			<interval units="min">240</interval>
 			<enable>true</enable>
