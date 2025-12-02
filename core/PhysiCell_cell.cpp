@@ -3404,6 +3404,25 @@ void Cell::remove_self_from_all_neighbors( void )
 			else
 			{ /* future error message */  }
 	}
+	
+	// This is a bit of a ugly hack, we need to find the origin of that bug
+	#pragma omp parallel for 
+	for ( int i = 0; i < all_cells->size(); i++ )
+	{
+		Cell* pC = (*all_cells)[i];
+		if (pC != this)
+		{
+			auto SearchResult = std::find( 
+			pC->state.neighbors.begin(),pC->state.neighbors.end(),this );
+			if ( SearchResult != pC->state.neighbors.end() )
+			{
+				std::cout << "Cell " << pC->ID << " still has cell " << this->ID << " as a neighbor!" << std::endl;
+				pC->state.neighbors.erase( SearchResult ); 
+			}
+		
+		}
+	}
+
 
 	return; 
 }
@@ -3433,6 +3452,25 @@ void Cell::remove_all_spring_attachments( void )
 		// clear my list 
 		state.spring_attachments.clear(); 
 	}
+	
+	// This is a bit of a ugly hack, we need to find the origin of that bug
+	#pragma omp parallel for 
+	for ( int i = 0; i < all_cells->size(); i++ )
+	{
+		Cell* pC = (*all_cells)[i];
+		if (pC != this)
+		{
+			auto SearchResult = std::find( 
+			pC->state.spring_attachments.begin(),pC->state.spring_attachments.end(),this );
+			if ( SearchResult != pC->state.spring_attachments.end() )
+			{
+				std::cout << "Cell " << pC->ID << " still has cell " << this->ID << " as a spring attachment!" << std::endl;
+				pC->state.spring_attachments.erase( SearchResult ); 
+			}
+		
+		}
+	}
+	
 	return; 
 }
 
