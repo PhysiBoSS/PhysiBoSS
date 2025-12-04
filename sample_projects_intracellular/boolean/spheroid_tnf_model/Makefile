@@ -25,13 +25,13 @@ ifneq ($(OS), Windows_NT)
 	LDL_FLAG = -ldl
 endif
 
-LIB := -L$(CUR_DIR)/$(MABOSS_DIR)/lib -lMaBoSS-static $(LDL_FLAG)
-INC := -DADDON_PHYSIBOSS -I$(CUR_DIR)/$(MABOSS_DIR)/include -DMAXNODES=$(MABOSS_MAX_NODES)
+LIB := -L"$(CUR_DIR)/$(MABOSS_DIR)/lib" -lMaBoSS-static $(LDL_FLAG)
+INC := -DADDON_PHYSIBOSS -I"$(CUR_DIR)/$(MABOSS_DIR)/include" -DMAXNODES=$(MABOSS_MAX_NODES)
 
 
 # If max nodes > 64, change lib path 
 ifeq ($(shell expr $(MABOSS_MAX_NODES) '>' 64), 1)
-LIB := -L$(CUR_DIR)/$(MABOSS_DIR)/lib -lMaBoSS_$(MABOSS_MAX_NODES)n-static $(LDL_FLAG)
+LIB := -L"$(CUR_DIR)/$(MABOSS_DIR)/lib" -lMaBoSS_$(MABOSS_MAX_NODES)n-static $(LDL_FLAG)
 endif
 
 ARCH := native # best auto-tuning
